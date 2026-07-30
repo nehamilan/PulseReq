@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { Field, Panel, PageShell } from "@/components/page-shell";
+import { OrderForm } from "@/components/order-form";
 import { StatusBadge } from "@/components/status-badge";
 import { effectiveStatus, hoursRemaining, patientName } from "@/lib/domain";
 import { useRequisitions } from "@/lib/requisition-store";
@@ -34,13 +35,9 @@ function OrderPage() {
       title="Doctor Portal"
       description="Issue a diagnostic requisition as a secure, expiring link. The patient chooses where and when; the lab receives structured LOINC-coded orders."
       actions={
-        <button
-          type="button"
-          disabled
-          className="rounded-md bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground opacity-50"
-        >
-          New requisition
-        </button>
+        <span className="rounded-md border border-border bg-surface px-3 py-1.5 text-xs text-muted-foreground">
+          Links expire 72h after issue
+        </span>
       }
     >
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -96,19 +93,18 @@ function OrderPage() {
           </ul>
         </Panel>
 
-        <Panel title="Order form" hint="Next step">
-          <p className="text-sm text-muted-foreground">
-            The LOINC test picker, patient lookup and link generator land in the
-            next build step. The data model and FHIR{" "}
-            <code className="font-mono text-xs">ServiceRequest</code> mapping are
-            already in place behind this screen.
-          </p>
-          <dl className="mt-4 grid gap-3">
-            <Field label="Coding system" value="LOINC (http://loinc.org)" />
-            <Field label="Link lifetime" value="72 hours from issue" />
-            <Field label="Export shape" value="FHIR R4 Bundle · collection" />
-          </dl>
-        </Panel>
+        <div className="space-y-5">
+          <Panel title="New requisition" hint="LOINC coded">
+            <OrderForm />
+          </Panel>
+          <Panel title="Interoperability">
+            <dl className="grid gap-3">
+              <Field label="Coding system" value="LOINC (http://loinc.org)" />
+              <Field label="Link lifetime" value="72 hours from issue" />
+              <Field label="Export shape" value="FHIR R4 Bundle · collection" />
+            </dl>
+          </Panel>
+        </div>
       </div>
     </PageShell>
   );
