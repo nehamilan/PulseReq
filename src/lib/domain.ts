@@ -32,6 +32,8 @@ export interface OrderedTest {
   /** e.g. "Fasting 12h required" */
   instruction?: string;
   specimen?: string;
+  /** Routing hint: phlebotomy-style lab work vs imaging suite. */
+  modality?: "lab" | "imaging";
 }
 
 export interface Patient {
