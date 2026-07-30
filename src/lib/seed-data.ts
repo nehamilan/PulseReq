@@ -125,13 +125,75 @@ export const REQUISITIONS: Requisition[] = [
 ];
 
 /** Common orderable tests for the doctor portal's test picker. */
-export const LOINC_CATALOG = [
-  { code: "58410-2", display: "CBC panel with differential, Blood" },
-  { code: "2339-0", display: "Glucose [Mass/volume] in Blood" },
-  { code: "24331-1", display: "Lipid 1996 panel - Serum or Plasma" },
-  { code: "4548-4", display: "Hemoglobin A1c/Hemoglobin.total in Blood" },
-  { code: "3016-3", display: "Thyrotropin [Units/volume] in Serum or Plasma" },
-  { code: "2160-0", display: "Creatinine [Mass/volume] in Serum or Plasma" },
-  { code: "5769-8", display: "Bacteria identified in Stool by Light microscopy" },
-  { code: "24357-6", display: "Urinalysis macro (dipstick) panel in Urine" },
-] as const;
+export interface CatalogEntry {
+  category: "Blood panels" | "Imaging";
+  code: string;
+  display: string;
+  /** Short clinician-facing label used in the picker. */
+  label: string;
+  instruction?: string;
+  specimen?: string;
+  modality: "lab" | "imaging";
+}
+
+export const TEST_CATALOG: CatalogEntry[] = [
+  {
+    category: "Blood panels",
+    code: "2339-0",
+    display: "Glucose [Mass/volume] in Blood",
+    label: "Fasting blood glucose",
+    instruction: "Fasting 12 hours required",
+    specimen: "Serum",
+    modality: "lab",
+  },
+  {
+    category: "Blood panels",
+    code: "24331-1",
+    display: "Lipid 1996 panel - Serum or Plasma",
+    label: "Lipid panel",
+    instruction: "Fasting 12 hours required",
+    specimen: "Serum",
+    modality: "lab",
+  },
+  {
+    category: "Blood panels",
+    code: "58410-2",
+    display: "CBC panel with differential, Blood",
+    label: "Complete blood count",
+    specimen: "Whole blood (EDTA)",
+    modality: "lab",
+  },
+  {
+    category: "Blood panels",
+    code: "4548-4",
+    display: "Hemoglobin A1c/Hemoglobin.total in Blood",
+    label: "Hemoglobin A1c",
+    specimen: "Whole blood",
+    modality: "lab",
+  },
+  {
+    category: "Blood panels",
+    code: "3016-3",
+    display: "Thyrotropin [Units/volume] in Serum or Plasma",
+    label: "Thyrotropin (TSH)",
+    specimen: "Serum",
+    modality: "lab",
+  },
+  {
+    category: "Imaging",
+    code: "36643-5",
+    display: "XR Chest PA and Lateral",
+    label: "Chest X-ray",
+    modality: "imaging",
+  },
+  {
+    category: "Imaging",
+    code: "24916-9",
+    display: "US Abdomen",
+    label: "Abdominal ultrasound",
+    instruction: "Nothing by mouth 6 hours before scan",
+    modality: "imaging",
+  },
+];
+
+export const CATALOG_CATEGORIES = ["Blood panels", "Imaging"] as const;
