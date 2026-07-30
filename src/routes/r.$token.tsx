@@ -137,7 +137,6 @@ function LinkProblem({
       eyebrow="Role · Patient"
       title={title}
       description={body}
-active      actions={null}
     >
       <Panel title="Link reference">
         <p className="font-mono text-sm text-muted-foreground tabular">{token}</p>
