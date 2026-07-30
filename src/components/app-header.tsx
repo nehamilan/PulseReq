@@ -38,7 +38,7 @@ export function AppHeader() {
           ))}
         </nav>
 
-        <span className="ml-auto rounded-full border border-border bg-surface px-3 py-1 text-[11px] font-medium tracking-tight text-muted-foreground">
+        <span className="ml-auto rounded-full border border-border bg-surface px-3 py-1 text-[11px] font-medium text-muted-foreground">
           Frontend-only mock · Synthetic data · FHIR R4 · no real PHI
         </span>
       </div>
