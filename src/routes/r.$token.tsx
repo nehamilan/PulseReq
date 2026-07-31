@@ -48,6 +48,18 @@ export const Route = createFileRoute("/r/$token")({
   component: PatientView,
 });
 
+function BackLink({ patientId }: { patientId: string }) {
+  return (
+    <Link
+      to="/p/$patientId"
+      params={{ patientId }}
+      className="inline-flex items-center gap-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+    >
+      ← Back to portal
+    </Link>
+  );
+}
+
 function PatientView() {
   const { token } = Route.useParams();
   const { findByToken, getPatient, getPractitioner, getCenter, centers, updateRequisition } =
