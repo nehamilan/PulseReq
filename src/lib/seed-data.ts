@@ -139,7 +139,7 @@ export const PATIENTS: Patient[] = [
     birthDate: "1971-12-07",
     phone: "+1 403-555-0189",
     address: {
-      line: "２02 Mahogany Blvd SE".replace("２", "2"),
+      line: "202 Mahogany Blvd SE",
       city: "Calgary",
       province: "AB",
       postalCode: "T3M 2N4",
