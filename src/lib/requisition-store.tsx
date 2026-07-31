@@ -46,6 +46,10 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
         requisitions.find(
           (r) => r.token.toLowerCase() === token.trim().toLowerCase(),
         ),
+      findByPatientId: (patientId) =>
+        requisitions
+          .filter((r) => r.patientId === patientId)
+          .sort((a, b) => new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime()),
       addRequisition: (req) => setRequisitions((prev) => [req, ...prev]),
       updateRequisition: (id, patch) =>
         setRequisitions((prev) =>
