@@ -39,8 +39,11 @@ function PatientPortalDropdown() {
         Patient Portal
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">
-        <DropdownMenuLabel>Choose a patient</DropdownMenuLabel>
+        <DropdownMenuLabel>Select a demo patient</DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <p className="px-3 py-1.5 text-[11px] leading-relaxed text-muted-foreground">
+          In a real deployment, patients log in and only see their own records.
+        </p>
         {PATIENTS.map((patient) => (
           <DropdownMenuItem
             key={patient.id}
