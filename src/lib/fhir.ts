@@ -33,6 +33,16 @@ export function toFhirPatient(p: Patient) {
     name: [{ family: p.familyName, given: [p.givenName] }],
     birthDate: p.birthDate,
     telecom: [{ system: "phone", value: p.phone }],
+    address: [
+      {
+        use: "home",
+        line: [p.address.line],
+        city: p.address.city,
+        state: p.address.province,
+        postalCode: p.address.postalCode,
+        country: "CA",
+      },
+    ],
   };
 }
 
