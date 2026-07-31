@@ -162,21 +162,23 @@ export function IntakeDrawer({
               </section>
             </div>
 
-            <section className="mt-6 print-labels">
-              <SectionTitle>
-                Specimen labels ({labels.length} to print)
-              </SectionTitle>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {labels.map((l) => (
-                  <SpecimenLabelCard
-                    key={l.tube.code}
-                    label={l}
-                    req={req}
-                    patient={patient}
-                  />
-                ))}
-              </div>
-            </section>
+            {imagingOnly ? null : (
+              <section className="mt-6 print-labels">
+                <SectionTitle>
+                  Specimen labels ({labels.length} to print)
+                </SectionTitle>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {labels.map((l) => (
+                    <SpecimenLabelCard
+                      key={l.tube.code}
+                      label={l}
+                      req={req}
+                      patient={patient}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
 
             <section className="mt-6 no-print">
               <SectionTitle>Audit &amp; privacy ledger</SectionTitle>
@@ -184,22 +186,39 @@ export function IntakeDrawer({
             </section>
 
             <div className="sticky bottom-0 mt-6 flex flex-wrap gap-2 border-t border-border bg-background py-4 no-print">
-              <Button
-                onClick={() => {
-                  completeCheckIn(req.id, "lab-tech");
-                  window.print();
-                  toast.success("Check-in complete", {
-                    description: `${labels.length} label${labels.length === 1 ? "" : "s"} sent to print · status set to specimen collected.`,
-                  });
-                  onOpenChange(false);
-                }}
-                disabled={req.status === "completed"}
-              >
-                {req.status === "completed"
-                  ? "Check-in already completed"
-                  : "Complete check-in & print labels"}
-              </Button>
-              <Button
+              {req.status === "completed" ? (
+                <Button disabled>Intake already complete</Button>
+              ) : req.status === "checked-in" ? (
+                <Button
+                  onClick={() => {
+                    completeIntake(req.id, "lab-tech");
+                    if (!imagingOnly) window.print();
+                    toast.success("Intake complete", {
+                      description: handoffDetail(req.tests),
+                    });
+                    onOpenChange(false);
+                  }}
+                >
+                  {imagingOnly
+                    ? "Release to imaging worklist"
+                    : "Print labels & complete intake"}
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => {
+                    checkInPatient(req.id, "lab-tech");
+                    toast.success("Patient checked in", {
+                      description:
+                        "Identity verified · order ready for collection.",
+                    });
+                  }}
+                  disabled={req.status !== "booked"}
+                >
+                  Check in patient
+                </Button>
+              )}
+              {imagingOnly ? null : (
+                <Button
                 variant="outline"
                 onClick={() => {
                   logAudit(
@@ -212,7 +231,8 @@ export function IntakeDrawer({
                 }}
               >
                 Print labels only
-              </Button>
+                </Button>
+              )}
             </div>
           </>
         ) : null}
