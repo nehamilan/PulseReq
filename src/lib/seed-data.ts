@@ -310,6 +310,32 @@ REQUISITIONS.push(
       },
     ],
   },
+  {
+    id: "rq-7",
+    token: "req-e5813c",
+    status: "booked",
+    patientId: "pat-4",
+    practitionerId: "prac-1",
+    centerId: "ctr-1",
+    appointmentAt: tomorrowAt(9, 30),
+    priority: "routine",
+    linkLifetimeDays: LINK_LIFETIME_DAYS,
+    issuedAt: "2026-07-30T10:15:00.000Z",
+    expiresAt: "2026-08-06T10:15:00.000Z",
+    tests: [
+      {
+        id: "ot-9",
+        coding: {
+          system: "http://loinc.org",
+          code: "24331-1",
+          display: "Lipid 1996 panel - Serum or Plasma",
+        },
+        instruction: "Fasting 12 hours required",
+        specimen: "Serum",
+        modality: "lab",
+      },
+    ],
+  },
 );
 
 /** One pending request so the clinician queue is populated on first load. */
