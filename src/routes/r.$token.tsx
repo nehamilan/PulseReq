@@ -137,13 +137,9 @@ function PatientView() {
       eyebrow="Role · Patient"
       title="Your diagnostic requisition"
       description="No paper form to carry. Show this link — or the check-in code from it — at the diagnostic centre."
-      actions={
-        <div className="flex flex-wrap items-center gap-2">
-          <BackLink patientId={req.patientId} />
-          <StatusBadge status={status} />
-        </div>
-      }
+      actions={<StatusBadge status={status} />}
     >
+      <BackLink patientId={req.patientId} />
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
         <Panel
           title="Tests ordered"
