@@ -2,7 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { Field, Panel, PageShell } from "@/components/page-shell";
 import { StatusBadge } from "@/components/status-badge";
-import { effectiveStatus, patientName } from "@/lib/domain";
+import {
+  effectiveStatus,
+  formatAddress,
+  formatDob,
+  patientName,
+} from "@/lib/domain";
 import { useRequisitions } from "@/lib/requisition-store";
 
 function formatDate(iso: string) {
@@ -113,6 +118,14 @@ function PatientView() {
               value={patient ? patientName(patient) : "—"}
             />
             <Field label="Health number" value={patient?.phn ?? "—"} />
+            <Field
+              label="Date of birth"
+              value={patient ? formatDob(patient.birthDate) : "—"}
+            />
+            <Field
+              label="Address"
+              value={patient ? formatAddress(patient.address) : "—"}
+            />
             <Field label="Ordered by" value={practitioner?.name ?? "—"} />
             <Field label="Clinic" value={practitioner?.clinic ?? "—"} />
             <Field label="Reference" value={req.token} />
