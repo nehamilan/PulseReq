@@ -8,17 +8,26 @@ import {
 
 import type {
   DiagnosticCenter,
+  ExtensionRequest,
   Patient,
   Practitioner,
   Requisition,
 } from "./domain";
-import { CENTERS, PATIENTS, PRACTITIONERS, REQUISITIONS } from "./seed-data";
+import { extendExpiry } from "./domain";
+import {
+  CENTERS,
+  EXTENSION_REQUESTS,
+  PATIENTS,
+  PRACTITIONERS,
+  REQUISITIONS,
+} from "./seed-data";
 
 interface RequisitionStore {
   requisitions: Requisition[];
   patients: Patient[];
   practitioners: Practitioner[];
   centers: DiagnosticCenter[];
+  extensionRequests: ExtensionRequest[];
   getPatient: (id: string) => Patient | undefined;
   getPractitioner: (id: string) => Practitioner | undefined;
   getCenter: (id?: string) => DiagnosticCenter | undefined;
@@ -26,12 +35,24 @@ interface RequisitionStore {
   findByPatientId: (patientId: string) => Requisition[];
   addRequisition: (req: Requisition) => void;
   updateRequisition: (id: string, patch: Partial<Requisition>) => void;
+  /** Latest extension request for a requisition, if any. */
+  latestExtensionFor: (requisitionId: string) => ExtensionRequest | undefined;
+  pendingExtensions: () => ExtensionRequest[];
+  requestExtension: (
+    requisitionId: string,
+    requestedDays: 3 | 7 | 14,
+    reason?: string,
+  ) => void;
+  approveExtension: (extensionId: string) => void;
+  declineExtension: (extensionId: string) => void;
 }
 
 const Ctx = createContext<RequisitionStore | null>(null);
 
 export function RequisitionProvider({ children }: { children: ReactNode }) {
   const [requisitions, setRequisitions] = useState<Requisition[]>(REQUISITIONS);
+  const [extensionRequests, setExtensionRequests] =
+    useState<ExtensionRequest[]>(EXTENSION_REQUESTS);
 
   const value = useMemo<RequisitionStore>(
     () => ({
@@ -39,6 +60,7 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
       patients: PATIENTS,
       practitioners: PRACTITIONERS,
       centers: CENTERS,
+      extensionRequests,
       getPatient: (id) => PATIENTS.find((p) => p.id === id),
       getPractitioner: (id) => PRACTITIONERS.find((p) => p.id === id),
       getCenter: (id) => (id ? CENTERS.find((c) => c.id === id) : undefined),
@@ -55,8 +77,67 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
         setRequisitions((prev) =>
           prev.map((r) => (r.id === id ? { ...r, ...patch } : r)),
         ),
+      latestExtensionFor: (requisitionId) =>
+        [...extensionRequests]
+          .filter((e) => e.requisitionId === requisitionId)
+          .sort(
+            (a, b) =>
+              new Date(b.requestedAt).getTime() -
+              new Date(a.requestedAt).getTime(),
+          )[0],
+      pendingExtensions: () =>
+        extensionRequests
+          .filter((e) => e.status === "pending")
+          .sort(
+            (a, b) =>
+              new Date(a.requestedAt).getTime() -
+              new Date(b.requestedAt).getTime(),
+          ),
+      requestExtension: (requisitionId, requestedDays, reason) =>
+        setExtensionRequests((prev) => [
+          ...prev,
+          {
+            id: `ext-${Math.random().toString(36).slice(2, 8)}`,
+            requisitionId,
+            requestedDays,
+            reason: reason?.trim() ? reason.trim().slice(0, 140) : undefined,
+            status: "pending",
+            requestedAt: new Date().toISOString(),
+          },
+        ]),
+      approveExtension: (extensionId) => {
+        const request = extensionRequests.find((e) => e.id === extensionId);
+        if (!request || request.status !== "pending") return;
+        setRequisitions((prev) =>
+          prev.map((r) =>
+            r.id === request.requisitionId
+              ? {
+                  ...r,
+                  status: "active",
+                  expiresAt: extendExpiry(r, request.requestedDays),
+                  extensionCount: (r.extensionCount ?? 0) + 1,
+                }
+              : r,
+          ),
+        );
+        setExtensionRequests((prev) =>
+          prev.map((e) =>
+            e.id === extensionId
+              ? { ...e, status: "approved", resolvedAt: new Date().toISOString() }
+              : e,
+          ),
+        );
+      },
+      declineExtension: (extensionId) =>
+        setExtensionRequests((prev) =>
+          prev.map((e) =>
+            e.id === extensionId && e.status === "pending"
+              ? { ...e, status: "declined", resolvedAt: new Date().toISOString() }
+              : e,
+          ),
+        ),
     }),
-    [requisitions],
+    [requisitions, extensionRequests],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
