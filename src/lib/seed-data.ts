@@ -762,6 +762,7 @@ export const EXTENSION_REQUESTS: ExtensionRequest[] = [
     reason: "Could not fast before the last two appointments",
     status: "approved",
     requestedAt: relDayAt(-3, 12, 0),
+    resolvedAt: relDayAt(-3, 15, 20),
   },
 ];
 
