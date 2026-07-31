@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { OrderedTest, Requisition } from "@/lib/domain";
+import { policyForTest } from "@/lib/results";
 import { useRequisitions } from "@/lib/requisition-store";
 import { CATALOG_CATEGORIES, TEST_CATALOG } from "@/lib/seed-data";
 import { newToken } from "@/lib/tokens";
@@ -72,6 +73,11 @@ export function OrderForm() {
         instruction: entry.instruction,
         specimen: entry.specimen,
         modality: entry.modality,
+        releasePolicy: policyForTest({
+          id: "probe",
+          coding: { system: "http://loinc.org", code: entry.code, display: entry.display },
+          modality: entry.modality,
+        }).policy,
       };
     });
 

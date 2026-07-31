@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { IntakeDrawer } from "@/components/intake-drawer";
 import { LabImpactBanner } from "@/components/lab-impact-banner";
 import { Panel, PageShell } from "@/components/page-shell";
+import { ReleaseStateChip } from "@/components/result-chips";
 import { StatusBadge } from "@/components/status-badge";
 import { PriorityBadge } from "@/components/priority-badge";
 import {
@@ -46,8 +47,19 @@ const TABS: { id: QueueTab; label: string }[] = [
 ];
 
 function LabPage() {
-  const { requisitions, patients, centers, getPatient, getCenter, findByToken } =
-    useRequisitions();
+  const {
+    requisitions,
+    patients,
+    centers,
+    getPatient,
+    getCenter,
+    findByToken,
+    reportFor,
+    now,
+    clockOffsetDays,
+    advanceClock,
+    resetClock,
+  } = useRequisitions();
   const [query, setQuery] = useState("");
   const [centerId, setCenterId] = useState("ctr-1");
   const [tab, setTab] = useState<QueueTab>("today");
@@ -109,6 +121,7 @@ function LabPage() {
       title={`Lab Tech Dashboard — ${center?.name ?? "Diagnostic centre"}`}
       description="Today's booked appointments arrive as structured FHIR orders — no handwriting, no faxed forms, no re-keying at intake."
       actions={
+        <div className="flex flex-wrap items-end gap-3">
         <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           Centre
           <select
@@ -123,6 +136,27 @@ function LabPage() {
             ))}
           </select>
         </label>
+          <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Embargo clock
+            <div className="mt-1 flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => advanceClock(3)}
+                className="rounded-md border border-input bg-background px-2.5 py-2 text-xs font-normal normal-case tracking-normal text-foreground transition hover:bg-accent"
+              >
+                +3 days
+              </button>
+              <button
+                type="button"
+                onClick={resetClock}
+                disabled={clockOffsetDays === 0}
+                className="rounded-md border border-input bg-background px-2.5 py-2 text-xs font-normal normal-case tracking-normal text-muted-foreground transition hover:bg-accent disabled:opacity-40"
+              >
+                {clockOffsetDays === 0 ? "now" : `+${clockOffsetDays}d · reset`}
+              </button>
+            </div>
+          </div>
+        </div>
       }
     >
       <LabImpactBanner queue={todaysQueue} />
@@ -223,11 +257,13 @@ function LabPage() {
                   <th className="pb-2 font-medium">DOB</th>
                   <th className="pb-2 font-medium">Tests</th>
                   <th className="pb-2 font-medium">Status</th>
+                  <th className="pb-2 font-medium">Results</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {scoped.map((req) => {
                   const patient = getPatient(req.patientId);
+                  const report = reportFor(req.id);
                   return (
                     <tr
                       key={req.id}
@@ -268,13 +304,20 @@ function LabPage() {
                       <td className="py-3">
                         <StatusBadge status={effectiveStatus(req)} />
                       </td>
+                      <td className="py-3">
+                        {report ? (
+                          <ReleaseStateChip report={report} now={now()} />
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </td>
                     </tr>
                   );
                 })}
                 {scoped.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={8}
                       className="py-6 text-center text-sm text-muted-foreground"
                     >
                       No appointments match this view.

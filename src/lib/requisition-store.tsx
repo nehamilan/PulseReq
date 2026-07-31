@@ -17,10 +17,17 @@ import type {
 } from "./domain";
 import { auditHash, extendExpiry, handoffDetail } from "./domain";
 import {
+  buildReport,
+  embargoLapsed,
+  resolveReleasePolicy,
+  type DiagnosticReportRecord,
+} from "./results";
+import {
   CENTERS,
   EXTENSION_REQUESTS,
   PATIENTS,
   PRACTITIONERS,
+  REPORTS,
   REQUISITIONS,
 } from "./seed-data";
 
@@ -31,6 +38,17 @@ interface RequisitionStore {
   centers: DiagnosticCenter[];
   extensionRequests: ExtensionRequest[];
   auditEvents: AuditEvent[];
+  reports: DiagnosticReportRecord[];
+  /** Simulation clock — advances so embargo lapses are demoable. */
+  now: () => Date;
+  clockOffsetDays: number;
+  advanceClock: (days: number) => void;
+  resetClock: () => void;
+  reportFor: (requisitionId: string) => DiagnosticReportRecord | undefined;
+  /** Lab publishes results; IMMEDIATE policy releases in the same step. */
+  publishResults: (requisitionId: string, actor: string) => void;
+  /** Clinician review & release — also acts as embargo early-release. */
+  releaseResults: (requisitionId: string, actor: string) => void;
   auditFor: (requisitionId: string) => AuditEvent[];
   logAudit: (
     requisitionId: string,
@@ -137,6 +155,10 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>(() =>
     seedAudit(REQUISITIONS),
   );
+  const [reports, setReports] = useState<DiagnosticReportRecord[]>(REPORTS);
+  const [clockOffsetDays, setClockOffsetDays] = useState(0);
+
+  const now = () => new Date(Date.now() + clockOffsetDays * 86_400_000);
 
   const append = (
     entries: {
@@ -167,6 +189,61 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
       centers: CENTERS,
       extensionRequests,
       auditEvents,
+      reports,
+      now,
+      clockOffsetDays,
+      advanceClock: (days) => setClockOffsetDays((d) => d + days),
+      resetClock: () => setClockOffsetDays(0),
+      reportFor: (requisitionId) =>
+        reports.find((r) => r.requisitionId === requisitionId),
+      publishResults: (requisitionId, actor) => {
+        const req = requisitions.find((r) => r.id === requisitionId);
+        if (!req || reports.some((r) => r.requisitionId === requisitionId)) return;
+        const report = buildReport(req, now());
+        setReports((prev) => [...prev, report]);
+        const spec = resolveReleasePolicy(req.tests);
+        append([
+          {
+            requisitionId,
+            action: "result.published",
+            actor,
+            detail: `DiagnosticReport issued · ${report.observations.length} Observation(s) · policy ${spec.policy}`,
+          },
+          ...(report.status === "released"
+            ? [
+                {
+                  requisitionId,
+                  action: "result.auto-released" as AuditAction,
+                  actor: "policy-engine",
+                  detail:
+                    "Routine panel · released to patient portal without clinician hold",
+                },
+              ]
+            : []),
+        ]);
+      },
+      releaseResults: (requisitionId, actor) => {
+        const report = reports.find((r) => r.requisitionId === requisitionId);
+        if (!report || report.status === "released") return;
+        const at = now().toISOString();
+        setReports((prev) =>
+          prev.map((r) =>
+            r.requisitionId === requisitionId
+              ? { ...r, status: "released", releasedAt: at, releasedBy: actor }
+              : r,
+          ),
+        );
+        append([
+          {
+            requisitionId,
+            action: "result.released",
+            actor,
+            detail: embargoLapsed(report, now())
+              ? "Clinician confirmed release after embargo lapse"
+              : "Clinician reviewed and released report to patient",
+          },
+        ]);
+      },
       auditFor: (requisitionId) =>
         auditEvents
           .filter((e) => e.requisitionId === requisitionId)
@@ -286,7 +363,7 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
           ),
         ),
     }),
-    [requisitions, extensionRequests, auditEvents],
+    [requisitions, extensionRequests, auditEvents, reports, clockOffsetDays],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

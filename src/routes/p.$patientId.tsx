@@ -13,6 +13,7 @@ import {
   patientName,
 } from "@/lib/domain";
 import { useRequisitions } from "@/lib/requisition-store";
+import { isVisibleToPatient } from "@/lib/results";
 
 export const Route = createFileRoute("/p/$patientId")({
   head: () => ({
@@ -37,7 +38,7 @@ export const Route = createFileRoute("/p/$patientId")({
 
 function PatientPortal() {
   const { patientId } = Route.useParams();
-  const { getPatient, findByPatientId } = useRequisitions();
+  const { getPatient, findByPatientId, reportFor, now } = useRequisitions();
   const patient = getPatient(patientId);
   const requisitions = findByPatientId(patientId);
 
@@ -71,6 +72,10 @@ function PatientPortal() {
             {requisitions.map((req) => {
               const status = effectiveStatus(req);
               const testNames = req.tests.map((t) => t.coding.display).join(" · ");
+              const report = reportFor(req.id);
+              const resultsVisible = report
+                ? isVisibleToPatient(report, now())
+                : false;
               return (
                 <li key={req.id} className="py-4 first:pt-0 last:pb-0">
                   <div className="flex flex-wrap items-start justify-between gap-3">
@@ -96,6 +101,17 @@ function PatientPortal() {
                     ) : null}
                     {req.status === "completed" ? (
                       <span className="text-success">{handoffDetail(req.tests)}</span>
+                    ) : null}
+                    {report ? (
+                      <span
+                        className={
+                          resultsVisible ? "text-success" : "text-warning-foreground"
+                        }
+                      >
+                        {resultsVisible
+                          ? "Results available"
+                          : "Results pending clinician release"}
+                      </span>
                     ) : null}
                   </div>
 
