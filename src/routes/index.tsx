@@ -29,20 +29,23 @@ const ROLES = [
   {
     to: "/order",
     label: "Doctor Portal",
-    body: "Order tests by LOINC code and issue a 72-hour patient link instead of printing a form.",
+    body: "Order tests by LOINC code and issue an expiring patient link instead of printing a form.",
     cta: "Open ordering view",
+    params: {},
   },
   {
-    to: "/r/req-8f92a1",
+    to: "/r/$token",
     label: "Patient View",
     body: "The tokenized link a patient receives: what was ordered, prep instructions, where to go.",
     cta: "Open sample link",
+    params: { token: "req-8f92a1" },
   },
   {
     to: "/lab",
     label: "Lab Tech Dashboard",
     body: "Resolve a token at intake and read a structured order — no handwriting, no re-keying.",
     cta: "Open intake view",
+    params: {},
   },
 ] as const;
 
@@ -59,6 +62,7 @@ function Index() {
             <p className="text-sm text-muted-foreground">{role.body}</p>
             <Link
               to={role.to}
+              params={role.params as never}
               className="mt-4 inline-flex rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
             >
               {role.cta}
