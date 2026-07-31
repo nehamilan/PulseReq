@@ -4,6 +4,7 @@ import { Field, Panel, PageShell } from "@/components/page-shell";
 import { OrderForm } from "@/components/order-form";
 import { StatusBadge } from "@/components/status-badge";
 import { PriorityBadge } from "@/components/priority-badge";
+import { ExtensionRequestsPanel } from "@/components/extension-requests-panel";
 import {
   effectiveStatus,
   expiryLabel,
@@ -50,6 +51,8 @@ function OrderPage() {
       }
     >
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="space-y-5">
+        <ExtensionRequestsPanel />
         <Panel title="Issued requisitions" hint={`${requisitions.length} total`}>
           <ul className="divide-y divide-border">
             {requisitions.map((req) => {
@@ -82,6 +85,9 @@ function OrderPage() {
                         {status === "expired"
                           ? `expired ${formatClinicalDate(req.expiresAt)}`
                           : `${expiryLabel(req)} (${formatClinicalDate(req.expiresAt)})`}
+                        {req.extensionCount
+                          ? ` · extended ${req.extensionCount === 1 ? "once" : `${req.extensionCount}×`}`
+                          : ""}
                       </p>
                       <ul className="mt-2 flex flex-wrap gap-1.5">
                         {req.tests.map((t) => (
@@ -114,6 +120,7 @@ function OrderPage() {
             })}
           </ul>
         </Panel>
+        </div>
 
         <div className="space-y-5">
           <Panel title="New requisition" hint="LOINC coded">

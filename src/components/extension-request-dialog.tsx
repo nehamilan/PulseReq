@@ -25,10 +25,7 @@ export function ExtensionRequestControl({ req }: { req: Requisition }) {
     return <ExtensionPill request={latest} req={req} />;
   }
 
-  const resolvedNote =
-    latest && latest.status !== "pending" ? (
-      <ExtensionPill request={latest} req={req} />
-    ) : null;
+  const resolvedNote = latest ? <ExtensionPill request={latest} req={req} /> : null;
 
   if (!canRequestExtension(req)) return resolvedNote;
 
