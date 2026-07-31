@@ -72,6 +72,8 @@ export interface DiagnosticCenter {
   province: string;
   capabilities: string[];
   nextAvailable: string;
+  /** Simulated distance from the patient's home address, in km. */
+  distanceKm: number;
 }
 
 export interface Requisition {
@@ -161,4 +163,53 @@ export function expiryLabel(req: Requisition, now: Date = new Date()): string {
   if (hours < 24) return `expires in ${hours}h`;
   const days = Math.round(hours / 24);
   return `expires in ${days} day${days === 1 ? "" : "s"}`;
+}
+
+const MODALITY_CAPABILITIES: Record<"lab" | "imaging", string[]> = {
+  lab: ["Phlebotomy"],
+  imaging: ["X-Ray", "Ultrasound"],
+};
+
+/** Tests this centre cannot perform, given its listed capabilities. */
+export function unsupportedTests(
+  center: DiagnosticCenter,
+  tests: OrderedTest[],
+): OrderedTest[] {
+  return tests.filter((t) => {
+    const needed = MODALITY_CAPABILITIES[t.modality ?? "lab"];
+    return !needed.some((cap) => center.capabilities.includes(cap));
+  });
+}
+
+export function centerSupports(
+  center: DiagnosticCenter,
+  tests: OrderedTest[],
+): boolean {
+  return unsupportedTests(center, tests).length === 0;
+}
+
+/** Eight 15-minute appointment slots starting at the centre's next opening. */
+export function slotsForCenter(
+  center: DiagnosticCenter,
+  count = 8,
+): string[] {
+  const start = new Date(center.nextAvailable).getTime();
+  return Array.from({ length: count }, (_, i) =>
+    new Date(start + i * 15 * 60_000).toISOString(),
+  );
+}
+
+/** "14:30" — 24h clock slot label. */
+export function formatSlotTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString("en-CA", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
+/** Google Maps directions URL for a centre. */
+export function directionsUrl(center: DiagnosticCenter): string {
+  const q = `${center.name}, ${center.address}, ${center.city} ${center.province}`;
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(q)}`;
 }
