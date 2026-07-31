@@ -1,61 +1,16 @@
-# Patient Portal List View
+# Hide Patient View from the header while keeping the route
 
-## Current state
+## Why it appears now
+`/r/$token` is a single-requisition deep link, not a top-level role. The header is currently treating it as a primary tab, which is confusing now that there is a Patient Portal (`/p/$patientId`) where the patient picks a requisition and clicks **Open requisition** to reach `/r/$token`. The header should be a role switcher, not a list of every reachable page.
 
-- Each requisition is its own patient-facing link at `/r/$token`.
-- A patient with multiple requisitions currently receives multiple separate links.
-- The index page links straight to one sample token.
+## What this plan does
+1. Remove the "Patient View" entry from the header role tabs in `src/components/app-header.tsx`.
+2. Keep `src/routes/r.$token.tsx` fully functional — it is still the requisition detail/booking page, now reached through the Patient Portal or a direct link.
+3. Keep the Patient Portal's "Open requisition" links unchanged.
 
-## What this plan adds
+## What is left alone
+- The home page "Patient View" sample card remains as a demo entry point, so visitors can still see what a patient link looks like without going through the portal.
+- No route files, store logic, or data model changes.
 
-A patient portal route at `/p/$patientId` that lists every requisition for that patient in one place, while leaving `/r/$token` as the single-requisition view.
-
-## Changes
-
-### 1. New route: `/p/$patientId`
-
-File: `src/routes/p.$patientId.tsx`
-
-- Looks up the patient by `patientId` from the shared store.
-- Lists all requisitions where `patientId` matches.
-- Sorts by `issuedAt` descending (newest first).
-- Each row shows:
-  - Ordered test names (truncated if many)
-  - `StatusBadge` (effective status)
-  - `PriorityBadge`
-  - `issuedAt` date
-  - `expiryLabel` (e.g., "expires in 7 days")
-  - Link to `/r/$token` labelled "Open requisition"
-- Empty state: "No requisitions found for this patient."
-- Invalid patient ID: friendly error message.
-
-### 2. Store support
-
-File: `src/lib/requisition-store.tsx` (if needed)
-
-- Add a `findByPatientId(patientId)` helper that returns all matching requisitions.
-
-### 3. Navigation entry points
-
-File: `src/routes/index.tsx`
-
-- Add a fourth card to the role grid: "Patient Portal".
-- Link it to `/p/$patientId` with the seed patient's ID as sample params.
-- Keep the existing "Patient View" sample link card as-is.
-
-File: `src/components/app-header.tsx` (if appropriate)
-
-- Consider adding a "Patient Portal" link in the header role tabs, or keep it as a demo-only route reachable from the home page.
-
-### 4. Route metadata
-
-File: `src/routes/p.$patientId.tsx`
-
-- Add `head()` with a patient-specific title and description.
-
-## Technical notes
-
-- No new dependencies.
-- Uses the existing `RequisitionProvider` context and `PageShell` / `Panel` / `StatusBadge` / `PriorityBadge` components.
-- No authentication: the patient portal is accessed by a patient ID in the URL, consistent with the frontend-only mock.
-- `/r/$token` remains the single-requisition view and is not replaced.
+## Result
+Header tabs become: **Doctor Portal | Patient Portal | Lab Tech Dashboard**. The patient still opens any requisition from the portal, and `/r/$token` continues to work as before.

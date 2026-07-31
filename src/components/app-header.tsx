@@ -7,11 +7,6 @@ const ROLES = [
     label: "Patient Portal",
     params: { patientId: "pat-1" },
   },
-  {
-    to: "/r/$token",
-    label: "Patient View",
-    params: { token: "req-8f92a1" },
-  },
   { to: "/lab", label: "Lab Tech Dashboard", params: {} },
 ] as const;
 
