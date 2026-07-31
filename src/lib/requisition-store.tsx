@@ -7,13 +7,15 @@ import {
 } from "react";
 
 import type {
+  AuditAction,
+  AuditEvent,
   DiagnosticCenter,
   ExtensionRequest,
   Patient,
   Practitioner,
   Requisition,
 } from "./domain";
-import { extendExpiry } from "./domain";
+import { auditHash, extendExpiry } from "./domain";
 import {
   CENTERS,
   EXTENSION_REQUESTS,
@@ -28,6 +30,16 @@ interface RequisitionStore {
   practitioners: Practitioner[];
   centers: DiagnosticCenter[];
   extensionRequests: ExtensionRequest[];
+  auditEvents: AuditEvent[];
+  auditFor: (requisitionId: string) => AuditEvent[];
+  logAudit: (
+    requisitionId: string,
+    action: AuditAction,
+    actor: string,
+    detail: string,
+  ) => void;
+  /** Flip a booked order to collected and append the intake audit trail. */
+  completeCheckIn: (requisitionId: string, actor: string) => void;
   getPatient: (id: string) => Patient | undefined;
   getPractitioner: (id: string) => Practitioner | undefined;
   getCenter: (id?: string) => DiagnosticCenter | undefined;
@@ -47,12 +59,91 @@ interface RequisitionStore {
   declineExtension: (extensionId: string) => void;
 }
 
+/** Lifecycle events replayed from seed requisitions, chained by hash. */
+function seedAudit(reqs: Requisition[]): AuditEvent[] {
+  const events: Omit<AuditEvent, "hash" | "prevHash">[] = [];
+  for (const req of reqs) {
+    events.push({
+      id: `aud-${req.id}-issued`,
+      requisitionId: req.id,
+      at: req.issuedAt,
+      actor: "prac-1",
+      action: "order.issued",
+      detail: `ServiceRequest created · ${req.tests.length} LOINC item(s)`,
+    });
+    if (req.appointmentAt) {
+      events.push({
+        id: `aud-${req.id}-opened`,
+        requisitionId: req.id,
+        at: new Date(
+          new Date(req.appointmentAt).getTime() - 36 * 3_600_000,
+        ).toISOString(),
+        actor: "patient",
+        action: "link.opened",
+        detail: `Tokenized read via /r/${req.token}`,
+      });
+      events.push({
+        id: `aud-${req.id}-booked`,
+        requisitionId: req.id,
+        at: new Date(
+          new Date(req.appointmentAt).getTime() - 35 * 3_600_000,
+        ).toISOString(),
+        actor: "patient",
+        action: "appointment.booked",
+        detail: `Slot reserved at ${req.centerId ?? "centre"}`,
+      });
+    }
+    if (req.status === "completed") {
+      events.push({
+        id: `aud-${req.id}-checkin`,
+        requisitionId: req.id,
+        at: req.appointmentAt ?? req.issuedAt,
+        actor: "lab-tech",
+        action: "checkin.completed",
+        detail: "Specimen collected · LIS record closed",
+      });
+    }
+  }
+  events.sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
+  let prev = "0".repeat(16);
+  return events.map((e) => {
+    const hash = auditHash(`${e.id}|${e.at}|${e.action}|${e.detail}`, prev);
+    const entry: AuditEvent = { ...e, prevHash: prev, hash };
+    prev = hash;
+    return entry;
+  });
+}
+
 const Ctx = createContext<RequisitionStore | null>(null);
 
 export function RequisitionProvider({ children }: { children: ReactNode }) {
   const [requisitions, setRequisitions] = useState<Requisition[]>(REQUISITIONS);
   const [extensionRequests, setExtensionRequests] =
     useState<ExtensionRequest[]>(EXTENSION_REQUESTS);
+  const [auditEvents, setAuditEvents] = useState<AuditEvent[]>(() =>
+    seedAudit(REQUISITIONS),
+  );
+
+  const append = (
+    entries: {
+      requisitionId: string;
+      action: AuditAction;
+      actor: string;
+      detail: string;
+    }[],
+  ) =>
+    setAuditEvents((prev) => {
+      let prevHash = prev[prev.length - 1]?.hash ?? "0".repeat(16);
+      const next = entries.map((e, i) => {
+        const at = new Date(Date.now() + i).toISOString();
+        const id = `aud-${Math.random().toString(36).slice(2, 8)}`;
+        const hash = auditHash(`${id}|${at}|${e.action}|${e.detail}`, prevHash);
+        const event: AuditEvent = { ...e, id, at, prevHash, hash };
+        prevHash = hash;
+        return event;
+      });
+      return [...prev, ...next];
+    });
 
   const value = useMemo<RequisitionStore>(
     () => ({
@@ -61,6 +152,34 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
       practitioners: PRACTITIONERS,
       centers: CENTERS,
       extensionRequests,
+      auditEvents,
+      auditFor: (requisitionId) =>
+        auditEvents
+          .filter((e) => e.requisitionId === requisitionId)
+          .sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime()),
+      logAudit: (requisitionId, action, actor, detail) =>
+        append([{ requisitionId, action, actor, detail }]),
+      completeCheckIn: (requisitionId, actor) => {
+        setRequisitions((prev) =>
+          prev.map((r) =>
+            r.id === requisitionId ? { ...r, status: "completed" } : r,
+          ),
+        );
+        append([
+          {
+            requisitionId,
+            action: "labels.printed",
+            actor,
+            detail: "Specimen labels rendered for print",
+          },
+          {
+            requisitionId,
+            action: "checkin.completed",
+            actor,
+            detail: "Specimen collected · LIS record closed",
+          },
+        ]);
+      },
       getPatient: (id) => PATIENTS.find((p) => p.id === id),
       getPractitioner: (id) => PRACTITIONERS.find((p) => p.id === id),
       getCenter: (id) => (id ? CENTERS.find((c) => c.id === id) : undefined),
@@ -137,7 +256,7 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
           ),
         ),
     }),
-    [requisitions, extensionRequests],
+    [requisitions, extensionRequests, auditEvents],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
