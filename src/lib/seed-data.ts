@@ -54,6 +54,36 @@ export const PATIENTS: Patient[] = [
       postalCode: "T2X 3H4",
     },
   },
+  {
+    id: "pat-3",
+    givenName: "Priya",
+    familyName: "Nair",
+    phn: "AB-770412",
+    province: "AB",
+    birthDate: "1994-06-21",
+    phone: "+1 587-555-0110",
+    address: {
+      line: "1104 Kensington Rd NW",
+      city: "Calgary",
+      province: "AB",
+      postalCode: "T2N 3P3",
+    },
+  },
+  {
+    id: "pat-4",
+    givenName: "Owen",
+    familyName: "Whitecalf",
+    phn: "AB-330985",
+    province: "AB",
+    birthDate: "1978-01-09",
+    phone: "+1 403-555-0175",
+    address: {
+      line: "45 Cranston Way SE",
+      city: "Calgary",
+      province: "AB",
+      postalCode: "T3M 0K4",
+    },
+  },
 ];
 
 export const PRACTITIONERS: Practitioner[] = [
@@ -140,7 +170,7 @@ export const REQUISITIONS: Requisition[] = [
     patientId: "pat-2",
     practitionerId: "prac-1",
     centerId: "ctr-1",
-    appointmentAt: "2026-07-31T15:40:00.000Z",
+    appointmentAt: todayAt(9, 15),
     priority: "stat",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
     issuedAt: "2026-07-29T11:00:00.000Z",
