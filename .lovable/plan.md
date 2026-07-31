@@ -1,38 +1,57 @@
-## Sequencing (my recommendation)
+## Verdict on the release-policy idea
 
-Ship this status-wording fix **before** the results workflow. It's a ~30-minute change, and the results feature will sit directly on top of it:
+Agreed — this is the right refinement and it fixes the contradiction in the original prompt. A single per-test `ReleasePolicy` enum, resolved to a per-report decision, is exactly how real portals behave and it demonstrates clinical governance without extra machinery.
+
+Two adjustments:
+
+**1. Policy belongs on the test (LOINC), not the report.** A requisition can mix a lipid panel (immediate) with an ultrasound (embargo). Attach the policy to each test in the catalogue, then resolve the *report's* policy as the most restrictive one present: `EMBARGO_DELAY > CLINICIAN_HOLD > IMMEDIATE`. One mixed order then correctly holds the whole report rather than half-leaking it.
+
+**2. Make `EMBARGO_DELAY` actually time-based, or drop it.** If it behaves identically to `CLINICIAN_HOLD` it's a label, not a mechanism. Implement it as: auto-release after N days *unless* the clinician releases earlier — and show the patient a live countdown ("Available to view Aug 7 unless your clinician releases it sooner"). Because this is a mock, add a "fast-forward embargo clock" dev control so the behaviour is demoable without waiting a week. Clinician early-release is the escape hatch that makes the distinction visible in a 60-second demo.
+
+Also worth keeping from my earlier review: results are a **separate lifecycle from the order**, not a new `RequisitionStatus`. Order stays `Intake complete`; the report carries its own state.
 
 ```text
-Booked → Checked in → Intake complete → [results workflow: Resulted → Released to patient]
+Order:  Booked → Checked in → Intake complete
+Report:            (none) → Preliminary → Released to patient
+                              └─ policy decides whether release is automatic
 ```
-
-If "Intake complete" is still labelled "Specimen collected" when results land, the lifecycle reads as two competing terminal states. Fix the base first, then send your results prompt.
-
-## Why the current label is wrong
-
-In a real outpatient lab, specimen collection is a *milestone*, not the end: the order isn't finished until results are verified and released. It's also meaningless for imaging — an X-ray order has no specimen. PulseReq today uses "Specimen collected" as the terminal label for both.
 
 ## What to build
 
-**1. Status labels (`src/lib/domain.ts`)**
-- `completed` label → `"Intake complete"`. FHIR mapping unchanged (`checked-in → in-progress`, `completed → completed`).
-- Add `handoffDetail(tests)` returning a modality-aware sub-line: *"Specimen collected · handed to LIS"* for lab work, *"Exam ready · released to imaging worklist"* for imaging, and a combined line for mixed orders.
+**Domain (`src/lib/domain.ts`)**
+- `type ReleasePolicy = "IMMEDIATE" | "CLINICIAN_HOLD" | "EMBARGO_DELAY"` plus `releasePolicy` (and `embargoDays` for the third) on `OrderedTest`.
+- `resolveReleasePolicy(tests)` → most restrictive policy in the order.
+- `Observation { testId, coding, value, unit, refLow, refHigh, interpretation }` and `DiagnosticReportRecord { id, requisitionId, status: "preliminary" | "released", policy, publishedAt, embargoLiftsAt?, releasedAt?, releasedBy?, observations, narrative? }`.
+- `interpret(value, low, high)` → `N | H | L`; `isVisibleToPatient(report, now)` — true when released, or when the embargo has lapsed; `patientResultStateLabel(report)` for the pending copy.
+- LOINC catalogue extension: mock value range, UCUM unit, reference interval, plain-language explainer, and policy per test. Seeded so a lipid panel emits multiple Observations.
 
-**2. Two-step intake flow (`src/components/intake-drawer.tsx`)**
-- On a `booked` order the primary action becomes **"Check in patient"** → status `checked-in`, logs a `patient.checked-in` audit event, no print.
-- Once `checked-in`, primary action becomes **"Print labels & complete intake"** → status `completed`, logs `labels.printed` + `intake.completed`, triggers `window.print()`.
-- Imaging-only orders hide the label block; the action reads **"Release to imaging worklist"**.
+**Seed policies** — Fasting glucose / lipids / CBC / electrolytes → `IMMEDIATE`. Pathology, biopsy, tumour markers → `CLINICIAN_HOLD`. X-ray / ultrasound / CT / MRI → `EMBARGO_DELAY` (7 days). Rationale strings stored alongside so the UI can explain *why* a result is held.
 
-**3. Store (`src/lib/requisition-store.tsx`)**
-- Split `completeCheckIn` into `checkInPatient(id, actor)` and `completeIntake(id, actor)`; update seeded audit detail strings to the new wording.
+**Store (`src/lib/requisition-store.tsx`)**
+- `reports` state, `reportFor(requisitionId)`.
+- `publishResults(reqId, actor)` — generates Observations, sets policy-resolved state; `IMMEDIATE` reports land released in one step.
+- `releaseResults(reqId, actor)` — clinician review & release; works as early-release for embargoed reports.
+- Audit chain gains `result.published`, `result.auto-released`, `result.released`, `result.viewed`.
 
-**4. Lab queue (`src/routes/lab.tsx`)**
-- Surface the `Checked in` badge state in the queue so a partially processed patient is visible.
+**FHIR (`src/lib/fhir.ts`)**
+- `toFhirObservation()` with `code`, `valueQuantity` (UCUM), `referenceRange`, `interpretation`, `basedOn` → ServiceRequest.
+- `toFhirDiagnosticReport()` with `status` (`preliminary` / `final`), `result[]` references, `performer`.
+- `toFhirResultBundle()` shared by both inspect drawers.
 
-**5. Patient portal (`src/routes/p.$patientId.tsx`)**
-- Replace the hard-coded `Specimen collected` string with the modality-aware handoff line.
+**Lab dashboard (`src/routes/lab.tsx`, `src/components/intake-drawer.tsx`)**
+- On `Intake complete` rows: **"Simulate result generation"**. After publishing, the row shows the resolved policy chip — *Auto-released to patient* / *Held for clinician review* / *Embargoed until 7 Aug*.
 
-**6. Seed data (`src/lib/seed-data.ts`)**
-- Leave one seeded requisition in `checked-in` so the two-step flow is visible on first load.
+**Doctor portal (`src/routes/order.tsx`)**
+- New **Results review inbox** panel, grouped by patient, abnormal-first. Amber/red tags derived from `interpretation`.
+- Held and embargoed reports get **"Review & release to patient"**; already-auto-released ones show *Released automatically · routine panel* with an acknowledge action, so the clinician still sees everything.
+- **Inspect FHIR DiagnosticReport** drawer reusing the existing JSON viewer.
 
-No changes to routing, layout, or FHIR payload shapes. Results delivery (doctor vs patient presentation, authorization) is explicitly out of scope here — that's your next prompt.
+**Patient views (`src/routes/r.$token.tsx`, `src/routes/p.$patientId.tsx`)**
+- Not yet visible → badge *"Results received by clinic — pending physician review"*, or for embargo, *"Available 7 Aug unless your clinician releases it sooner"*, each with a one-line plain-language reason.
+- Visible → **My diagnostic results**: test name, value + unit, reference range, In range / Out of range badge, collapsible plain-language explainer, and a "not a diagnosis — discuss with your clinician" note.
+- Toggle between patient view and raw FHIR DiagnosticReport JSON.
+- Portal list gains a "Results available" marker.
+
+**Demo aids** — seed one released routine panel, one clinician-held pathology report, one embargoed ultrasound; plus a small "advance embargo clock" control on the lab page so the timed path is demoable immediately.
+
+Frontend-only, synthetic values, no routing or layout changes.
