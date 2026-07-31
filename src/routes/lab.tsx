@@ -4,7 +4,12 @@ import { useState } from "react";
 import { Panel, PageShell } from "@/components/page-shell";
 import { StatusBadge } from "@/components/status-badge";
 import { PriorityBadge } from "@/components/priority-badge";
-import { effectiveStatus, patientName } from "@/lib/domain";
+import {
+  effectiveStatus,
+  formatAddress,
+  formatDob,
+  patientName,
+} from "@/lib/domain";
 import { useRequisitions } from "@/lib/requisition-store";
 
 export const Route = createFileRoute("/lab")({
@@ -72,6 +77,10 @@ function LabPage() {
                   PHN {matchPatient.phn} · {match.tests.length} test
                   {match.tests.length === 1 ? "" : "s"}
                 </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  DOB {formatDob(matchPatient.birthDate)} ·{" "}
+                  {formatAddress(matchPatient.address)}
+                </p>
               </div>
             ) : (
               <div className="rounded-md border border-destructive/25 bg-destructive/10 p-3 text-destructive">
@@ -89,6 +98,7 @@ function LabPage() {
                   <th className="pb-2 font-medium">Token</th>
                   <th className="pb-2 font-medium">Priority</th>
                   <th className="pb-2 font-medium">Patient</th>
+                  <th className="pb-2 font-medium">DOB</th>
                   <th className="pb-2 font-medium">Tests</th>
                   <th className="pb-2 font-medium">Centre</th>
                   <th className="pb-2 font-medium">Status</th>
@@ -111,6 +121,12 @@ function LabPage() {
                         <span className="block text-xs text-muted-foreground tabular">
                           {patient?.phn}
                         </span>
+                        <span className="block text-xs text-muted-foreground">
+                          {patient ? formatAddress(patient.address) : ""}
+                        </span>
+                      </td>
+                      <td className="py-3 text-xs text-muted-foreground tabular">
+                        {patient ? formatDob(patient.birthDate) : "—"}
                       </td>
                       <td className="py-3 text-xs text-muted-foreground tabular">
                         {req.tests.map((t) => t.coding.code).join(", ")}
