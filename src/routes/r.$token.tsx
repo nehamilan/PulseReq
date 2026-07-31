@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -48,6 +48,18 @@ export const Route = createFileRoute("/r/$token")({
   component: PatientView,
 });
 
+function BackLink({ patientId }: { patientId: string }) {
+  return (
+    <Link
+      to="/p/$patientId"
+      params={{ patientId }}
+      className="inline-flex items-center gap-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+    >
+      ← Back to portal
+    </Link>
+  );
+}
+
 function PatientView() {
   const { token } = Route.useParams();
   const { findByToken, getPatient, getPractitioner, getCenter, centers, updateRequisition } =
@@ -86,8 +98,13 @@ function PatientView() {
         eyebrow="Role · Patient"
         title="Your appointment is booked"
         description="Bring the check-in code below — the diagnostic centre already has your order."
-        actions={<StatusBadge status={status} />}
-      >
+      actions={
+        <div className="flex flex-wrap items-center gap-2">
+          <BackLink patientId={req.patientId} />
+          <StatusBadge status={status} />
+        </div>
+      }
+    >
         <BookingConfirmation
           req={req}
           center={center}
@@ -124,7 +141,12 @@ function PatientView() {
       eyebrow="Role · Patient"
       title="Your diagnostic requisition"
       description="No paper form to carry. Show this link — or the check-in code from it — at the diagnostic centre."
-      actions={<StatusBadge status={status} />}
+      actions={
+        <div className="flex flex-wrap items-center gap-2">
+          <BackLink patientId={req.patientId} />
+          <StatusBadge status={status} />
+        </div>
+      }
     >
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
         <Panel

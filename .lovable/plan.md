@@ -1,16 +1,11 @@
-# Hide Patient View from the header while keeping the route
+Add a secondary "Back to patient portal" link to the `/r/$token` requisition detail page so a patient can return to their list without relying on the header.
 
-## Why it appears now
-`/r/$token` is a single-requisition deep link, not a top-level role. The header is currently treating it as a primary tab, which is confusing now that there is a Patient Portal (`/p/$patientId`) where the patient picks a requisition and clicks **Open requisition** to reach `/r/$token`. The header should be a role switcher, not a list of every reachable page.
+Changes:
+- `src/routes/r.$token.tsx`:
+  - Import `Link` from `@tanstack/react-router`.
+  - In the main requisition view (active/booking state), add a `Link` to `/p/$patientId` with `params={{ patientId: req.patientId }}` as a `PageShell` `action` or as a small secondary link just under the title.
+  - Repeat the same back link in the `booked`/`completed` confirmation state so the patient can return after viewing the appointment.
+- `src/components/booking-confirmation.tsx` (optional): if the back link is better placed alongside the booking confirmation title, render it as a small button here.
+- Ensure the styling uses existing clinical tokens (`text-muted-foreground`, hover to `text-foreground`) and keeps the page's visual hierarchy intact.
 
-## What this plan does
-1. Remove the "Patient View" entry from the header role tabs in `src/components/app-header.tsx`.
-2. Keep `src/routes/r.$token.tsx` fully functional — it is still the requisition detail/booking page, now reached through the Patient Portal or a direct link.
-3. Keep the Patient Portal's "Open requisition" links unchanged.
-
-## What is left alone
-- The home page "Patient View" sample card remains as a demo entry point, so visitors can still see what a patient link looks like without going through the portal.
-- No route files, store logic, or data model changes.
-
-## Result
-Header tabs become: **Doctor Portal | Patient Portal | Lab Tech Dashboard**. The patient still opens any requisition from the portal, and `/r/$token` continues to work as before.
+The route remains `/r/$token` and the patient portal list remains `/p/$patientId`.
