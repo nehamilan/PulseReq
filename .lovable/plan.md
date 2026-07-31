@@ -1,37 +1,47 @@
-Scope: Add a configurable link lifetime selector to the PulseReq Doctor Portal. This is requirement #1 only — no other changes from the broader list (issued date, STAT badge, demographics) are included.
+# Step 5 — Patient Booking Portal & Token Routing
 
-User-facing change
-- In the "New requisition" form, the clinician can now choose how long the patient-facing link remains valid: 3 days, 7 days (default), 14 days, or 21 days.
-- The chosen lifetime is stored on the requisition and surfaced in the success dialog and the issued-list metadata.
+Keeps the existing `/r/$token` route as the single patient URL. Adds centre selection, slot booking, and a confirmation screen.
 
-Files to change
+## 1. Data model (`src/lib/domain.ts`, `src/lib/seed-data.ts`)
 
-1. `src/lib/domain.ts`
-   - Add `linkLifetimeDays: 3 | 7 | 14 | 21` to the `Requisition` interface.
+- Add `distanceKm: number` to `DiagnosticCenter`.
+- Replace the two seed centres with three Calgary sites, keeping `ctr-*` ids:
+  - `ctr-1` APL Chinook Centre — 1.2 km — Phlebotomy, Urinalysis, ECG — next slot today 14:30
+  - `ctr-2` APL Foothills — 4.5 km — Phlebotomy, X-Ray, Ultrasound — next slot tomorrow 09:00
+  - `ctr-3` DynaLIFE Sunridge — 6.1 km — Phlebotomy, Urinalysis — next slot today 16:15
+- Helper `centerSupports(center, tests)` — a centre is bookable only if it covers every ordered modality (imaging orders need X-Ray/Ultrasound capability).
+- Helper `slotsForCenter(center)` — generates 15-minute pills from the centre's next-available time (8 slots).
 
-2. `src/lib/seed-data.ts`
-   - Change `EXPIRES_AT` so the seed requisition is +7 days from `ISSUED_AT` instead of +72h.
-   - Set `linkLifetimeDays: 7` on both seed requisitions.
+## 2. Patient view (`src/routes/r.$token.tsx`)
 
-3. `src/components/order-form.tsx`
-   - Add local state `linkLifetimeDays` defaulting to `7`.
-   - Render a second segmented control below "Urgency" labeled "Link lifetime" with options: 3, 7, 14, 21 days.
-   - On submit, compute `expiresAt` from `issuedAt + linkLifetimeDays * 24h` and include `linkLifetimeDays` in the created `Requisition`.
+Booking state machine driven by requisition status:
 
-4. `src/components/requisition-created-dialog.tsx`
-   - Replace the hard-coded "valid 72 hours" copy with the actual stored lifetime, e.g. "valid 7 days".
+- **`active` (awaiting booking)** — replaces the current "coming in the next build step" placeholder:
+  - Requisition summary panel stays (patient, DOB, address, PHN, ordered tests with prep instructions, requesting clinician + clinic).
+  - **Centre locator**: card list sorted by distance, each showing name, address, distance, capabilities, next available. Centres that can't perform the ordered tests render disabled with a "Cannot perform: Chest X-ray" note.
+  - Selecting a centre expands **15-minute slot pills** below it.
+  - **`Confirm & Link Requisition`** button, disabled until centre + slot are chosen.
+- **`booked`** — confirmation screen (also what a returning patient sees).
+- **expired / revoked / invalid** — unchanged.
 
-5. `src/routes/order.tsx`
-   - Update the global hint pill from "Links expire 72h after issue" to "Link lifetime: 7 days default".
-   - In the issued requisitions list, replace "expires in Xh" with a clearer label that includes both the issued date and the configured lifetime: e.g. "Issued 30 Jul 2026 · expires 6 Aug 2026 · 7 days".
-   - Update the Interoperability panel's "Link lifetime" field to "3 / 7 / 14 / 21 days, configurable at issue".
+## 3. Confirm behaviour
 
-Out of scope for this plan
-- Displaying issuedAt dates in isolation (requirement #2).
-- STAT badge or STAT queue sorting (requirement #3).
-- Adding patient DOB/address (requirement #4).
+On confirm: `updateRequisition(id, { status: "booked", centerId, appointmentAt })`, plus a sonner toast. No page reload — the view re-renders into the confirmation screen.
 
-Implementation notes
-- Keep the existing `effectiveStatus` / `isExpired` helpers unchanged; they already derive status from `expiresAt`, so the new lifetimes will automatically drive expiry logic.
-- Use the existing segmented-control UI pattern already present for the urgency toggle so the new selector feels visually consistent.
-- No backend changes are needed; the app remains frontend-only with in-memory state.
+## 4. Confirmation screen (`src/components/booking-confirmation.tsx`)
+
+- Appointment header: centre name, address, date and 24h time.
+- **Check-in code**: deterministic SVG block-matrix generated from the token, labelled "Mock check-in code — not a scannable barcode", with the token printed in monospace underneath.
+- Prep reminders pulled from the ordered tests (e.g. "Fasting 12 hours required").
+- **Get directions** — external link to Google Maps directions for the centre address.
+- **Change appointment** — returns to `active` so the flow can be re-demoed.
+
+## 5. Copy alignment
+
+Patient-facing status labels read "Awaiting booking" / "Appointment booked"; the FHIR enum values stay `active` / `booked` underneath. The lab dashboard picks the booked centre and appointment time up automatically through the shared store.
+
+## Technical notes
+
+- No new dependencies; the check-in code is inline SVG.
+- All state lives in the existing `RequisitionProvider` context — still frontend-only, synthetic data.
+- Directions are an outbound Maps link, not an embedded map (no API key needed).

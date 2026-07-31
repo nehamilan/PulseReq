@@ -1,9 +1,13 @@
 import { Link } from "@tanstack/react-router";
 
 const ROLES = [
-  { to: "/order", label: "Doctor Portal", hint: "Order" },
-  { to: "/r/req-8f92a1", label: "Patient View", hint: "Token link" },
-  { to: "/lab", label: "Lab Tech Dashboard", hint: "Intake" },
+  { to: "/order", label: "Doctor Portal", params: {} },
+  {
+    to: "/r/$token",
+    label: "Patient View",
+    params: { token: "req-8f92a1" },
+  },
+  { to: "/lab", label: "Lab Tech Dashboard", params: {} },
 ] as const;
 
 export function AppHeader() {
@@ -24,6 +28,7 @@ export function AppHeader() {
             <Link
               key={role.to}
               to={role.to}
+              params={role.params as never}
               activeProps={{
                 className: "bg-card text-foreground shadow-sm border-border",
               }}
