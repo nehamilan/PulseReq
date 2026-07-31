@@ -11,7 +11,9 @@ import type {
  */
 
 const ISSUED_AT = "2026-07-30T14:10:00.000Z";
-const EXPIRES_AT = "2026-08-02T14:10:00.000Z"; // +72h
+const EXPIRES_AT = "2026-08-06T14:10:00.000Z"; // +7 days
+
+const LINK_LIFETIME_DAYS = 7 as const;
 
 export const PATIENTS: Patient[] = [
   {
@@ -73,6 +75,7 @@ export const REQUISITIONS: Requisition[] = [
     patientId: "pat-1",
     practitionerId: "prac-1",
     priority: "routine",
+    linkLifetimeDays: LINK_LIFETIME_DAYS,
     issuedAt: ISSUED_AT,
     expiresAt: EXPIRES_AT,
     clinicalNotes: "Fatigue, 6-week history. Rule out anemia.",
@@ -107,6 +110,7 @@ export const REQUISITIONS: Requisition[] = [
     centerId: "ctr-1",
     appointmentAt: "2026-07-31T15:40:00.000Z",
     priority: "routine",
+    linkLifetimeDays: LINK_LIFETIME_DAYS,
     issuedAt: "2026-07-29T11:00:00.000Z",
     expiresAt: "2026-08-05T11:00:00.000Z",
     tests: [

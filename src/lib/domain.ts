@@ -78,6 +78,8 @@ export interface Requisition {
   tests: OrderedTest[];
   clinicalNotes?: string;
   priority: "routine" | "urgent" | "stat";
+  /** Configurable patient-link lifetime, in days. */
+  linkLifetimeDays: 3 | 7 | 14 | 21;
   issuedAt: string;
   expiresAt: string;
 }
