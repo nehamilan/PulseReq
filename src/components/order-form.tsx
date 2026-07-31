@@ -72,6 +72,11 @@ export function OrderForm() {
         instruction: entry.instruction,
         specimen: entry.specimen,
         modality: entry.modality,
+        releasePolicy: policyForTest({
+          id: "probe",
+          coding: { system: "http://loinc.org", code: entry.code, display: entry.display },
+          modality: entry.modality,
+        }).policy,
       };
     });
 
