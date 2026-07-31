@@ -109,7 +109,7 @@ export const REQUISITIONS: Requisition[] = [
     practitionerId: "prac-1",
     centerId: "ctr-1",
     appointmentAt: "2026-07-31T15:40:00.000Z",
-    priority: "routine",
+    priority: "stat",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
     issuedAt: "2026-07-29T11:00:00.000Z",
     expiresAt: "2026-08-05T11:00:00.000Z",
