@@ -17,7 +17,7 @@ export const STATUS_LABEL: Record<RequisitionStatus, string> = {
   active: "Awaiting booking",
   booked: "Appointment booked",
   "checked-in": "Checked in",
-  completed: "Specimen collected",
+  completed: "Intake complete",
   revoked: "Revoked by clinician",
   expired: "Link expired",
 };
@@ -394,8 +394,9 @@ export type AuditAction =
   | "link.opened"
   | "appointment.booked"
   | "intake.read"
+  | "patient.checked-in"
   | "labels.printed"
-  | "checkin.completed";
+  | "intake.completed";
 
 export interface AuditEvent {
   id: string;
@@ -413,8 +414,9 @@ export const AUDIT_LABEL: Record<AuditAction, string> = {
   "link.opened": "TOKENIZED READ",
   "appointment.booked": "APPOINTMENT BOOKED",
   "intake.read": "PHI ACCESS · INTAKE",
+  "patient.checked-in": "PATIENT CHECKED IN",
   "labels.printed": "LABELS PRINTED",
-  "checkin.completed": "CHECK-IN COMPLETED",
+  "intake.completed": "INTAKE COMPLETED",
 };
 
 /** Simulated content hash — deterministic, chained to the previous entry. */
