@@ -46,7 +46,20 @@ export interface OrderedTest {
   specimen?: string;
   /** Routing hint: phlebotomy-style lab work vs imaging suite. */
   modality?: "lab" | "imaging";
+  /** Governs whether a published result reaches the patient automatically. */
+  releasePolicy?: ReleasePolicy;
+  /** Days a result is embargoed, when releasePolicy is EMBARGO_DELAY. */
+  embargoDays?: number;
 }
+
+/**
+ * Jurisdictional / facility release governance for a diagnostic result.
+ *
+ * IMMEDIATE      routine outpatient blood work — auto-released on publication
+ * CLINICIAN_HOLD sensitive or life-altering — withheld until a clinician releases
+ * EMBARGO_DELAY  auto-releases after a delay unless a clinician releases sooner
+ */
+export type ReleasePolicy = "IMMEDIATE" | "CLINICIAN_HOLD" | "EMBARGO_DELAY";
 
 export interface Patient {
   id: string;
@@ -410,7 +423,11 @@ export type AuditAction =
   | "intake.read"
   | "patient.checked-in"
   | "labels.printed"
-  | "intake.completed";
+  | "intake.completed"
+  | "result.published"
+  | "result.auto-released"
+  | "result.released"
+  | "result.viewed";
 
 export interface AuditEvent {
   id: string;
@@ -431,6 +448,10 @@ export const AUDIT_LABEL: Record<AuditAction, string> = {
   "patient.checked-in": "PATIENT CHECKED IN",
   "labels.printed": "LABELS PRINTED",
   "intake.completed": "INTAKE COMPLETED",
+  "result.published": "RESULT PUBLISHED",
+  "result.auto-released": "RESULT AUTO-RELEASED",
+  "result.released": "RESULT RELEASED BY CLINICIAN",
+  "result.viewed": "PHI ACCESS · RESULT VIEWED",
 };
 
 /** Simulated content hash — deterministic, chained to the previous entry. */
