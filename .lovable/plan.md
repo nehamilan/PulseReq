@@ -1,57 +1,47 @@
-## Verdict on the release-policy idea
+Goal
+Make the global header's "Patient Portal" tab open a patient selector instead of always linking to the sample patient `pat-1`. Selecting a patient navigates to `/p/$patientId` so the user can switch between synthetic patients from anywhere in the app.
 
-Agreed — this is the right refinement and it fixes the contradiction in the original prompt. A single per-test `ReleasePolicy` enum, resolved to a per-report decision, is exactly how real portals behave and it demonstrates clinical governance without extra machinery.
+Current state
+- `src/components/app-header.tsx` renders three role tabs as TanStack `<Link>` elements in a segmented control.
+- The Patient Portal tab is hardcoded to `/p/$patientId` with `params: { patientId: "pat-1" }`.
+- Four synthetic patients exist in `src/lib/seed-data.ts`: `pat-1` Jane Doe, `pat-2` Marc Tremblay, `pat-3` Priya Nair, `pat-4` Owen Whitecalf.
+- The project already has `src/components/ui/dropdown-menu.tsx` and `src/components/ui/select.tsx` from shadcn.
+- Utility helpers `patientName(p)` and `formatDob(dob)` already exist in `src/lib/domain.ts`.
 
-Two adjustments:
+Proposed approach
+Replace the Patient Portal tab with a DropdownMenu trigger styled to match the existing segmented tab. The dropdown lists every patient with enough identity context (name, PHN, DOB) so the selector is unambiguous. Selecting a patient calls `navigate({ to: "/p/$patientId", params: { patientId: patient.id } })`.
 
-**1. Policy belongs on the test (LOINC), not the report.** A requisition can mix a lipid panel (immediate) with an ultrasound (embargo). Attach the policy to each test in the catalogue, then resolve the *report's* policy as the most restrictive one present: `EMBARGO_DELAY > CLINICIAN_HOLD > IMMEDIATE`. One mixed order then correctly holds the whole report rather than half-leaking it.
+Why DropdownMenu instead of Select:
+- A Select looks like a form field and would clash with the tab bar aesthetic.
+- A DropdownMenu lets each row show richer patient context (name + PHN + DOB) and keeps the trigger looking identical to the Doctor Portal / Lab Tech Dashboard tabs.
 
-**2. Make `EMBARGO_DELAY` actually time-based, or drop it.** If it behaves identically to `CLINICIAN_HOLD` it's a label, not a mechanism. Implement it as: auto-release after N days *unless* the clinician releases earlier — and show the patient a live countdown ("Available to view Aug 7 unless your clinician releases it sooner"). Because this is a mock, add a "fast-forward embargo clock" dev control so the behaviour is demoable without waiting a week. Clinician early-release is the escape hatch that makes the distinction visible in a 60-second demo.
+Files to modify
+1. `src/components/app-header.tsx`
+   - Remove the Patient Portal entry from the static `ROLES` array.
+   - Render the Doctor Portal and Lab Tech Dashboard tabs exactly as they are now.
+   - Add a separate Patient Portal DropdownMenu block in the same `<nav>`.
+   - Import `useNavigate` from `@tanstack/react-router` to handle selection.
+   - Import `PATIENTS` from `@/lib/seed-data` to populate the list.
+   - Import `patientName` and `formatDob` from `@/lib/domain` to format rows.
+   - Import the DropdownMenu primitives from `@/components/ui/dropdown-menu`.
+   - Detect the active route (`/p/$patientId`) using `useMatch({ from: "/p/$patientId" })` or `useRouterState`, and apply the same active/inactive visual classes as the other tabs.
+   - Dropdown trigger: a button styled like the existing tab links (`rounded-md border px-3 py-1.5 text-[13px] font-medium transition-colors`).
+   - Dropdown content: a compact clinical menu with one item per patient.
+     - Primary label: `Jane Doe`
+     - Secondary label: `PHN AB-982341 · Mar 14, 1987 (39y)`
+   - On item click, navigate to the selected patient's portal.
 
-Also worth keeping from my earlier review: results are a **separate lifecycle from the order**, not a new `RequisitionStatus`. Order stays `Intake complete`; the report carries its own state.
+UI/UX details
+- Keep the tab bar width and alignment unchanged; the Patient Portal trigger should be the same height and padding as the other tabs.
+- The active state should fire whenever the current route is `/p/$patientId`, regardless of which patient is selected, matching how TanStack Link's `activeProps` behaves for the other tabs.
+- Add keyboard accessibility: `DropdownMenuTrigger` receives focus, arrow keys move through patients, Enter/Space selects.
+- No changes to the patient portal route (`src/routes/p.$patientId.tsx`) are required; it already handles any `patientId`.
+- No state changes are needed because the selector reads the static seed list and navigates via the router.
 
-```text
-Order:  Booked → Checked in → Intake complete
-Report:            (none) → Preliminary → Released to patient
-                              └─ policy decides whether release is automatic
-```
+Out of scope
+- Adding a "new patient" option (would require a form and data changes).
+- Sorting/filtering patients (only four synthetic patients exist; a flat list is sufficient).
+- Persisting the last-selected patient (pure navigation is enough for the prototype).
 
-## What to build
-
-**Domain (`src/lib/domain.ts`)**
-- `type ReleasePolicy = "IMMEDIATE" | "CLINICIAN_HOLD" | "EMBARGO_DELAY"` plus `releasePolicy` (and `embargoDays` for the third) on `OrderedTest`.
-- `resolveReleasePolicy(tests)` → most restrictive policy in the order.
-- `Observation { testId, coding, value, unit, refLow, refHigh, interpretation }` and `DiagnosticReportRecord { id, requisitionId, status: "preliminary" | "released", policy, publishedAt, embargoLiftsAt?, releasedAt?, releasedBy?, observations, narrative? }`.
-- `interpret(value, low, high)` → `N | H | L`; `isVisibleToPatient(report, now)` — true when released, or when the embargo has lapsed; `patientResultStateLabel(report)` for the pending copy.
-- LOINC catalogue extension: mock value range, UCUM unit, reference interval, plain-language explainer, and policy per test. Seeded so a lipid panel emits multiple Observations.
-
-**Seed policies** — Fasting glucose / lipids / CBC / electrolytes → `IMMEDIATE`. Pathology, biopsy, tumour markers → `CLINICIAN_HOLD`. X-ray / ultrasound / CT / MRI → `EMBARGO_DELAY` (7 days). Rationale strings stored alongside so the UI can explain *why* a result is held.
-
-**Store (`src/lib/requisition-store.tsx`)**
-- `reports` state, `reportFor(requisitionId)`.
-- `publishResults(reqId, actor)` — generates Observations, sets policy-resolved state; `IMMEDIATE` reports land released in one step.
-- `releaseResults(reqId, actor)` — clinician review & release; works as early-release for embargoed reports.
-- Audit chain gains `result.published`, `result.auto-released`, `result.released`, `result.viewed`.
-
-**FHIR (`src/lib/fhir.ts`)**
-- `toFhirObservation()` with `code`, `valueQuantity` (UCUM), `referenceRange`, `interpretation`, `basedOn` → ServiceRequest.
-- `toFhirDiagnosticReport()` with `status` (`preliminary` / `final`), `result[]` references, `performer`.
-- `toFhirResultBundle()` shared by both inspect drawers.
-
-**Lab dashboard (`src/routes/lab.tsx`, `src/components/intake-drawer.tsx`)**
-- On `Intake complete` rows: **"Simulate result generation"**. After publishing, the row shows the resolved policy chip — *Auto-released to patient* / *Held for clinician review* / *Embargoed until 7 Aug*.
-
-**Doctor portal (`src/routes/order.tsx`)**
-- New **Results review inbox** panel, grouped by patient, abnormal-first. Amber/red tags derived from `interpretation`.
-- Held and embargoed reports get **"Review & release to patient"**; already-auto-released ones show *Released automatically · routine panel* with an acknowledge action, so the clinician still sees everything.
-- **Inspect FHIR DiagnosticReport** drawer reusing the existing JSON viewer.
-
-**Patient views (`src/routes/r.$token.tsx`, `src/routes/p.$patientId.tsx`)**
-- Not yet visible → badge *"Results received by clinic — pending physician review"*, or for embargo, *"Available 7 Aug unless your clinician releases it sooner"*, each with a one-line plain-language reason.
-- Visible → **My diagnostic results**: test name, value + unit, reference range, In range / Out of range badge, collapsible plain-language explainer, and a "not a diagnosis — discuss with your clinician" note.
-- Toggle between patient view and raw FHIR DiagnosticReport JSON.
-- Portal list gains a "Results available" marker.
-
-**Demo aids** — seed one released routine panel, one clinician-held pathology report, one embargoed ultrasound; plus a small "advance embargo clock" control on the lab page so the timed path is demoable immediately.
-
-Frontend-only, synthetic values, no routing or layout changes.
+Verification
+After implementation, clicking the Patient Portal tab in the header should open a dropdown, and choosing a patient should navigate to `/p/pat-2`, `/p/pat-3`, etc., with the header tab remaining active on those routes.
