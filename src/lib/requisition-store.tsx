@@ -173,7 +173,23 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
           .sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime()),
       logAudit: (requisitionId, action, actor, detail) =>
         append([{ requisitionId, action, actor, detail }]),
-      completeCheckIn: (requisitionId, actor) => {
+      checkInPatient: (requisitionId, actor) => {
+        setRequisitions((prev) =>
+          prev.map((r) =>
+            r.id === requisitionId ? { ...r, status: "checked-in" } : r,
+          ),
+        );
+        append([
+          {
+            requisitionId,
+            action: "patient.checked-in",
+            actor,
+            detail: "Patient arrived · identity verified at intake",
+          },
+        ]);
+      },
+      completeIntake: (requisitionId, actor) => {
+        const req = requisitions.find((r) => r.id === requisitionId);
         setRequisitions((prev) =>
           prev.map((r) =>
             r.id === requisitionId ? { ...r, status: "completed" } : r,
@@ -188,9 +204,9 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
           },
           {
             requisitionId,
-            action: "checkin.completed",
+            action: "intake.completed",
             actor,
-            detail: "Specimen collected · LIS record closed",
+            detail: req ? handoffDetail(req.tests) : "Order handed to LIS",
           },
         ]);
       },
