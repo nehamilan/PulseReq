@@ -59,6 +59,12 @@ export const POLICY_BY_LOINC: Record<string, PolicySpec> = {
   "60568-3": SENSITIVE,
   "36643-5": IMAGING,
   "24916-9": IMAGING,
+  "2276-4": ROUTINE,
+  "14635-7": ROUTINE,
+  "24323-8": ROUTINE,
+  "24357-6": ROUTINE,
+  "24606-6": IMAGING,
+  "24627-2": IMAGING,
 };
 
 export function policyForTest(test: OrderedTest): PolicySpec {
@@ -227,6 +233,113 @@ export const ANALYTES_BY_LOINC: Record<string, AnalyteSpec[]> = {
         "The signal your brain sends to the thyroid. High TSH usually means an underactive thyroid; low means overactive.",
     },
   ],
+  "2276-4": [
+    {
+      code: "2276-4",
+      display: "Ferritin",
+      unit: "µg/L",
+      refLow: 15,
+      refHigh: 200,
+      sample: [8, 240],
+      decimals: 0,
+      explainer:
+        "Ferritin reflects how much iron your body has in storage. Low values are the earliest sign of iron deficiency.",
+    },
+  ],
+  "14635-7": [
+    {
+      code: "14635-7",
+      display: "Vitamin D (25-hydroxy)",
+      unit: "nmol/L",
+      refLow: 75,
+      refHigh: 250,
+      sample: [38, 180],
+      decimals: 0,
+      explainer:
+        "Vitamin D supports bone health and immune function. Levels commonly run low through Canadian winters.",
+    },
+  ],
+  "24323-8": [
+    {
+      code: "2951-2",
+      display: "Sodium",
+      unit: "mmol/L",
+      refLow: 135,
+      refHigh: 145,
+      sample: [131, 148],
+      decimals: 0,
+      explainer:
+        "Sodium is the main salt in your blood. It tracks hydration and how your kidneys balance fluid.",
+    },
+    {
+      code: "2823-3",
+      display: "Potassium",
+      unit: "mmol/L",
+      refLow: 3.5,
+      refHigh: 5.1,
+      sample: [3.1, 5.6],
+      decimals: 1,
+      explainer:
+        "Potassium keeps muscles and the heart rhythm working normally. Both high and low values matter.",
+    },
+    {
+      code: "2160-0",
+      display: "Creatinine",
+      unit: "µmol/L",
+      refLow: 50,
+      refHigh: 100,
+      sample: [44, 128],
+      decimals: 0,
+      explainer:
+        "A muscle waste product cleared by the kidneys. Rising creatinine suggests reduced kidney filtering.",
+    },
+    {
+      code: "33914-3",
+      display: "eGFR (CKD-EPI)",
+      unit: "mL/min/1.73m2",
+      refLow: 60,
+      refHigh: 130,
+      sample: [48, 118],
+      decimals: 0,
+      explainer:
+        "An estimate of how well your kidneys filter blood. Sustained values under 60 warrant follow-up.",
+    },
+    {
+      code: "1742-6",
+      display: "Alanine aminotransferase (ALT)",
+      unit: "U/L",
+      refLow: 7,
+      refHigh: 45,
+      sample: [9, 72],
+      decimals: 0,
+      explainer:
+        "A liver enzyme. Elevations can follow alcohol, medication, fatty liver or infection.",
+    },
+  ],
+  "24357-6": [
+    {
+      code: "5804-0",
+      display: "Protein, urine (dipstick)",
+      unit: "g/L",
+      refLow: 0,
+      refHigh: 0.15,
+      sample: [0, 0.4],
+      decimals: 2,
+      explainer:
+        "Protein leaking into urine can be an early marker of kidney strain.",
+    },
+    {
+      code: "5792-7",
+      display: "Glucose, urine (dipstick)",
+      unit: "mmol/L",
+      refLow: 0,
+      refHigh: 0.8,
+      sample: [0, 2.2],
+      decimals: 1,
+      explainer:
+        "Sugar normally stays out of urine. Its presence usually means blood sugar is running high.",
+    },
+  ],
 };
 
 /** Narrative impressions for modalities that produce no numeric value. */
@@ -237,6 +350,10 @@ export const NARRATIVE_BY_LOINC: Record<string, string> = {
     "Abdominal ultrasound. Liver normal in echotexture without focal lesion. Gallbladder contains a single 6 mm mobile echogenic focus with posterior shadowing; wall thickness normal, no sonographic Murphy sign. Kidneys, pancreas and spleen unremarkable. IMPRESSION: Small cholelithiasis without evidence of acute cholecystitis. Clinical correlation advised.",
   "60568-3":
     "Synoptic pathology report. Specimen received in formalin. Sections show benign glandular tissue with mild chronic inflammation. No dysplasia and no evidence of malignancy identified in the material examined. IMPRESSION: Benign findings.",
+  "24606-6":
+    "Bilateral screening mammogram, CC and MLO projections. Breast composition category B (scattered fibroglandular densities). No dominant mass, architectural distortion or suspicious microcalcification. IMPRESSION: BI-RADS 1 — negative. Routine screening interval recommended.",
+  "24627-2":
+    "CT chest with IV contrast. No pulmonary embolus to the segmental level. A 5 mm solid nodule is present in the right lower lobe, unchanged in comparison with prior imaging. No mediastinal or hilar adenopathy, no pleural effusion. IMPRESSION: Stable sub-centimetre pulmonary nodule; no acute finding.",
 };
 
 /* --- Observations & reports ---------------------------------------- */
