@@ -112,7 +112,7 @@ export function OrderForm() {
           <SelectContent>
             {patients.map((p) => (
               <SelectItem key={p.id} value={p.id}>
-                {p.givenName} {p.familyName} · PHN {p.phn}
+                {p.givenName} {p.familyName} · DOB {p.birthDate} · PHN {p.phn}
               </SelectItem>
             ))}
           </SelectContent>

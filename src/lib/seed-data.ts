@@ -24,6 +24,12 @@ export const PATIENTS: Patient[] = [
     province: "AB",
     birthDate: "1987-03-14",
     phone: "+1 587-555-0148",
+    address: {
+      line: "812 14 St NW",
+      city: "Calgary",
+      province: "AB",
+      postalCode: "T2N 1Z6",
+    },
   },
   {
     id: "pat-2",
@@ -33,6 +39,12 @@ export const PATIENTS: Patient[] = [
     province: "AB",
     birthDate: "1962-11-02",
     phone: "+1 403-555-0192",
+    address: {
+      line: "27 Sunmills Green SE",
+      city: "Calgary",
+      province: "AB",
+      postalCode: "T2X 3H4",
+    },
   },
 ];
 

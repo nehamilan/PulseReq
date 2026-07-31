@@ -10,6 +10,8 @@ import {
   formatClinicalDate,
   formatClinicalDateTime,
   patientName,
+  formatDob,
+  formatAddress,
 } from "@/lib/domain";
 import { useRequisitions } from "@/lib/requisition-store";
 
@@ -63,6 +65,10 @@ function OrderPage() {
                         <span className="ml-2 font-mono text-xs font-normal text-muted-foreground tabular">
                           PHN {patient?.phn}
                         </span>
+                      </p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        DOB {patient ? formatDob(patient.birthDate) : "—"} ·{" "}
+                        {patient ? formatAddress(patient.address) : "—"}
                       </p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
                         Ordered by {practitioner?.name} ·{" "}
