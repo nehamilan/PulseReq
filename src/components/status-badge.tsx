@@ -3,6 +3,7 @@ import { STATUS_LABEL, type RequisitionStatus } from "@/lib/domain";
 const STYLES: Record<RequisitionStatus, string> = {
   active: "bg-primary/10 text-primary border-primary/20",
   booked: "bg-success/10 text-success border-success/25",
+  "checked-in": "bg-primary/15 text-primary border-primary/30",
   completed: "bg-muted text-muted-foreground border-border",
   revoked: "bg-destructive/10 text-destructive border-destructive/25",
   expired: "bg-warning/15 text-warning-foreground border-warning/35",
