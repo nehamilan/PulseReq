@@ -215,6 +215,96 @@ REQUISITIONS.push({
   ],
 });
 
+/** Booked appointments at APL Chinook so the lab queue reflects a real day. */
+REQUISITIONS.push(
+  {
+    id: "rq-4",
+    token: "req-a41c9f",
+    status: "booked",
+    patientId: "pat-3",
+    practitionerId: "prac-1",
+    centerId: "ctr-1",
+    appointmentAt: todayAt(10, 0),
+    priority: "routine",
+    linkLifetimeDays: LINK_LIFETIME_DAYS,
+    issuedAt: "2026-07-28T16:30:00.000Z",
+    expiresAt: "2026-08-04T16:30:00.000Z",
+    clinicalNotes: "Pre-natal screen, first trimester.",
+    tests: [
+      {
+        id: "ot-5",
+        coding: {
+          system: "http://loinc.org",
+          code: "58410-2",
+          display: "CBC panel with differential, Blood",
+        },
+        specimen: "Whole blood (EDTA)",
+        modality: "lab",
+      },
+      {
+        id: "ot-6",
+        coding: {
+          system: "http://loinc.org",
+          code: "3016-3",
+          display: "Thyrotropin [Units/volume] in Serum or Plasma",
+        },
+        specimen: "Serum",
+        modality: "lab",
+      },
+    ],
+  },
+  {
+    id: "rq-5",
+    token: "req-c07b53",
+    status: "completed",
+    patientId: "pat-4",
+    practitionerId: "prac-1",
+    centerId: "ctr-1",
+    appointmentAt: todayAt(8, 30),
+    priority: "routine",
+    linkLifetimeDays: LINK_LIFETIME_DAYS,
+    issuedAt: "2026-07-27T13:05:00.000Z",
+    expiresAt: "2026-08-03T13:05:00.000Z",
+    tests: [
+      {
+        id: "ot-7",
+        coding: {
+          system: "http://loinc.org",
+          code: "4548-4",
+          display: "Hemoglobin A1c/Hemoglobin.total in Blood",
+        },
+        specimen: "Whole blood",
+        modality: "lab",
+      },
+    ],
+  },
+  {
+    id: "rq-6",
+    token: "req-b92d10",
+    status: "booked",
+    patientId: "pat-1",
+    practitionerId: "prac-1",
+    centerId: "ctr-2",
+    appointmentAt: todayAt(13, 45),
+    priority: "urgent",
+    linkLifetimeDays: LINK_LIFETIME_DAYS,
+    issuedAt: "2026-07-29T09:40:00.000Z",
+    expiresAt: "2026-08-05T09:40:00.000Z",
+    clinicalNotes: "Persistent cough, 3 weeks.",
+    tests: [
+      {
+        id: "ot-8",
+        coding: {
+          system: "http://loinc.org",
+          code: "36643-5",
+          display: "XR Chest PA and Lateral",
+        },
+        modality: "imaging",
+      },
+    ],
+  },
+);
+
 /** One pending request so the clinician queue is populated on first load. */
 export const EXTENSION_REQUESTS: ExtensionRequest[] = [
   {
