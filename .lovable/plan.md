@@ -1,46 +1,37 @@
-# Step 2 — Doctor Portal order composer
+Scope: Add a configurable link lifetime selector to the PulseReq Doctor Portal. This is requirement #1 only — no other changes from the broader list (issued date, STAT badge, demographics) are included.
 
-## Scope
-Turn `/order`'s placeholder "Order form" panel into a working requisition composer that writes into the existing in-memory store, then surfaces the result in a confirmation overlay.
+User-facing change
+- In the "New requisition" form, the clinician can now choose how long the patient-facing link remains valid: 3 days, 7 days (default), 14 days, or 21 days.
+- The chosen lifetime is stored on the requisition and surfaced in the success dialog and the issued-list metadata.
 
-## Catalogue corrections
-Expand `LOINC_CATALOG` in `src/lib/seed-data.ts` into a categorized structure with corrected codes:
+Files to change
 
-```text
-Blood panels
-  2339-0    Glucose [Mass/volume] in Blood        fasting 12h, Serum
-  24331-1   Lipid 1996 panel                      fasting 12h, Serum
-  58410-2   CBC panel with differential           Whole blood (EDTA)
-  4548-4    Hemoglobin A1c                        Whole blood
-  3016-3    Thyrotropin (TSH)                     Serum
-Imaging
-  36643-5   Chest X-ray                           no prep
-  24916-9   Ultrasound abdomen                    NPO 6h before scan
-```
+1. `src/lib/domain.ts`
+   - Add `linkLifetimeDays: 3 | 7 | 14 | 21` to the `Requisition` interface.
 
-Each entry carries `category`, `code`, `display`, optional `instruction`, `specimen`, and a `modality` of `lab | imaging` so downstream screens can route correctly.
+2. `src/lib/seed-data.ts`
+   - Change `EXPIRES_AT` so the seed requisition is +7 days from `ISSUED_AT` instead of +72h.
+   - Set `linkLifetimeDays: 7` on both seed requisitions.
 
-## Form
-Right-hand panel in `src/routes/order.tsx` becomes `<OrderForm>` (new file `src/components/order-form.tsx`):
+3. `src/components/order-form.tsx`
+   - Add local state `linkLifetimeDays` defaulting to `7`.
+   - Render a second segmented control below "Urgency" labeled "Link lifetime" with options: 3, 7, 14, 21 days.
+   - On submit, compute `expiresAt` from `issuedAt + linkLifetimeDays * 24h` and include `linkLifetimeDays` in the created `Requisition`.
 
-- **Patient** — select over store `patients` (Jane Doe · AB-982341, Marc Tremblay · AB-114907), showing PHN inline.
-- **Ordering clinician** — fixed to Dr. Sarah Jenkins with licence shown (single practitioner in seed).
-- **Tests** — checkbox list grouped by category heading; each row shows the LOINC code in mono and any prep instruction as a muted sub-line.
-- **Urgency** — two-state segmented control mapping to the existing `priority` union: Normal → `routine`, STAT → `stat`.
-- **Clinical notes** — optional textarea, maps to `clinicalNotes`.
-- **Submit** — `Generate Tokenized Requisition`, disabled until a patient and ≥1 test are selected.
+4. `src/components/requisition-created-dialog.tsx`
+   - Replace the hard-coded "valid 72 hours" copy with the actual stored lifetime, e.g. "valid 7 days".
 
-## Token + persistence
-New `src/lib/tokens.ts`: `newToken()` returns `req-` plus 6 hex chars, retried against existing tokens for uniqueness. On submit, build a `Requisition` with `status: "active"`, `issuedAt: now`, `expiresAt: now + 72h`, selected tests mapped to `OrderedTest`, and push it through `addRequisition`. It appears immediately at the top of the issued list.
+5. `src/routes/order.tsx`
+   - Update the global hint pill from "Links expire 72h after issue" to "Link lifetime: 7 days default".
+   - In the issued requisitions list, replace "expires in Xh" with a clearer label that includes both the issued date and the configured lifetime: e.g. "Issued 30 Jul 2026 · expires 6 Aug 2026 · 7 days".
+   - Update the Interoperability panel's "Link lifetime" field to "3 / 7 / 14 / 21 days, configurable at issue".
 
-## Confirmation overlay
-New `src/components/requisition-created-dialog.tsx`, a shadcn `Dialog` with two tabs:
+Out of scope for this plan
+- Displaying issuedAt dates in isolation (requirement #2).
+- STAT badge or STAT queue sorting (requirement #3).
+- Adding patient DOB/address (requirement #4).
 
-- **Patient copy** — displays `https://pulsereq.ca/requisition/<token>` with a Copy Link button (sonner toast on success), plus a working in-app "Open patient view" link to `/r/$token`. A one-line note states the display domain is illustrative and the demo link is local.
-- **Inspect HL7 FHIR payload** — `toFhirBundle({ requisition, patient, practitioner })` rendered as pretty-printed JSON in a scrollable mono block, with Copy JSON. Caption: `FHIR R4 · Bundle (collection) · ServiceRequest.status=active · intent=order · system=http://loinc.org`.
-
-## Technical notes
-- Frontend-only; no Cloud, no server functions. State lives in the existing `RequisitionProvider`, so a page refresh resets to seed — that's expected for the mock.
-- Imaging orders set `modality: "imaging"` on their tests so Step 3 can filter centres by capability; no centre selection happens in this step (the patient chooses).
-- Reuse existing `Panel`/`Field`/`StatusBadge` primitives and semantic tokens only — no hardcoded colours.
-- Add shadcn `dialog`, `tabs`, `select`, `checkbox`, `textarea`, `label` if not already present, and mount sonner's `<Toaster />` once in `__root.tsx`.
+Implementation notes
+- Keep the existing `effectiveStatus` / `isExpired` helpers unchanged; they already derive status from `expiresAt`, so the new lifetimes will automatically drive expiry logic.
+- Use the existing segmented-control UI pattern already present for the urgency toggle so the new selector feels visually consistent.
+- No backend changes are needed; the app remains frontend-only with in-memory state.

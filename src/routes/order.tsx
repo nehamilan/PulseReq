@@ -3,8 +3,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Field, Panel, PageShell } from "@/components/page-shell";
 import { OrderForm } from "@/components/order-form";
 import { StatusBadge } from "@/components/status-badge";
-import { effectiveStatus, hoursRemaining, patientName } from "@/lib/domain";
+import { effectiveStatus, patientName } from "@/lib/domain";
 import { useRequisitions } from "@/lib/requisition-store";
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-CA", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
 export const Route = createFileRoute("/order")({
   head: () => ({
@@ -36,7 +44,7 @@ function OrderPage() {
       description="Issue a diagnostic requisition as a secure, expiring link. The patient chooses where and when; the lab receives structured LOINC-coded orders."
       actions={
         <span className="rounded-md border border-border bg-surface px-3 py-1.5 text-xs text-muted-foreground">
-          Links expire 72h after issue
+          Link lifetime: 7 days default
         </span>
       }
     >
@@ -59,8 +67,9 @@ function OrderPage() {
                       </p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
                         Ordered by {practitioner?.name} ·{" "}
-                        <span className="font-mono tabular">{req.token}</span> ·
-                        expires in {hoursRemaining(req)}h
+                        <span className="font-mono tabular">{req.token}</span> ·{" "}
+                        Issued {formatDate(req.issuedAt)} · expires{" "}
+                        {formatDate(req.expiresAt)} · {req.linkLifetimeDays} days
                       </p>
                       <ul className="mt-2 flex flex-wrap gap-1.5">
                         {req.tests.map((t) => (
@@ -100,7 +109,7 @@ function OrderPage() {
           <Panel title="Interoperability">
             <dl className="grid gap-3">
               <Field label="Coding system" value="LOINC (http://loinc.org)" />
-              <Field label="Link lifetime" value="72 hours from issue" />
+              <Field label="Link lifetime" value="3 / 7 / 14 / 21 days, configurable at issue" />
               <Field label="Export shape" value="FHIR R4 Bundle · collection" />
             </dl>
           </Panel>

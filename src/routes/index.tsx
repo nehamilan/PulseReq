@@ -83,8 +83,8 @@ function Index() {
         </Panel>
         <Panel title="Safety">
           <p className="text-sm text-muted-foreground">
-            Links expire after 72 hours and can be revoked. All data here is
-            synthetic — no real patient information.
+            Links expire after a clinician-chosen window (3–21 days) and can be
+            revoked. All data here is synthetic — no real patient information.
           </p>
         </Panel>
       </div>
