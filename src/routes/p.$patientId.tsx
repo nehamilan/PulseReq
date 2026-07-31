@@ -9,6 +9,7 @@ import {
   expiryLabel,
   formatClinicalDate,
   formatClinicalDateTime,
+  handoffDetail,
   patientName,
 } from "@/lib/domain";
 import { useRequisitions } from "@/lib/requisition-store";

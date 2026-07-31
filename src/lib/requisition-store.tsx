@@ -15,7 +15,7 @@ import type {
   Practitioner,
   Requisition,
 } from "./domain";
-import { auditHash, extendExpiry } from "./domain";
+import { auditHash, extendExpiry, handoffDetail } from "./domain";
 import {
   CENTERS,
   EXTENSION_REQUESTS,
@@ -38,8 +38,10 @@ interface RequisitionStore {
     actor: string,
     detail: string,
   ) => void;
-  /** Flip a booked order to collected and append the intake audit trail. */
-  completeCheckIn: (requisitionId: string, actor: string) => void;
+  /** Booked → checked-in: patient has arrived and been identity-verified. */
+  checkInPatient: (requisitionId: string, actor: string) => void;
+  /** Checked-in → completed: labels printed, order handed to the LIS/worklist. */
+  completeIntake: (requisitionId: string, actor: string) => void;
   getPatient: (id: string) => Patient | undefined;
   getPractitioner: (id: string) => Practitioner | undefined;
   getCenter: (id?: string) => DiagnosticCenter | undefined;
@@ -93,14 +95,26 @@ function seedAudit(reqs: Requisition[]): AuditEvent[] {
         detail: `Slot reserved at ${req.centerId ?? "centre"}`,
       });
     }
-    if (req.status === "completed") {
+    if (req.status === "checked-in" || req.status === "completed") {
       events.push({
         id: `aud-${req.id}-checkin`,
         requisitionId: req.id,
         at: req.appointmentAt ?? req.issuedAt,
         actor: "lab-tech",
-        action: "checkin.completed",
-        detail: "Specimen collected · LIS record closed",
+        action: "patient.checked-in",
+        detail: "Patient arrived · identity verified at intake",
+      });
+    }
+    if (req.status === "completed") {
+      events.push({
+        id: `aud-${req.id}-intake-complete`,
+        requisitionId: req.id,
+        at: new Date(
+          new Date(req.appointmentAt ?? req.issuedAt).getTime() + 12 * 60_000,
+        ).toISOString(),
+        actor: "lab-tech",
+        action: "intake.completed",
+        detail: handoffDetail(req.tests),
       });
     }
   }
