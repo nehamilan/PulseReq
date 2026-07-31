@@ -47,6 +47,13 @@ export interface Patient {
   phone: string;
 }
 
+export interface PatientAddress {
+  line: string;
+  city: string;
+  province: string;
+  postalCode: string;
+}
+
 export interface Practitioner {
   id: string;
   name: string;
