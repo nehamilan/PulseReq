@@ -1,47 +1,61 @@
-# Step 5 — Patient Booking Portal & Token Routing
+# Patient Portal List View
 
-Keeps the existing `/r/$token` route as the single patient URL. Adds centre selection, slot booking, and a confirmation screen.
+## Current state
 
-## 1. Data model (`src/lib/domain.ts`, `src/lib/seed-data.ts`)
+- Each requisition is its own patient-facing link at `/r/$token`.
+- A patient with multiple requisitions currently receives multiple separate links.
+- The index page links straight to one sample token.
 
-- Add `distanceKm: number` to `DiagnosticCenter`.
-- Replace the two seed centres with three Calgary sites, keeping `ctr-*` ids:
-  - `ctr-1` APL Chinook Centre — 1.2 km — Phlebotomy, Urinalysis, ECG — next slot today 14:30
-  - `ctr-2` APL Foothills — 4.5 km — Phlebotomy, X-Ray, Ultrasound — next slot tomorrow 09:00
-  - `ctr-3` DynaLIFE Sunridge — 6.1 km — Phlebotomy, Urinalysis — next slot today 16:15
-- Helper `centerSupports(center, tests)` — a centre is bookable only if it covers every ordered modality (imaging orders need X-Ray/Ultrasound capability).
-- Helper `slotsForCenter(center)` — generates 15-minute pills from the centre's next-available time (8 slots).
+## What this plan adds
 
-## 2. Patient view (`src/routes/r.$token.tsx`)
+A patient portal route at `/p/$patientId` that lists every requisition for that patient in one place, while leaving `/r/$token` as the single-requisition view.
 
-Booking state machine driven by requisition status:
+## Changes
 
-- **`active` (awaiting booking)** — replaces the current "coming in the next build step" placeholder:
-  - Requisition summary panel stays (patient, DOB, address, PHN, ordered tests with prep instructions, requesting clinician + clinic).
-  - **Centre locator**: card list sorted by distance, each showing name, address, distance, capabilities, next available. Centres that can't perform the ordered tests render disabled with a "Cannot perform: Chest X-ray" note.
-  - Selecting a centre expands **15-minute slot pills** below it.
-  - **`Confirm & Link Requisition`** button, disabled until centre + slot are chosen.
-- **`booked`** — confirmation screen (also what a returning patient sees).
-- **expired / revoked / invalid** — unchanged.
+### 1. New route: `/p/$patientId`
 
-## 3. Confirm behaviour
+File: `src/routes/p.$patientId.tsx`
 
-On confirm: `updateRequisition(id, { status: "booked", centerId, appointmentAt })`, plus a sonner toast. No page reload — the view re-renders into the confirmation screen.
+- Looks up the patient by `patientId` from the shared store.
+- Lists all requisitions where `patientId` matches.
+- Sorts by `issuedAt` descending (newest first).
+- Each row shows:
+  - Ordered test names (truncated if many)
+  - `StatusBadge` (effective status)
+  - `PriorityBadge`
+  - `issuedAt` date
+  - `expiryLabel` (e.g., "expires in 7 days")
+  - Link to `/r/$token` labelled "Open requisition"
+- Empty state: "No requisitions found for this patient."
+- Invalid patient ID: friendly error message.
 
-## 4. Confirmation screen (`src/components/booking-confirmation.tsx`)
+### 2. Store support
 
-- Appointment header: centre name, address, date and 24h time.
-- **Check-in code**: deterministic SVG block-matrix generated from the token, labelled "Mock check-in code — not a scannable barcode", with the token printed in monospace underneath.
-- Prep reminders pulled from the ordered tests (e.g. "Fasting 12 hours required").
-- **Get directions** — external link to Google Maps directions for the centre address.
-- **Change appointment** — returns to `active` so the flow can be re-demoed.
+File: `src/lib/requisition-store.tsx` (if needed)
 
-## 5. Copy alignment
+- Add a `findByPatientId(patientId)` helper that returns all matching requisitions.
 
-Patient-facing status labels read "Awaiting booking" / "Appointment booked"; the FHIR enum values stay `active` / `booked` underneath. The lab dashboard picks the booked centre and appointment time up automatically through the shared store.
+### 3. Navigation entry points
+
+File: `src/routes/index.tsx`
+
+- Add a fourth card to the role grid: "Patient Portal".
+- Link it to `/p/$patientId` with the seed patient's ID as sample params.
+- Keep the existing "Patient View" sample link card as-is.
+
+File: `src/components/app-header.tsx` (if appropriate)
+
+- Consider adding a "Patient Portal" link in the header role tabs, or keep it as a demo-only route reachable from the home page.
+
+### 4. Route metadata
+
+File: `src/routes/p.$patientId.tsx`
+
+- Add `head()` with a patient-specific title and description.
 
 ## Technical notes
 
-- No new dependencies; the check-in code is inline SVG.
-- All state lives in the existing `RequisitionProvider` context — still frontend-only, synthetic data.
-- Directions are an outbound Maps link, not an embedded map (no API key needed).
+- No new dependencies.
+- Uses the existing `RequisitionProvider` context and `PageShell` / `Panel` / `StatusBadge` / `PriorityBadge` components.
+- No authentication: the patient portal is accessed by a patient ID in the URL, consistent with the frontend-only mock.
+- `/r/$token` remains the single-requisition view and is not replaced.
