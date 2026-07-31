@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import { BookingConfirmation } from "@/components/booking-confirmation";
@@ -328,7 +328,7 @@ function LinkProblem({
   body: string;
   token: string;
   patientId?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <PageShell
