@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { AuditLedger } from "@/components/audit-ledger";
 import { Field } from "@/components/page-shell";
 import { PriorityBadge } from "@/components/priority-badge";
+import { PolicyChip, ReleaseStateChip } from "@/components/result-chips";
 import { SpecimenLabelCard } from "@/components/specimen-label";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ import {
   type Requisition,
 } from "@/lib/domain";
 import { useRequisitions } from "@/lib/requisition-store";
+import { resolveReleasePolicy } from "@/lib/results";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -51,6 +53,9 @@ export function IntakeDrawer({
     logAudit,
     checkInPatient,
     completeIntake,
+    reportFor,
+    publishResults,
+    now,
   } = useRequisitions();
   const loggedFor = useRef<string | null>(null);
 
@@ -79,6 +84,8 @@ export function IntakeDrawer({
   const imagingOnly = req
     ? req.tests.length > 0 && req.tests.every((t) => t.modality === "imaging")
     : false;
+  const report = req ? reportFor(req.id) : undefined;
+  const policy = req ? resolveReleasePolicy(req.tests) : undefined;
 
   return (
     <Sheet open={Boolean(req)} onOpenChange={onOpenChange}>
@@ -185,9 +192,49 @@ export function IntakeDrawer({
               <AuditLedger events={events} />
             </section>
 
+            {req.status === "completed" ? (
+              <section className="mt-6 no-print">
+                <SectionTitle>Results</SectionTitle>
+                {report ? (
+                  <div className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/30 p-3">
+                    <ReleaseStateChip report={report} now={now()} />
+                    <PolicyChip report={report} />
+                    <span className="text-xs text-muted-foreground">
+                      {report.observations.length} observation
+                      {report.observations.length === 1 ? "" : "s"} sent to the
+                      ordering clinician
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    No report published yet · release policy on publication:{" "}
+                    <span className="font-medium text-foreground">
+                      {policy?.policy}
+                    </span>
+                  </p>
+                )}
+              </section>
+            ) : null}
+
             <div className="sticky bottom-0 mt-6 flex flex-wrap gap-2 border-t border-border bg-background py-4 no-print">
               {req.status === "completed" ? (
-                <Button disabled>Intake already complete</Button>
+                report ? (
+                  <Button disabled>Results published</Button>
+                ) : (
+                  <Button
+                    onClick={() => {
+                      publishResults(req.id, "lab-tech");
+                      toast.success("Results published", {
+                        description:
+                          policy?.policy === "IMMEDIATE"
+                            ? "Routine panel — auto-released to the patient portal."
+                            : "Sent to the ordering clinician for review before patient release.",
+                      });
+                    }}
+                  >
+                    Simulate lab results generation
+                  </Button>
+                )
               ) : req.status === "checked-in" ? (
                 <Button
                   onClick={() => {
