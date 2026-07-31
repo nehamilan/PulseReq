@@ -23,6 +23,13 @@ function todayAt(hour: number, minute: number): string {
   return d.toISOString();
 }
 
+function tomorrowAt(hour: number, minute: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  d.setHours(hour, minute, 0, 0);
+  return d.toISOString();
+}
+
 export const PATIENTS: Patient[] = [
   {
     id: "pat-1",
