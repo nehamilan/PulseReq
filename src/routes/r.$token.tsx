@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { BookingConfirmation } from "@/components/booking-confirmation";
+import { ExtensionRequestControl } from "@/components/extension-request-dialog";
 import { Field, Panel, PageShell } from "@/components/page-shell";
 import { StatusBadge } from "@/components/status-badge";
 import {
@@ -84,7 +85,10 @@ function PatientView() {
             ? `Requisition links stay active for up to ${req.linkLifetimeDays} days. Contact your clinic to have a new one issued.`
             : "Your clinician withdrew this requisition. Contact the clinic if you think this is a mistake."
         }
-      />
+        patientId={req.patientId}
+      >
+        {status === "expired" ? <ExtensionRequestControl req={req} /> : null}
+      </LinkProblem>
     );
   }
 
@@ -163,6 +167,7 @@ function PatientView() {
               </li>
             ))}
           </ul>
+          <ExtensionRequestControl req={req} />
         </Panel>
 
         <Panel title="Requisition details">
@@ -316,10 +321,14 @@ function LinkProblem({
   title,
   body,
   token,
+  patientId,
+  children,
 }: {
   title: string;
   body: string;
   token: string;
+  patientId?: string;
+  children?: React.ReactNode;
 }) {
   return (
     <PageShell
@@ -327,8 +336,10 @@ function LinkProblem({
       title={title}
       description={body}
     >
+      {patientId ? <BackLink patientId={patientId} /> : null}
       <Panel title="Link reference">
         <p className="font-mono text-sm text-muted-foreground tabular">{token}</p>
+        {children}
       </Panel>
     </PageShell>
   );
