@@ -3,6 +3,11 @@ import { Link } from "@tanstack/react-router";
 const ROLES = [
   { to: "/order", label: "Doctor Portal", params: {} },
   {
+    to: "/p/$patientId",
+    label: "Patient Portal",
+    params: { patientId: "pat-1" },
+  },
+  {
     to: "/r/$token",
     label: "Patient View",
     params: { token: "req-8f92a1" },
