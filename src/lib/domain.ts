@@ -8,6 +8,7 @@
 export type RequisitionStatus =
   | "active"
   | "booked"
+  | "checked-in"
   | "completed"
   | "revoked"
   | "expired";
@@ -15,9 +16,20 @@ export type RequisitionStatus =
 export const STATUS_LABEL: Record<RequisitionStatus, string> = {
   active: "Awaiting booking",
   booked: "Appointment booked",
+  "checked-in": "Checked in",
   completed: "Specimen collected",
   revoked: "Revoked by clinician",
   expired: "Link expired",
+};
+
+/** FHIR R4 ServiceRequest.status for each internal state. */
+export const FHIR_STATUS: Record<RequisitionStatus, string> = {
+  active: "active",
+  booked: "active",
+  "checked-in": "in-progress",
+  completed: "completed",
+  revoked: "revoked",
+  expired: "revoked",
 };
 
 export interface Coding {
@@ -156,7 +168,13 @@ export function effectiveStatus(
   req: Requisition,
   now: Date = new Date(),
 ): RequisitionStatus {
-  if (req.status === "completed" || req.status === "revoked") return req.status;
+  if (
+    req.status === "completed" ||
+    req.status === "revoked" ||
+    req.status === "checked-in"
+  ) {
+    return req.status;
+  }
   return isExpired(req, now) ? "expired" : req.status;
 }
 
