@@ -92,6 +92,59 @@ export interface Requisition {
   linkLifetimeDays: 3 | 7 | 14 | 21;
   issuedAt: string;
   expiresAt: string;
+  /** How many times a clinician has granted an expiry extension. */
+  extensionCount?: number;
+}
+
+export type ExtensionStatus = "pending" | "approved" | "declined";
+
+/**
+ * A patient-initiated request for more time on an expiring link.
+ * Maps onto an amendment of ServiceRequest.occurrencePeriod.end once granted.
+ */
+export interface ExtensionRequest {
+  id: string;
+  requisitionId: string;
+  requestedDays: 3 | 7 | 14;
+  reason?: string;
+  status: ExtensionStatus;
+  requestedAt: string;
+  resolvedAt?: string;
+}
+
+export const EXTENSION_DAY_OPTIONS = [3, 7, 14] as const;
+
+/** New expiry ISO after granting `days`, measured from now if already lapsed. */
+export function extendExpiry(
+  req: Requisition,
+  days: number,
+  now: Date = new Date(),
+): string {
+  const base = Math.max(new Date(req.expiresAt).getTime(), now.getTime());
+  return new Date(base + days * 86_400_000).toISOString();
+}
+
+/**
+ * Patients may only ask for more time on an unbooked order that has lapsed
+ * or is within 48 hours of lapsing.
+ */
+export function canRequestExtension(
+  req: Requisition,
+  now: Date = new Date(),
+): boolean {
+  if (req.status !== "active") return false;
+  return isExpired(req, now) || hoursRemaining(req, now) <= 48;
+}
+
+/** "waiting 2 days" / "waiting 5h" — queue age for the clinician view. */
+export function waitingLabel(iso: string, now: Date = new Date()): string {
+  const hours = Math.max(
+    0,
+    Math.round((now.getTime() - new Date(iso).getTime()) / 3_600_000),
+  );
+  if (hours < 24) return `waiting ${hours}h`;
+  const days = Math.round(hours / 24);
+  return `waiting ${days} day${days === 1 ? "" : "s"}`;
 }
 
 export function isExpired(req: Requisition, now: Date = new Date()): boolean {
