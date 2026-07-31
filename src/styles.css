@@ -166,3 +166,39 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-drawer,
+  .print-drawer * {
+    visibility: visible;
+  }
+  .print-drawer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    overflow: visible;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+    transform: none !important;
+  }
+  .print-drawer .no-print,
+  .print-drawer button {
+    display: none !important;
+  }
+  .print-labels {
+    margin: 0;
+  }
+  .print-labels > div {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8mm;
+  }
+  @page {
+    margin: 10mm;
+  }
+}
