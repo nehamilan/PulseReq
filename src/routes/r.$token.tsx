@@ -144,32 +144,7 @@ function PatientView() {
       actions={<StatusBadge status={status} />}
     >
       <BackLink patientId={req.patientId} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <Panel
-          title="Tests ordered"
-          hint={`Link valid until ${formatDate(req.expiresAt)}`}
-        >
-          <ul className="divide-y divide-border">
-            {req.tests.map((t) => (
-              <li key={t.id} className="py-3 first:pt-0 last:pb-0">
-                <p className="text-sm font-medium text-foreground">
-                  {t.coding.display}
-                </p>
-                <p className="mt-0.5 font-mono text-xs text-muted-foreground tabular">
-                  LOINC {t.coding.code}
-                  {t.specimen ? ` · ${t.specimen}` : ""}
-                </p>
-                {t.instruction ? (
-                  <p className="mt-1.5 inline-block rounded border border-warning/35 bg-warning/15 px-2 py-0.5 text-xs text-warning-foreground">
-                    {t.instruction}
-                  </p>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-          <ExtensionRequestControl req={req} />
-        </Panel>
-
+      <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
         <Panel title="Requisition details">
           <dl className="grid gap-3">
             <Field
@@ -193,6 +168,31 @@ function PatientView() {
               value={center ? center.name : "Not booked yet"}
             />
           </dl>
+        </Panel>
+
+        <Panel
+          title="Tests ordered"
+          hint={`Link valid until ${formatDate(req.expiresAt)}`}
+        >
+          <ul className="divide-y divide-border">
+            {req.tests.map((t) => (
+              <li key={t.id} className="py-3 first:pt-0 last:pb-0">
+                <p className="text-sm font-medium text-foreground">
+                  {t.coding.display}
+                </p>
+                <p className="mt-0.5 font-mono text-xs text-muted-foreground tabular">
+                  LOINC {t.coding.code}
+                  {t.specimen ? ` · ${t.specimen}` : ""}
+                </p>
+                {t.instruction ? (
+                  <p className="mt-1.5 inline-block rounded border border-warning/35 bg-warning/15 px-2 py-0.5 text-xs text-warning-foreground">
+                    {t.instruction}
+                  </p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+          <ExtensionRequestControl req={req} />
         </Panel>
       </div>
 
