@@ -227,7 +227,7 @@ REQUISITIONS.push(
   {
     id: "rq-4",
     token: "req-a41c9f",
-    status: "booked",
+    status: "checked-in",
     patientId: "pat-3",
     practitionerId: "prac-1",
     centerId: "ctr-1",
