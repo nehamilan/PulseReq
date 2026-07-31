@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { PageShell, Panel } from "@/components/page-shell";
+import { ExtensionRequestControl } from "@/components/extension-request-dialog";
 import { PriorityBadge } from "@/components/priority-badge";
 import { StatusBadge } from "@/components/status-badge";
 import {
@@ -104,6 +105,7 @@ function PatientPortal() {
                   >
                     Open requisition
                   </Link>
+                  <ExtensionRequestControl req={req} />
                 </li>
               );
             })}
