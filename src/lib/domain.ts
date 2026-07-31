@@ -8,6 +8,7 @@
 export type RequisitionStatus =
   | "active"
   | "booked"
+  | "checked-in"
   | "completed"
   | "revoked"
   | "expired";
@@ -15,9 +16,20 @@ export type RequisitionStatus =
 export const STATUS_LABEL: Record<RequisitionStatus, string> = {
   active: "Awaiting booking",
   booked: "Appointment booked",
+  "checked-in": "Checked in",
   completed: "Specimen collected",
   revoked: "Revoked by clinician",
   expired: "Link expired",
+};
+
+/** FHIR R4 ServiceRequest.status for each internal state. */
+export const FHIR_STATUS: Record<RequisitionStatus, string> = {
+  active: "active",
+  booked: "active",
+  "checked-in": "in-progress",
+  completed: "completed",
+  revoked: "revoked",
+  expired: "revoked",
 };
 
 export interface Coding {
@@ -156,7 +168,13 @@ export function effectiveStatus(
   req: Requisition,
   now: Date = new Date(),
 ): RequisitionStatus {
-  if (req.status === "completed" || req.status === "revoked") return req.status;
+  if (
+    req.status === "completed" ||
+    req.status === "revoked" ||
+    req.status === "checked-in"
+  ) {
+    return req.status;
+  }
   return isExpired(req, now) ? "expired" : req.status;
 }
 
@@ -265,4 +283,163 @@ export function formatSlotTime(iso: string): string {
 export function directionsUrl(center: DiagnosticCenter): string {
   const q = `${center.name}, ${center.address}, ${center.city} ${center.province}`;
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(q)}`;
+}
+
+/* ------------------------------------------------------------------ */
+/* Lab intake: specimen tubes, labels, audit ledger, impact metrics    */
+/* ------------------------------------------------------------------ */
+
+export interface TubeType {
+  code: string;
+  name: string;
+  /** Tailwind classes for the cap-colour chip. */
+  swatch: string;
+}
+
+const TUBE_SST: TubeType = {
+  code: "SST",
+  name: "Gold SST (serum)",
+  swatch: "bg-warning/70 border-warning",
+};
+const TUBE_EDTA: TubeType = {
+  code: "EDTA",
+  name: "Lavender EDTA (whole blood)",
+  swatch: "bg-primary/50 border-primary",
+};
+const TUBE_FLUORIDE: TubeType = {
+  code: "NaF",
+  name: "Grey fluoride oxalate (glucose)",
+  swatch: "bg-muted-foreground/50 border-muted-foreground",
+};
+const TUBE_IMAGING: TubeType = {
+  code: "IMG",
+  name: "Imaging worklist entry (no specimen)",
+  swatch: "bg-success/40 border-success",
+};
+
+/** LOINC → collection tube. Falls back to serum for unmapped lab codes. */
+export const TUBE_BY_LOINC: Record<string, TubeType> = {
+  "58410-2": TUBE_EDTA,
+  "4548-4": TUBE_EDTA,
+  "2339-0": TUBE_FLUORIDE,
+  "24331-1": TUBE_SST,
+  "3016-3": TUBE_SST,
+  "36643-5": TUBE_IMAGING,
+  "24916-9": TUBE_IMAGING,
+};
+
+export function tubeForTest(test: OrderedTest): TubeType {
+  return (
+    TUBE_BY_LOINC[test.coding.code] ??
+    (test.modality === "imaging" ? TUBE_IMAGING : TUBE_SST)
+  );
+}
+
+export interface SpecimenLabel {
+  tube: TubeType;
+  tests: OrderedTest[];
+}
+
+/** One printed label per distinct tube — a 3-test order can print 2 labels. */
+export function labelsForTests(tests: OrderedTest[]): SpecimenLabel[] {
+  const byTube = new Map<string, SpecimenLabel>();
+  for (const test of tests) {
+    const tube = tubeForTest(test);
+    const entry = byTube.get(tube.code);
+    if (entry) entry.tests.push(test);
+    else byTube.set(tube.code, { tube, tests: [test] });
+  }
+  return [...byTube.values()];
+}
+
+/** Deterministic accession number for the LIS intake sheet. */
+export function accessionFor(req: Requisition): string {
+  let h = 2166136261;
+  for (let i = 0; i < req.token.length; i++) {
+    h ^= req.token.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  const digits = String((h >>> 0) % 1_000_000).padStart(6, "0");
+  return `APL-${new Date(req.issuedAt).getFullYear()}-${digits}`;
+}
+
+/* --- Impact model ------------------------------------------------- */
+
+/** Discrete fields a technician would otherwise key by hand, per patient. */
+export const AUTOFILLED_FIELDS = 26;
+/** Estimated keystroke + verification time per field. */
+export const SECONDS_PER_FIELD = 12;
+
+export interface QueueSavings {
+  patients: number;
+  fields: number;
+  minutesPerPatient: number;
+  minutesToday: number;
+}
+
+export function savingsForQueue(reqs: Requisition[]): QueueSavings {
+  const minutesPerPatient = (AUTOFILLED_FIELDS * SECONDS_PER_FIELD) / 60;
+  return {
+    patients: reqs.length,
+    fields: AUTOFILLED_FIELDS * reqs.length,
+    minutesPerPatient: Math.round(minutesPerPatient * 10) / 10,
+    minutesToday: Math.round(minutesPerPatient * reqs.length),
+  };
+}
+
+/* --- Audit ledger -------------------------------------------------- */
+
+export type AuditAction =
+  | "order.issued"
+  | "link.opened"
+  | "appointment.booked"
+  | "intake.read"
+  | "labels.printed"
+  | "checkin.completed";
+
+export interface AuditEvent {
+  id: string;
+  requisitionId: string;
+  at: string;
+  actor: string;
+  action: AuditAction;
+  detail: string;
+  hash: string;
+  prevHash: string;
+}
+
+export const AUDIT_LABEL: Record<AuditAction, string> = {
+  "order.issued": "ORDER ISSUED",
+  "link.opened": "TOKENIZED READ",
+  "appointment.booked": "APPOINTMENT BOOKED",
+  "intake.read": "PHI ACCESS · INTAKE",
+  "labels.printed": "LABELS PRINTED",
+  "checkin.completed": "CHECK-IN COMPLETED",
+};
+
+/** Simulated content hash — deterministic, chained to the previous entry. */
+export function auditHash(payload: string, prevHash: string): string {
+  let h = 2166136261;
+  const input = `${prevHash}|${payload}`;
+  for (let i = 0; i < input.length; i++) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  let out = "";
+  let x = h >>> 0;
+  for (let i = 0; i < 4; i++) {
+    out += (x >>> 0).toString(16).padStart(8, "0");
+    x = Math.imul(x ^ (x >>> 15), 2246822507) >>> 0;
+  }
+  return out.slice(0, 16);
+}
+
+/** True when `iso` falls on the same calendar day as `now`. */
+export function isSameDay(iso: string, now: Date = new Date()): boolean {
+  const d = new Date(iso);
+  return (
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate()
+  );
 }

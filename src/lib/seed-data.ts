@@ -16,6 +16,20 @@ const EXPIRES_AT = "2026-08-06T14:10:00.000Z"; // +7 days
 
 const LINK_LIFETIME_DAYS = 7 as const;
 
+/** Today at a given local 24h time — keeps the lab queue populated forever. */
+function todayAt(hour: number, minute: number): string {
+  const d = new Date();
+  d.setHours(hour, minute, 0, 0);
+  return d.toISOString();
+}
+
+function tomorrowAt(hour: number, minute: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  d.setHours(hour, minute, 0, 0);
+  return d.toISOString();
+}
+
 export const PATIENTS: Patient[] = [
   {
     id: "pat-1",
@@ -45,6 +59,36 @@ export const PATIENTS: Patient[] = [
       city: "Calgary",
       province: "AB",
       postalCode: "T2X 3H4",
+    },
+  },
+  {
+    id: "pat-3",
+    givenName: "Priya",
+    familyName: "Nair",
+    phn: "AB-770412",
+    province: "AB",
+    birthDate: "1994-06-21",
+    phone: "+1 587-555-0110",
+    address: {
+      line: "1104 Kensington Rd NW",
+      city: "Calgary",
+      province: "AB",
+      postalCode: "T2N 3P3",
+    },
+  },
+  {
+    id: "pat-4",
+    givenName: "Owen",
+    familyName: "Whitecalf",
+    phn: "AB-330985",
+    province: "AB",
+    birthDate: "1978-01-09",
+    phone: "+1 403-555-0175",
+    address: {
+      line: "45 Cranston Way SE",
+      city: "Calgary",
+      province: "AB",
+      postalCode: "T3M 0K4",
     },
   },
 ];
@@ -133,7 +177,7 @@ export const REQUISITIONS: Requisition[] = [
     patientId: "pat-2",
     practitionerId: "prac-1",
     centerId: "ctr-1",
-    appointmentAt: "2026-07-31T15:40:00.000Z",
+    appointmentAt: todayAt(9, 15),
     priority: "stat",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
     issuedAt: "2026-07-29T11:00:00.000Z",
@@ -177,6 +221,122 @@ REQUISITIONS.push({
     },
   ],
 });
+
+/** Booked appointments at APL Chinook so the lab queue reflects a real day. */
+REQUISITIONS.push(
+  {
+    id: "rq-4",
+    token: "req-a41c9f",
+    status: "booked",
+    patientId: "pat-3",
+    practitionerId: "prac-1",
+    centerId: "ctr-1",
+    appointmentAt: todayAt(10, 0),
+    priority: "routine",
+    linkLifetimeDays: LINK_LIFETIME_DAYS,
+    issuedAt: "2026-07-28T16:30:00.000Z",
+    expiresAt: "2026-08-04T16:30:00.000Z",
+    clinicalNotes: "Pre-natal screen, first trimester.",
+    tests: [
+      {
+        id: "ot-5",
+        coding: {
+          system: "http://loinc.org",
+          code: "58410-2",
+          display: "CBC panel with differential, Blood",
+        },
+        specimen: "Whole blood (EDTA)",
+        modality: "lab",
+      },
+      {
+        id: "ot-6",
+        coding: {
+          system: "http://loinc.org",
+          code: "3016-3",
+          display: "Thyrotropin [Units/volume] in Serum or Plasma",
+        },
+        specimen: "Serum",
+        modality: "lab",
+      },
+    ],
+  },
+  {
+    id: "rq-5",
+    token: "req-c07b53",
+    status: "completed",
+    patientId: "pat-4",
+    practitionerId: "prac-1",
+    centerId: "ctr-1",
+    appointmentAt: todayAt(8, 30),
+    priority: "routine",
+    linkLifetimeDays: LINK_LIFETIME_DAYS,
+    issuedAt: "2026-07-27T13:05:00.000Z",
+    expiresAt: "2026-08-03T13:05:00.000Z",
+    tests: [
+      {
+        id: "ot-7",
+        coding: {
+          system: "http://loinc.org",
+          code: "4548-4",
+          display: "Hemoglobin A1c/Hemoglobin.total in Blood",
+        },
+        specimen: "Whole blood",
+        modality: "lab",
+      },
+    ],
+  },
+  {
+    id: "rq-6",
+    token: "req-b92d10",
+    status: "booked",
+    patientId: "pat-1",
+    practitionerId: "prac-1",
+    centerId: "ctr-2",
+    appointmentAt: todayAt(13, 45),
+    priority: "urgent",
+    linkLifetimeDays: LINK_LIFETIME_DAYS,
+    issuedAt: "2026-07-29T09:40:00.000Z",
+    expiresAt: "2026-08-05T09:40:00.000Z",
+    clinicalNotes: "Persistent cough, 3 weeks.",
+    tests: [
+      {
+        id: "ot-8",
+        coding: {
+          system: "http://loinc.org",
+          code: "36643-5",
+          display: "XR Chest PA and Lateral",
+        },
+        modality: "imaging",
+      },
+    ],
+  },
+  {
+    id: "rq-7",
+    token: "req-e5813c",
+    status: "booked",
+    patientId: "pat-4",
+    practitionerId: "prac-1",
+    centerId: "ctr-1",
+    appointmentAt: tomorrowAt(9, 30),
+    priority: "routine",
+    linkLifetimeDays: LINK_LIFETIME_DAYS,
+    issuedAt: "2026-07-30T10:15:00.000Z",
+    expiresAt: "2026-08-06T10:15:00.000Z",
+    tests: [
+      {
+        id: "ot-9",
+        coding: {
+          system: "http://loinc.org",
+          code: "24331-1",
+          display: "Lipid 1996 panel - Serum or Plasma",
+        },
+        instruction: "Fasting 12 hours required",
+        specimen: "Serum",
+        modality: "lab",
+      },
+    ],
+  },
+);
 
 /** One pending request so the clinician queue is populated on first load. */
 export const EXTENSION_REQUESTS: ExtensionRequest[] = [
