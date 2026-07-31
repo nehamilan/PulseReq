@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { Panel, PageShell } from "@/components/page-shell";
 import { StatusBadge } from "@/components/status-badge";
+import { PriorityBadge } from "@/components/priority-badge";
 import { effectiveStatus, patientName } from "@/lib/domain";
 import { useRequisitions } from "@/lib/requisition-store";
 
@@ -86,6 +87,7 @@ function LabPage() {
               <thead>
                 <tr className="border-b border-border text-[11px] uppercase tracking-wide text-muted-foreground">
                   <th className="pb-2 font-medium">Token</th>
+                  <th className="pb-2 font-medium">Priority</th>
                   <th className="pb-2 font-medium">Patient</th>
                   <th className="pb-2 font-medium">Tests</th>
                   <th className="pb-2 font-medium">Centre</th>
@@ -100,6 +102,9 @@ function LabPage() {
                     <tr key={req.id}>
                       <td className="py-3 font-mono text-xs text-foreground tabular">
                         {req.token}
+                      </td>
+                      <td className="py-3">
+                        <PriorityBadge priority={req.priority} />
                       </td>
                       <td className="py-3 text-foreground">
                         {patient ? patientName(patient) : "—"}
