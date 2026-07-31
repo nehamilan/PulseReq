@@ -29,7 +29,12 @@ function formatDate(iso: string) {
   });
 }
 
+type ViewTab = "requisition" | "results";
+
 export const Route = createFileRoute("/r/$token")({
+  validateSearch: (search: Record<string, unknown>): { tab: ViewTab } => ({
+    tab: search.tab === "results" ? "results" : "requisition",
+  }),
   head: () => ({
     meta: [
       { title: "Your requisition — PulseReq" },
@@ -62,10 +67,60 @@ function BackLink({ patientId }: { patientId: string }) {
   );
 }
 
+/**
+ * Tab strip between the order itself and its diagnostic report.
+ * The report tab only exists once the lab has published something.
+ */
+function ViewTabs({
+  active,
+  onChange,
+}: {
+  active: ViewTab;
+  onChange: (tab: ViewTab) => void;
+}) {
+  const tabs: { id: ViewTab; label: string }[] = [
+    { id: "requisition", label: "Requisition" },
+    { id: "results", label: "Results" },
+  ];
+  return (
+    <div
+      role="tablist"
+      aria-label="Requisition view"
+      className="mb-5 inline-flex rounded-md border border-border p-0.5"
+    >
+      {tabs.map((t) => (
+        <button
+          key={t.id}
+          type="button"
+          role="tab"
+          aria-selected={active === t.id}
+          onClick={() => onChange(t.id)}
+          className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+            active === t.id
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {t.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function PatientView() {
   const { token } = Route.useParams();
-  const { findByToken, getPatient, getPractitioner, getCenter, centers, updateRequisition } =
-    useRequisitions();
+  const { tab } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const {
+    findByToken,
+    getPatient,
+    getPractitioner,
+    getCenter,
+    centers,
+    updateRequisition,
+    reportFor,
+  } = useRequisitions();
   const req = findByToken(token);
   const [selectedCenterId, setSelectedCenterId] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
@@ -75,8 +130,16 @@ function PatientView() {
   }
 
   const status = effectiveStatus(req);
+  const report = reportFor(req.id);
+  /**
+   * Link expiry only stops *booking*. In FHIR terms a lapsed
+   * ServiceRequest.occurrencePeriod.end does not retract the DiagnosticReport,
+   * so a published report stays reachable after the link goes stale.
+   * A revoked order is a clinical retraction and blocks everything.
+   */
+  const expiredWithoutReport = status === "expired" && !report;
 
-  if (status === "expired" || status === "revoked") {
+  if (expiredWithoutReport || status === "revoked") {
     return (
       <LinkProblem
         title={status === "expired" ? "This link has expired" : "This link was withdrawn"}
@@ -96,6 +159,40 @@ function PatientView() {
   const patient = getPatient(req.patientId);
   const practitioner = getPractitioner(req.practitionerId);
   const center = getCenter(req.centerId);
+  const activeTab: ViewTab = report ? tab : "requisition";
+  const setTab = (next: ViewTab) =>
+    navigate({ search: { tab: next }, replace: true });
+  const tabStrip = report ? (
+    <ViewTabs active={activeTab} onChange={setTab} />
+  ) : null;
+  const expiredNotice =
+    status === "expired" ? (
+      <div className="mb-5 rounded-md border border-warning/35 bg-warning/10 p-3">
+        <p className="text-sm font-medium text-warning-foreground">
+          This booking link has expired
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Contact your clinic to have a new requisition issued. Any results
+          already released to you stay available in the Results tab.
+        </p>
+        <ExtensionRequestControl req={req} />
+      </div>
+    ) : null;
+
+  if (activeTab === "results" && report) {
+    return (
+      <PageShell
+        eyebrow="Role · Patient"
+        title="Your diagnostic results"
+        description="Results released to you by your clinic, with the reference ranges the lab used."
+        actions={<StatusBadge status={status} />}
+      >
+        <BackLink patientId={req.patientId} />
+        {tabStrip}
+        <PatientResults req={req} />
+      </PageShell>
+    );
+  }
 
   if (status === "booked" || status === "completed") {
     return (
@@ -106,6 +203,7 @@ function PatientView() {
       actions={<StatusBadge status={status} />}
     >
       <BackLink patientId={req.patientId} />
+      {tabStrip}
       <BookingConfirmation
           req={req}
           center={center}
@@ -119,7 +217,6 @@ function PatientView() {
             });
           }}
         />
-        <PatientResults req={req} />
       </PageShell>
     );
   }
@@ -146,6 +243,8 @@ function PatientView() {
       actions={<StatusBadge status={status} />}
     >
       <BackLink patientId={req.patientId} />
+      {tabStrip}
+      {expiredNotice}
       <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
         <Panel title="Requisition details">
           <dl className="grid gap-3">
@@ -194,10 +293,11 @@ function PatientView() {
               </li>
             ))}
           </ul>
-          <ExtensionRequestControl req={req} />
+          {status === "expired" ? null : <ExtensionRequestControl req={req} />}
         </Panel>
       </div>
 
+      {status === "expired" ? null : (
       <div className="mt-5">
         <Panel
           title="Choose a diagnostic centre"
@@ -235,6 +335,7 @@ function PatientView() {
           ) : null}
         </Panel>
       </div>
+      )}
     </PageShell>
   );
 }
