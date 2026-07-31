@@ -1,12 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { toast } from "sonner";
 
+import { BookingConfirmation } from "@/components/booking-confirmation";
 import { Field, Panel, PageShell } from "@/components/page-shell";
 import { StatusBadge } from "@/components/status-badge";
 import {
+  centerSupports,
   effectiveStatus,
   formatAddress,
   formatDob,
+  formatSlotTime,
   patientName,
+  slotsForCenter,
+  unsupportedTests,
+  type DiagnosticCenter,
+  type OrderedTest,
 } from "@/lib/domain";
 import { useRequisitions } from "@/lib/requisition-store";
 
@@ -41,9 +50,11 @@ export const Route = createFileRoute("/r/$token")({
 
 function PatientView() {
   const { token } = Route.useParams();
-  const { findByToken, getPatient, getPractitioner, getCenter } =
+  const { findByToken, getPatient, getPractitioner, getCenter, centers, updateRequisition } =
     useRequisitions();
   const req = findByToken(token);
+  const [selectedCenterId, setSelectedCenterId] = useState<string | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
 
   if (!req) {
     return <LinkProblem title="This link isn't valid" token={token} body="We couldn't find a requisition for this link. Check the message from your clinic, or ask them to reissue it." />;
@@ -68,6 +79,45 @@ function PatientView() {
   const patient = getPatient(req.patientId);
   const practitioner = getPractitioner(req.practitionerId);
   const center = getCenter(req.centerId);
+
+  if (status === "booked" || status === "completed") {
+    return (
+      <PageShell
+        eyebrow="Role · Patient"
+        title="Your appointment is booked"
+        description="Bring the check-in code below — the diagnostic centre already has your order."
+        actions={<StatusBadge status={status} />}
+      >
+        <BookingConfirmation
+          req={req}
+          center={center}
+          onChange={() => {
+            setSelectedCenterId(null);
+            setSelectedSlot(null);
+            updateRequisition(req.id, {
+              status: "active",
+              centerId: undefined,
+              appointmentAt: undefined,
+            });
+          }}
+        />
+      </PageShell>
+    );
+  }
+
+  const sortedCenters = [...centers].sort((a, b) => a.distanceKm - b.distanceKm);
+
+  function confirmBooking() {
+    if (!req || !selectedCenterId || !selectedSlot) return;
+    updateRequisition(req.id, {
+      status: "booked",
+      centerId: selectedCenterId,
+      appointmentAt: selectedSlot,
+    });
+    toast.success("Appointment booked", {
+      description: "Your requisition is now linked to the diagnostic centre.",
+    });
+  }
 
   return (
     <PageShell
@@ -99,16 +149,6 @@ function PatientView() {
               </li>
             ))}
           </ul>
-
-          <div className="mt-5 rounded-md border border-dashed border-border bg-surface p-4">
-            <p className="text-sm font-medium text-foreground">
-              Choose a diagnostic centre
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Centre selection, time slots and the QR check-in code arrive in the
-              next build step.
-            </p>
-          </div>
         </Panel>
 
         <Panel title="Requisition details">
@@ -136,7 +176,125 @@ function PatientView() {
           </dl>
         </Panel>
       </div>
+
+      <div className="mt-5">
+        <Panel
+          title="Choose a diagnostic centre"
+          hint={`${sortedCenters.length} near ${patient?.address.city ?? "you"}`}
+        >
+          <ul className="space-y-3">
+            {sortedCenters.map((c) => (
+              <CenterCard
+                key={c.id}
+                center={c}
+                tests={req.tests}
+                selected={selectedCenterId === c.id}
+                selectedSlot={selectedSlot}
+                onSelectCenter={() => {
+                  setSelectedCenterId(c.id);
+                  setSelectedSlot(null);
+                }}
+                onSelectSlot={setSelectedSlot}
+              />
+            ))}
+          </ul>
+
+          <button
+            type="button"
+            onClick={confirmBooking}
+            disabled={!selectedCenterId || !selectedSlot}
+            className="mt-5 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Confirm &amp; link requisition
+          </button>
+          {!selectedCenterId || !selectedSlot ? (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Pick a centre and a time slot to continue.
+            </p>
+          ) : null}
+        </Panel>
+      </div>
     </PageShell>
+  );
+}
+
+function CenterCard({
+  center,
+  tests,
+  selected,
+  selectedSlot,
+  onSelectCenter,
+  onSelectSlot,
+}: {
+  center: DiagnosticCenter;
+  tests: OrderedTest[];
+  selected: boolean;
+  selectedSlot: string | null;
+  onSelectCenter: () => void;
+  onSelectSlot: (iso: string) => void;
+}) {
+  const supported = centerSupports(center, tests);
+  const missing = unsupportedTests(center, tests);
+
+  return (
+    <li
+      className={`rounded-md border p-3 transition-colors ${
+        selected ? "border-primary bg-primary/5" : "border-border bg-card"
+      } ${supported ? "" : "opacity-60"}`}
+    >
+      <button
+        type="button"
+        onClick={onSelectCenter}
+        disabled={!supported}
+        className="w-full text-left disabled:cursor-not-allowed"
+      >
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <p className="text-sm font-medium text-foreground">{center.name}</p>
+          <span className="text-xs text-muted-foreground tabular">
+            {center.distanceKm.toFixed(1)} km away
+          </span>
+        </div>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {center.address}, {center.city} {center.province}
+        </p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {center.capabilities.join(" · ")}
+        </p>
+        {supported ? (
+          <p className="mt-1 text-xs text-success">
+            Next slot {formatSlotTime(center.nextAvailable)}
+          </p>
+        ) : (
+          <p className="mt-1 text-xs text-destructive">
+            Cannot perform: {missing.map((t) => t.coding.display).join(", ")}
+          </p>
+        )}
+      </button>
+
+      {selected && supported ? (
+        <div className="mt-3 border-t border-border pt-3">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            15-minute slots
+          </p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {slotsForCenter(center).map((iso) => (
+              <button
+                key={iso}
+                type="button"
+                onClick={() => onSelectSlot(iso)}
+                className={`rounded-full border px-3 py-1 font-mono text-xs tabular transition-colors ${
+                  selectedSlot === iso
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-input bg-background text-foreground hover:bg-accent"
+                }`}
+              >
+                {formatSlotTime(iso)}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </li>
   );
 }
 
