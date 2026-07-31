@@ -193,6 +193,28 @@ export function OrderForm() {
       </div>
 
       <div className="space-y-1.5">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Link lifetime
+        </p>
+        <div className="inline-flex rounded-md border border-border p-0.5">
+          {LINK_LIFETIME_DAYS.map((d) => (
+            <button
+              key={d.key}
+              type="button"
+              onClick={() => setLinkLifetimeDays(d.key)}
+              className={`rounded px-3 py-1 text-xs font-medium transition-colors ${
+                linkLifetimeDays === d.key
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {d.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-1.5">
         <Label htmlFor="notes" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Clinical notes <span className="normal-case">(optional)</span>
         </Label>
