@@ -21,6 +21,7 @@ import {
   formatAddress,
   formatClinicalDateTime,
   formatDob,
+  handoffDetail,
   labelsForTests,
   patientName,
   type Requisition,
@@ -42,8 +43,15 @@ export function IntakeDrawer({
   req?: Requisition;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { getPatient, getPractitioner, getCenter, auditFor, logAudit, completeCheckIn } =
-    useRequisitions();
+  const {
+    getPatient,
+    getPractitioner,
+    getCenter,
+    auditFor,
+    logAudit,
+    checkInPatient,
+    completeIntake,
+  } = useRequisitions();
   const loggedFor = useRef<string | null>(null);
 
   // One PHI-access entry per drawer open.
@@ -68,6 +76,9 @@ export function IntakeDrawer({
   const status = req ? effectiveStatus(req) : undefined;
   const labels = req ? labelsForTests(req.tests) : [];
   const events = req ? auditFor(req.id) : [];
+  const imagingOnly = req
+    ? req.tests.length > 0 && req.tests.every((t) => t.modality === "imaging")
+    : false;
 
   return (
     <Sheet open={Boolean(req)} onOpenChange={onOpenChange}>
