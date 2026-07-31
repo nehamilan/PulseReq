@@ -77,12 +77,54 @@ export function BookingConfirmation({
   req,
   center,
   onChange,
+  completed = false,
+  onViewResults,
 }: {
   req: Requisition;
   center?: DiagnosticCenter;
-  onChange: () => void;
+  onChange?: () => void;
+  completed?: boolean;
+  onViewResults?: () => void;
 }) {
   const prep = req.tests.filter((t) => t.instruction);
+
+  if (completed) {
+    return (
+      <Panel title="Appointment completed" hint="This visit is done">
+        <div className="rounded-md border border-border bg-muted/40 p-4">
+          <p className="text-sm font-semibold text-foreground">
+            {center?.name ?? "Diagnostic centre"}
+          </p>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            {center ? `${center.address}, ${center.city} ${center.province}` : "—"}
+          </p>
+          <p className="mt-2 text-sm font-medium text-muted-foreground tabular">
+            {req.appointmentAt
+              ? formatClinicalDateTime(req.appointmentAt)
+              : "Date not recorded"}
+          </p>
+        </div>
+
+        <dl className="mt-4 grid gap-3">
+          <Field
+            label="Tests"
+            value={req.tests.map((t) => t.coding.display).join(", ")}
+          />
+          <Field label="Reference" value={req.token} />
+        </dl>
+
+        {onViewResults ? (
+          <button
+            type="button"
+            onClick={onViewResults}
+            className="mt-5 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            View results
+          </button>
+        ) : null}
+      </Panel>
+    );
+  }
 
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">

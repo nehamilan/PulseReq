@@ -1,42 +1,23 @@
-Add a "View Results" action to patient portal entries, and decouple result access from link expiry.
+## Goal
+Once a diagnostic report exists for a requisition, the Requisition tab should stop presenting live booking controls and instead show a compact, read-only appointment history, pointing the patient to Results.
 
-## Rationale
+## What changes
 
-Link expiry exists to stop a stale booking token being used to schedule an appointment. It should not lock a patient out of a diagnostic report for a test that was already performed. Result access is therefore gated only by the release policy (IMMEDIATE / CLINICIAN_HOLD / EMBARGO_DELAY), never by `expiresAt`.
+**1. `src/components/booking-confirmation.tsx`** — add an optional `completed` mode:
+- Panel title becomes "Appointment completed" (hint: "This visit is done") instead of "Appointment confirmed" / "Show this at check-in".
+- Hide the check-in code panel entirely (the QR/mock barcode has no purpose after the visit).
+- Hide "Change appointment" and "Get directions".
+- Hide the "Before you arrive" prep instructions block (prep is retrospective now).
+- Keep: centre name/address and the appointment date-time, rendered in neutral (border/muted) styling rather than emerald "success" styling; keep the tests list as a compact summary.
+- Layout collapses from two columns to one full-width panel in completed mode.
 
-## Changes
+**2. `src/routes/r.$token.tsx`** — drive that mode:
+- When `report` exists, render `BookingConfirmation` with `completed` and no `onChange` handler, for both `booked` and `completed` statuses.
+- Change the page title/description in that case to "Your appointment is complete" / "This visit has been processed by the lab. Your report is in the Results tab."
+- Add a primary **View results** button under the completed summary that switches to the Results tab (same `setTab("results")` used by the tab strip), so the main next action is obvious.
+- If a report exists but the requisition is still `active` (never booked — edge case), leave the current booking flow untouched.
 
-### 1. `src/routes/r.$token.tsx` — tabbed requisition page, expiry no longer blocks results
-
-- Add a `tab` search param (`"requisition" | "results"`, default `"requisition"`) validated on the route, so `/r/$token?tab=results` deep-links straight to results.
-- Move the current expired/revoked early-return so it no longer short-circuits when a report exists:
-  - **Revoked**: still blocks everything. A withdrawn order is a clinical retraction.
-  - **Expired with a report**: render the tabbed page. The Requisition tab shows a muted "This link has expired — contact your clinic to reissue" notice plus the extension-request control instead of the centre picker. The Results tab works normally.
-  - **Expired with no report**: keep the existing `LinkProblem` screen unchanged.
-- Render the tab strip only when a report exists for the requisition (`reportFor(req.id)`).
-- Requisition tab holds the existing content: details panel, tests panel, and either the booking confirmation or the centre picker depending on status.
-- Results tab renders `<PatientResults req={req} />`.
-- Remove the inline `<PatientResults req={req} />` that currently sits under `<BookingConfirmation>`, per the earlier decision to move results out of the detail view.
-
-### 2. `src/routes/p.$patientId.tsx` — the list action
-
-- Add a "View Results" button beside "Open requisition" on each entry.
-- Look up `reportFor(req.id)` and evaluate `isVisibleToPatient(report, now())`.
-- **Report exists and is visible**: enabled button linking to `/r/$token` with `search={{ tab: "results" }}`, styled with the emerald/success accent so it reads as a distinct outcome from the primary booking action.
-- **Report exists but is held or embargoed**: disabled button with amber styling and an inline hint — "Pending clinician release" or "Available [date]" from `embargoLiftsAt`.
-- **No report**: button is hidden entirely.
-- The button is shown regardless of expiry status; only a revoked requisition suppresses it.
-- Replace the existing standalone "Results available" / "Results pending clinician release" text line, since the button now carries that state.
-
-### 3. `src/components/patient-results.tsx` — unchanged
-
-Continues to gate on `isVisibleToPatient` and log the `result.viewed` audit event when opened.
-
-## Interoperability note
-
-This mirrors real behaviour: in FHIR terms, `ServiceRequest.occurrencePeriod.end` lapsing does not retract the `DiagnosticReport`. Worth a one-line comment in the route so the intent is legible to anyone reading the code.
-
-## Verification
-
-- Build and typecheck.
-- Preview: an expired requisition with a released report shows an enabled "View Results" button; clicking it opens the Results tab with the expiry notice visible on the Requisition tab; a revoked requisition shows no results action.
+## Technical notes
+- No domain, store, or results logic changes — presentation only.
+- `completed` is a new optional boolean prop on `BookingConfirmation`; `onChange` becomes optional so callers in completed mode don't need a no-op.
+- The expiry notice and extension-request control stay as they are; they're independent of report existence.
