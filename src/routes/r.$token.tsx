@@ -53,7 +53,7 @@ function BackLink({ patientId }: { patientId: string }) {
     <Link
       to="/p/$patientId"
       params={{ patientId }}
-      className="inline-flex items-center gap-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+      className="mb-5 inline-flex items-center gap-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
     >
       ← Back to portal
     </Link>
@@ -98,14 +98,10 @@ function PatientView() {
         eyebrow="Role · Patient"
         title="Your appointment is booked"
         description="Bring the check-in code below — the diagnostic centre already has your order."
-      actions={
-        <div className="flex flex-wrap items-center gap-2">
-          <BackLink patientId={req.patientId} />
-          <StatusBadge status={status} />
-        </div>
-      }
+      actions={<StatusBadge status={status} />}
     >
-        <BookingConfirmation
+      <BackLink patientId={req.patientId} />
+      <BookingConfirmation
           req={req}
           center={center}
           onChange={() => {
@@ -141,13 +137,9 @@ function PatientView() {
       eyebrow="Role · Patient"
       title="Your diagnostic requisition"
       description="No paper form to carry. Show this link — or the check-in code from it — at the diagnostic centre."
-      actions={
-        <div className="flex flex-wrap items-center gap-2">
-          <BackLink patientId={req.patientId} />
-          <StatusBadge status={status} />
-        </div>
-      }
+      actions={<StatusBadge status={status} />}
     >
+      <BackLink patientId={req.patientId} />
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
         <Panel
           title="Tests ordered"
