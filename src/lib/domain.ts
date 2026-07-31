@@ -45,6 +45,7 @@ export interface Patient {
   province: string;
   birthDate: string;
   phone: string;
+  address: PatientAddress;
 }
 
 export interface PatientAddress {
@@ -113,6 +114,25 @@ export function hoursRemaining(req: Requisition, now: Date = new Date()): number
 
 export function patientName(p: Patient): string {
   return `${p.givenName} ${p.familyName}`;
+}
+
+/** One-line mailing address, e.g. "812 14 St NW, Calgary AB T2N 1Z6". */
+export function formatAddress(a: PatientAddress): string {
+  return `${a.line}, ${a.city} ${a.province} ${a.postalCode}`;
+}
+
+/** Age in whole years at `now`. */
+export function ageInYears(birthDate: string, now: Date = new Date()): number {
+  const b = new Date(birthDate);
+  let age = now.getFullYear() - b.getFullYear();
+  const m = now.getMonth() - b.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < b.getDate())) age--;
+  return age;
+}
+
+/** "Mar 14, 1987 (39y)" — identity check line used across role views. */
+export function formatDob(birthDate: string): string {
+  return `${formatClinicalDate(birthDate)} (${ageInYears(birthDate)}y)`;
 }
 
 /** Short clinical date, e.g. "Jul 30, 2026". */
