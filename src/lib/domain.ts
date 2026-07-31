@@ -341,6 +341,20 @@ export interface SpecimenLabel {
 }
 
 /** One printed label per distinct tube — a 3-test order can print 2 labels. */
+/**
+ * Modality-aware description of what "intake complete" actually means for an
+ * order. PulseReq hands off to the LIS / worklist; it never resulted anything.
+ */
+export function handoffDetail(tests: OrderedTest[]): string {
+  const hasImaging = tests.some((t) => t.modality === "imaging");
+  const hasLab = tests.some((t) => t.modality !== "imaging");
+  if (hasImaging && hasLab) {
+    return "Specimen collected · exam released to imaging worklist";
+  }
+  if (hasImaging) return "Exam ready · released to imaging worklist";
+  return "Specimen collected · handed to LIS";
+}
+
 export function labelsForTests(tests: OrderedTest[]): SpecimenLabel[] {
   const byTube = new Map<string, SpecimenLabel>();
   for (const test of tests) {
