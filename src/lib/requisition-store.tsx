@@ -23,6 +23,7 @@ interface RequisitionStore {
   getPractitioner: (id: string) => Practitioner | undefined;
   getCenter: (id?: string) => DiagnosticCenter | undefined;
   findByToken: (token: string) => Requisition | undefined;
+  findByPatientId: (patientId: string) => Requisition[];
   addRequisition: (req: Requisition) => void;
   updateRequisition: (id: string, patch: Partial<Requisition>) => void;
 }
