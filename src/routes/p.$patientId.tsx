@@ -76,6 +76,8 @@ function PatientPortal() {
               const resultsVisible = report
                 ? isVisibleToPatient(report, now())
                 : false;
+              // Expiry only blocks booking — a published report stays reachable.
+              const showResults = Boolean(report) && status !== "revoked";
               return (
                 <li key={req.id} className="py-4 first:pt-0 last:pb-0">
                   <div className="flex flex-wrap items-start justify-between gap-3">
@@ -102,26 +104,43 @@ function PatientPortal() {
                     {req.status === "completed" ? (
                       <span className="text-success">{handoffDetail(req.tests)}</span>
                     ) : null}
-                    {report ? (
-                      <span
-                        className={
-                          resultsVisible ? "text-success" : "text-warning-foreground"
-                        }
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <Link
+                      to="/r/$token"
+                      params={{ token: req.token }}
+                      className="inline-flex rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                    >
+                      Open requisition
+                    </Link>
+                    {showResults && resultsVisible ? (
+                      <Link
+                        to="/r/$token"
+                        params={{ token: req.token }}
+                        search={{ tab: "results" }}
+                        className="inline-flex rounded-md border border-success/40 bg-success/10 px-3 py-1.5 text-sm font-medium text-success transition-colors hover:bg-success/20"
                       >
-                        {resultsVisible
-                          ? "Results available"
-                          : "Results pending clinician release"}
+                        View results
+                      </Link>
+                    ) : null}
+                    {showResults && !resultsVisible && report ? (
+                      <span className="inline-flex flex-col">
+                        <button
+                          type="button"
+                          disabled
+                          className="inline-flex cursor-not-allowed rounded-md border border-warning/40 bg-warning/10 px-3 py-1.5 text-sm font-medium text-warning-foreground opacity-80"
+                        >
+                          View results
+                        </button>
+                        <span className="mt-1 text-[11px] text-muted-foreground">
+                          {report.policy === "EMBARGO_DELAY" && report.embargoLiftsAt
+                            ? `Available ${formatClinicalDate(report.embargoLiftsAt)}`
+                            : "Pending clinician release"}
+                        </span>
                       </span>
                     ) : null}
                   </div>
-
-                  <Link
-                    to="/r/$token"
-                    params={{ token: req.token }}
-                    className="mt-3 inline-flex rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                  >
-                    Open requisition
-                  </Link>
                   <ExtensionRequestControl req={req} />
                 </li>
               );
