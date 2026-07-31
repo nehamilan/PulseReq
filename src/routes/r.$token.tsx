@@ -53,7 +53,7 @@ function BackLink({ patientId }: { patientId: string }) {
     <Link
       to="/p/$patientId"
       params={{ patientId }}
-      className="inline-flex items-center gap-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+      className="mb-5 inline-flex items-center gap-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
     >
       ← Back to portal
     </Link>
