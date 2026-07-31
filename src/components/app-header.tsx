@@ -1,14 +1,69 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useMatch, useNavigate } from "@tanstack/react-router";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { formatDob, patientName } from "@/lib/domain";
+import { PATIENTS } from "@/lib/seed-data";
+import { cn } from "@/lib/utils";
 
 const ROLES = [
-  { to: "/order", label: "Doctor Portal", params: {} },
-  {
-    to: "/p/$patientId",
-    label: "Patient Portal",
-    params: { patientId: "pat-1" },
-  },
-  { to: "/lab", label: "Lab Tech Dashboard", params: {} },
+  { to: "/order", label: "Doctor Portal" },
+  { to: "/lab", label: "Lab Tech Dashboard" },
 ] as const;
+
+function PatientPortalDropdown() {
+  const navigate = useNavigate({ from: "/" });
+  const patientMatch = useMatch({ from: "/p/$patientId", shouldThrow: false });
+  const isActive = !!patientMatch;
+
+  const activeClass =
+    "bg-card text-foreground shadow-sm border-border";
+  const inactiveClass =
+    "text-muted-foreground border-transparent hover:text-foreground";
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label="Select patient portal"
+        className={cn(
+          "rounded-md border px-3 py-1.5 text-[13px] font-medium transition-colors outline-none",
+          isActive ? activeClass : inactiveClass
+        )}
+      >
+        Patient Portal
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-64">
+        <DropdownMenuLabel>Choose a patient</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {PATIENTS.map((patient) => (
+          <DropdownMenuItem
+            key={patient.id}
+            className="flex flex-col items-start gap-0.5 px-3 py-2 cursor-pointer"
+            onClick={() =>
+              navigate({
+                to: "/p/$patientId",
+                params: { patientId: patient.id },
+              })
+            }
+          >
+            <span className="text-sm font-medium text-foreground">
+              {patientName(patient)}
+            </span>
+            <span className="text-xs text-muted-foreground tabular">
+              PHN {patient.phn} · {formatDob(patient.birthDate)}
+            </span>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 export function AppHeader() {
   return (
@@ -28,7 +83,6 @@ export function AppHeader() {
             <Link
               key={role.to}
               to={role.to}
-              params={role.params as never}
               activeProps={{
                 className: "bg-card text-foreground shadow-sm border-border",
               }}
@@ -41,6 +95,7 @@ export function AppHeader() {
               {role.label}
             </Link>
           ))}
+          <PatientPortalDropdown />
         </nav>
 
         <span className="ml-auto rounded-full border border-border bg-surface px-3 py-1 text-[11px] font-medium text-muted-foreground">
