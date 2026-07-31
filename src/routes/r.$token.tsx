@@ -159,9 +159,12 @@ function PatientView() {
   const patient = getPatient(req.patientId);
   const practitioner = getPractitioner(req.practitionerId);
   const center = getCenter(req.centerId);
-  const activeTab: ViewTab = report ? tab : "requisition";
+  const activeTab: ViewTab = report && tab === "results" ? "results" : "requisition";
   const setTab = (next: ViewTab) =>
-    navigate({ search: { tab: next }, replace: true });
+    navigate({
+      search: { tab: next === "results" ? "results" : undefined },
+      replace: true,
+    });
   const tabStrip = report ? (
     <ViewTabs active={activeTab} onChange={setTab} />
   ) : null;
