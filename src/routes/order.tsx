@@ -5,6 +5,7 @@ import { OrderForm } from "@/components/order-form";
 import { StatusBadge } from "@/components/status-badge";
 import { PriorityBadge } from "@/components/priority-badge";
 import { ExtensionRequestsPanel } from "@/components/extension-requests-panel";
+import { ResultsInbox } from "@/components/results-inbox";
 import {
   effectiveStatus,
   expiryLabel,
@@ -66,6 +67,7 @@ function OrderPage() {
 
         <div className="space-y-5">
         <ExtensionRequestsPanel />
+        <ResultsInbox />
         <Panel title="Issued requisitions" hint={`${requisitions.length} total`}>
           <ul className="divide-y divide-border">
             {requisitions.map((req) => {

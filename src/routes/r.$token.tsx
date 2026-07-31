@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { BookingConfirmation } from "@/components/booking-confirmation";
 import { ExtensionRequestControl } from "@/components/extension-request-dialog";
 import { Field, Panel, PageShell } from "@/components/page-shell";
+import { PatientResults } from "@/components/patient-results";
 import { StatusBadge } from "@/components/status-badge";
 import {
   centerSupports,
@@ -118,6 +119,7 @@ function PatientView() {
             });
           }}
         />
+        <PatientResults req={req} />
       </PageShell>
     );
   }
