@@ -55,7 +55,7 @@ export function RequisitionCreatedDialog({
             <span className="font-mono tabular text-foreground">
               {requisition.token}
             </span>{" "}
-            · valid 72 hours · no paper copy required.
+            · valid {requisition.linkLifetimeDays} days · no paper copy required.
           </DialogDescription>
         </DialogHeader>
 
