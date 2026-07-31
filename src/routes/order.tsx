@@ -50,7 +50,20 @@ function OrderPage() {
         </span>
       }
     >
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
+        <div className="space-y-5">
+          <Panel title="New requisition" hint="LOINC coded">
+            <OrderForm />
+          </Panel>
+          <Panel title="Interoperability">
+            <dl className="grid gap-3">
+              <Field label="Coding system" value="LOINC (http://loinc.org)" />
+              <Field label="Link lifetime" value="3 / 7 / 14 / 21 days, configurable at issue" />
+              <Field label="Export shape" value="FHIR R4 Bundle · collection" />
+            </dl>
+          </Panel>
+        </div>
+
         <div className="space-y-5">
         <ExtensionRequestsPanel />
         <Panel title="Issued requisitions" hint={`${requisitions.length} total`}>
@@ -120,19 +133,6 @@ function OrderPage() {
             })}
           </ul>
         </Panel>
-        </div>
-
-        <div className="space-y-5">
-          <Panel title="New requisition" hint="LOINC coded">
-            <OrderForm />
-          </Panel>
-          <Panel title="Interoperability">
-            <dl className="grid gap-3">
-              <Field label="Coding system" value="LOINC (http://loinc.org)" />
-              <Field label="Link lifetime" value="3 / 7 / 14 / 21 days, configurable at issue" />
-              <Field label="Export shape" value="FHIR R4 Bundle · collection" />
-            </dl>
-          </Panel>
         </div>
       </div>
     </PageShell>
