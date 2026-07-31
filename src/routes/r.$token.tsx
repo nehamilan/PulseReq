@@ -198,11 +198,18 @@ function PatientView() {
   }
 
   if (status === "booked" || status === "completed") {
+    const isHistorical = Boolean(report);
     return (
       <PageShell
         eyebrow="Role · Patient"
-        title="Your appointment is booked"
-        description="Bring the check-in code below — the diagnostic centre already has your order."
+        title={
+          isHistorical ? "Your appointment is complete" : "Your appointment is booked"
+        }
+        description={
+          isHistorical
+            ? "This visit has been processed by the lab. Your report is in the Results tab."
+            : "Bring the check-in code below — the diagnostic centre already has your order."
+        }
       actions={<StatusBadge status={status} />}
     >
       <BackLink patientId={req.patientId} />
@@ -210,6 +217,8 @@ function PatientView() {
       <BookingConfirmation
           req={req}
           center={center}
+          completed={isHistorical}
+          onViewResults={isHistorical ? () => setTab("results") : undefined}
           onChange={() => {
             setSelectedCenterId(null);
             setSelectedSlot(null);
