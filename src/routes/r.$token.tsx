@@ -32,8 +32,8 @@ function formatDate(iso: string) {
 type ViewTab = "requisition" | "results";
 
 export const Route = createFileRoute("/r/$token")({
-  validateSearch: (search: Record<string, unknown>): { tab: ViewTab } => ({
-    tab: search.tab === "results" ? "results" : "requisition",
+  validateSearch: (search: Record<string, unknown>): { tab?: ViewTab } => ({
+    tab: search.tab === "results" ? "results" : undefined,
   }),
   head: () => ({
     meta: [
