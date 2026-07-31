@@ -98,8 +98,13 @@ function PatientView() {
         eyebrow="Role · Patient"
         title="Your appointment is booked"
         description="Bring the check-in code below — the diagnostic centre already has your order."
-        actions={<StatusBadge status={status} />}
-      >
+      actions={
+        <div className="flex flex-wrap items-center gap-2">
+          <BackLink patientId={req.patientId} />
+          <StatusBadge status={status} />
+        </div>
+      }
+    >
         <BookingConfirmation
           req={req}
           center={center}
