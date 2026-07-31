@@ -3,16 +3,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Field, Panel, PageShell } from "@/components/page-shell";
 import { OrderForm } from "@/components/order-form";
 import { StatusBadge } from "@/components/status-badge";
-import { effectiveStatus, patientName } from "@/lib/domain";
+import {
+  effectiveStatus,
+  expiryLabel,
+  formatClinicalDate,
+  formatClinicalDateTime,
+  patientName,
+} from "@/lib/domain";
 import { useRequisitions } from "@/lib/requisition-store";
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-CA", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
 
 export const Route = createFileRoute("/order")({
   head: () => ({
@@ -67,9 +65,16 @@ function OrderPage() {
                       </p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
                         Ordered by {practitioner?.name} ·{" "}
-                        <span className="font-mono tabular">{req.token}</span> ·{" "}
-                        Issued {formatDate(req.issuedAt)} · expires{" "}
-                        {formatDate(req.expiresAt)} · {req.linkLifetimeDays} days
+                        <span className="font-mono tabular">{req.token}</span>
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground">
+                          Issued {formatClinicalDateTime(req.issuedAt)}
+                        </span>{" "}
+                        · {req.linkLifetimeDays}-day link ·{" "}
+                        {status === "expired"
+                          ? `expired ${formatClinicalDate(req.expiresAt)}`
+                          : `${expiryLabel(req)} (${formatClinicalDate(req.expiresAt)})`}
                       </p>
                       <ul className="mt-2 flex flex-wrap gap-1.5">
                         {req.tests.map((t) => (

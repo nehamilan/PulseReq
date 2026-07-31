@@ -107,3 +107,31 @@ export function hoursRemaining(req: Requisition, now: Date = new Date()): number
 export function patientName(p: Patient): string {
   return `${p.givenName} ${p.familyName}`;
 }
+
+/** Short clinical date, e.g. "Jul 30, 2026". */
+export function formatClinicalDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-CA", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+/** Date with 24h time, e.g. "Jul 30, 2026 · 09:14". */
+export function formatClinicalDateTime(iso: string): string {
+  const d = new Date(iso);
+  return `${formatClinicalDate(iso)} · ${d.toLocaleTimeString("en-CA", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  })}`;
+}
+
+/** Human countdown to link expiry, e.g. "expires in 6 days" / "expired". */
+export function expiryLabel(req: Requisition, now: Date = new Date()): string {
+  if (isExpired(req, now)) return "expired";
+  const hours = hoursRemaining(req, now);
+  if (hours < 24) return `expires in ${hours}h`;
+  const days = Math.round(hours / 24);
+  return `expires in ${days} day${days === 1 ? "" : "s"}`;
+}
