@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Field, Panel, PageShell } from "@/components/page-shell";
 import { OrderForm } from "@/components/order-form";
 import { StatusBadge } from "@/components/status-badge";
+import { PriorityBadge } from "@/components/priority-badge";
 import {
   effectiveStatus,
   expiryLabel,
@@ -92,6 +93,7 @@ function OrderPage() {
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <StatusBadge status={status} />
+                      <PriorityBadge priority={req.priority} routineHidden />
                       <Link
                         to="/r/$token"
                         params={{ token: req.token }}
