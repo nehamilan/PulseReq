@@ -1,5 +1,6 @@
 import type {
   DiagnosticCenter,
+  ExtensionRequest,
   Patient,
   Practitioner,
   Requisition,
@@ -149,6 +150,43 @@ export const REQUISITIONS: Requisition[] = [
         specimen: "Serum",
       },
     ],
+  },
+];
+
+REQUISITIONS.push({
+  id: "rq-3",
+  token: "req-5d20e7",
+  status: "active",
+  patientId: "pat-1",
+  practitionerId: "prac-1",
+  priority: "routine",
+  linkLifetimeDays: 7,
+  issuedAt: "2026-07-25T22:00:00.000Z",
+  expiresAt: "2026-08-01T22:00:00.000Z",
+  clinicalNotes: "Annual metabolic screen.",
+  tests: [
+    {
+      id: "ot-4",
+      coding: {
+        system: "http://loinc.org",
+        code: "4548-4",
+        display: "Hemoglobin A1c/Hemoglobin.total in Blood",
+      },
+      specimen: "Whole blood",
+      modality: "lab",
+    },
+  ],
+});
+
+/** One pending request so the clinician queue is populated on first load. */
+export const EXTENSION_REQUESTS: ExtensionRequest[] = [
+  {
+    id: "ext-1",
+    requisitionId: "rq-1",
+    requestedDays: 7,
+    reason: "Away for work until next week",
+    status: "pending",
+    requestedAt: "2026-07-31T08:20:00.000Z",
   },
 ];
 
