@@ -2,12 +2,16 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { Field, Panel, PageShell } from "@/components/page-shell";
 import { StatusBadge } from "@/components/status-badge";
-import {
-  effectiveStatus,
-  hoursRemaining,
-  patientName,
-} from "@/lib/domain";
+import { effectiveStatus, patientName } from "@/lib/domain";
 import { useRequisitions } from "@/lib/requisition-store";
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-CA", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
 export const Route = createFileRoute("/r/$token")({
   head: () => ({
@@ -49,7 +53,7 @@ function PatientView() {
         token={token}
         body={
           status === "expired"
-            ? "Requisition links stay active for 72 hours. Contact your clinic to have a new one issued."
+            ? `Requisition links stay active for up to ${req.linkLifetimeDays} days. Contact your clinic to have a new one issued.`
             : "Your clinician withdrew this requisition. Contact the clinic if you think this is a mistake."
         }
       />
@@ -70,7 +74,7 @@ function PatientView() {
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
         <Panel
           title="Tests ordered"
-          hint={`Link valid for ${hoursRemaining(req)} more hours`}
+          hint={`Link valid until ${formatDate(req.expiresAt)}`}
         >
           <ul className="divide-y divide-border">
             {req.tests.map((t) => (
