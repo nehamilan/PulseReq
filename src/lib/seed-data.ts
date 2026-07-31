@@ -31,6 +31,14 @@ function tomorrowAt(hour: number, minute: number): string {
   return d.toISOString();
 }
 
+/** N days from now (negative = in the past) at a given local time. */
+function relDayAt(offsetDays: number, hour: number, minute = 0): string {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  d.setHours(hour, minute, 0, 0);
+  return d.toISOString();
+}
+
 export const PATIENTS: Patient[] = [
   {
     id: "pat-1",
@@ -92,6 +100,51 @@ export const PATIENTS: Patient[] = [
       postalCode: "T3M 0K4",
     },
   },
+  {
+    id: "pat-5",
+    givenName: "Amara",
+    familyName: "Okafor",
+    phn: "AB-556128",
+    province: "AB",
+    birthDate: "1955-09-30",
+    phone: "+1 403-555-0133",
+    address: {
+      line: "310 Riverfront Ave SE",
+      city: "Calgary",
+      province: "AB",
+      postalCode: "T2G 5R3",
+    },
+  },
+  {
+    id: "pat-6",
+    givenName: "Liam",
+    familyName: "Fitzgerald",
+    phn: "AB-208764",
+    province: "AB",
+    birthDate: "2003-04-18",
+    phone: "+1 587-555-0166",
+    address: {
+      line: "78 Evanston Dr NW",
+      city: "Calgary",
+      province: "AB",
+      postalCode: "T3P 0G1",
+    },
+  },
+  {
+    id: "pat-7",
+    givenName: "Wei",
+    familyName: "Zhang",
+    phn: "AB-641230",
+    province: "AB",
+    birthDate: "1971-12-07",
+    phone: "+1 403-555-0189",
+    address: {
+      line: "２02 Mahogany Blvd SE".replace("２", "2"),
+      city: "Calgary",
+      province: "AB",
+      postalCode: "T3M 2N4",
+    },
+  },
 ];
 
 export const PRACTITIONERS: Practitioner[] = [
@@ -100,6 +153,20 @@ export const PRACTITIONERS: Practitioner[] = [
     name: "Dr. Sarah Jenkins",
     licence: "CPSA #45219",
     clinic: "Bowness Family Health",
+    province: "AB",
+  },
+  {
+    id: "prac-2",
+    name: "Dr. Amit Kapoor",
+    licence: "CPSA #51884",
+    clinic: "Riverbend Medical Clinic",
+    province: "AB",
+  },
+  {
+    id: "prac-3",
+    name: "Dr. Chloé Bergeron",
+    licence: "CPSA #48307",
+    clinic: "Mahogany Village Family Practice",
     province: "AB",
   },
 ];
@@ -134,6 +201,26 @@ export const CENTERS: DiagnosticCenter[] = [
     capabilities: ["Phlebotomy", "Urinalysis"],
     nextAvailable: "2026-07-31T16:15:00.000Z",
     distanceKm: 6.1,
+  },
+  {
+    id: "ctr-4",
+    name: "Mayfair Diagnostics Mahogany",
+    address: "50 Mahogany Plaza SE",
+    city: "Calgary",
+    province: "AB",
+    capabilities: ["X-Ray", "Ultrasound", "CT", "Mammography"],
+    nextAvailable: "2026-08-01T08:45:00.000Z",
+    distanceKm: 9.8,
+  },
+  {
+    id: "ctr-5",
+    name: "APL Westmount Collection Site",
+    address: "1240 Kensington Rd NW",
+    city: "Calgary",
+    province: "AB",
+    capabilities: ["Phlebotomy", "Urinalysis", "ECG"],
+    nextAvailable: "2026-07-31T13:00:00.000Z",
+    distanceKm: 2.7,
   },
 ];
 
