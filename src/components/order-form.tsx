@@ -21,6 +21,13 @@ const URGENCY = [
   { key: "stat" as const, label: "STAT" },
 ];
 
+const LINK_LIFETIME_DAYS = [
+  { key: 3 as const, label: "3 days" },
+  { key: 7 as const, label: "7 days" },
+  { key: 14 as const, label: "14 days" },
+  { key: 21 as const, label: "21 days" },
+];
+
 export function OrderForm() {
   const { patients, practitioners, requisitions, addRequisition } =
     useRequisitions();
@@ -29,6 +36,7 @@ export function OrderForm() {
   const [patientId, setPatientId] = useState<string>(patients[0]?.id ?? "");
   const [selected, setSelected] = useState<string[]>([]);
   const [priority, setPriority] = useState<"routine" | "stat">("routine");
+  const [linkLifetimeDays, setLinkLifetimeDays] = useState<3 | 7 | 14 | 21>(7);
   const [notes, setNotes] = useState("");
   const [created, setCreated] = useState<Requisition | null>(null);
 
@@ -74,8 +82,11 @@ export function OrderForm() {
       patientId,
       practitionerId: practitioner.id,
       priority,
+      linkLifetimeDays,
       issuedAt: now.toISOString(),
-      expiresAt: new Date(now.getTime() + 72 * 3_600_000).toISOString(),
+      expiresAt: new Date(
+        now.getTime() + linkLifetimeDays * 24 * 3_600_000,
+      ).toISOString(),
       clinicalNotes: notes.trim() || undefined,
       tests,
     };
@@ -85,6 +96,7 @@ export function OrderForm() {
     setSelected([]);
     setNotes("");
     setPriority("routine");
+    setLinkLifetimeDays(7);
   }
 
   return (
