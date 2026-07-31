@@ -9,6 +9,7 @@ import {
   expiryLabel,
   formatClinicalDate,
   formatClinicalDateTime,
+  handoffDetail,
   patientName,
 } from "@/lib/domain";
 import { useRequisitions } from "@/lib/requisition-store";
@@ -94,7 +95,7 @@ function PatientPortal() {
                       </span>
                     ) : null}
                     {req.status === "completed" ? (
-                      <span className="text-success">Specimen collected</span>
+                      <span className="text-success">{handoffDetail(req.tests)}</span>
                     ) : null}
                   </div>
 

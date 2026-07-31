@@ -17,7 +17,7 @@ export const STATUS_LABEL: Record<RequisitionStatus, string> = {
   active: "Awaiting booking",
   booked: "Appointment booked",
   "checked-in": "Checked in",
-  completed: "Specimen collected",
+  completed: "Intake complete",
   revoked: "Revoked by clinician",
   expired: "Link expired",
 };
@@ -341,6 +341,20 @@ export interface SpecimenLabel {
 }
 
 /** One printed label per distinct tube — a 3-test order can print 2 labels. */
+/**
+ * Modality-aware description of what "intake complete" actually means for an
+ * order. PulseReq hands off to the LIS / worklist; it never resulted anything.
+ */
+export function handoffDetail(tests: OrderedTest[]): string {
+  const hasImaging = tests.some((t) => t.modality === "imaging");
+  const hasLab = tests.some((t) => t.modality !== "imaging");
+  if (hasImaging && hasLab) {
+    return "Specimen collected · exam released to imaging worklist";
+  }
+  if (hasImaging) return "Exam ready · released to imaging worklist";
+  return "Specimen collected · handed to LIS";
+}
+
 export function labelsForTests(tests: OrderedTest[]): SpecimenLabel[] {
   const byTube = new Map<string, SpecimenLabel>();
   for (const test of tests) {
@@ -394,8 +408,9 @@ export type AuditAction =
   | "link.opened"
   | "appointment.booked"
   | "intake.read"
+  | "patient.checked-in"
   | "labels.printed"
-  | "checkin.completed";
+  | "intake.completed";
 
 export interface AuditEvent {
   id: string;
@@ -413,8 +428,9 @@ export const AUDIT_LABEL: Record<AuditAction, string> = {
   "link.opened": "TOKENIZED READ",
   "appointment.booked": "APPOINTMENT BOOKED",
   "intake.read": "PHI ACCESS · INTAKE",
+  "patient.checked-in": "PATIENT CHECKED IN",
   "labels.printed": "LABELS PRINTED",
-  "checkin.completed": "CHECK-IN COMPLETED",
+  "intake.completed": "INTAKE COMPLETED",
 };
 
 /** Simulated content hash — deterministic, chained to the previous entry. */
