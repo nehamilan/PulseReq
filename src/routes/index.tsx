@@ -34,6 +34,13 @@ const ROLES = [
     params: {},
   },
   {
+    to: "/p/$patientId",
+    label: "Patient Portal",
+    body: "All requisitions for a patient in one place, each linking to its booking and check-in code.",
+    cta: "Open sample portal",
+    params: { patientId: "pat-1" },
+  },
+  {
     to: "/r/$token",
     label: "Patient View",
     body: "The tokenized link a patient receives: what was ordered, prep instructions, where to go.",

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LabRouteImport } from './routes/lab'
 import { Route as OrderRouteImport } from './routes/order'
+import { Route as PPatientIdRouteImport } from './routes/p.$patientId'
 import { Route as RTokenRouteImport } from './routes/r.$token'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const OrderRoute = OrderRouteImport.update({
   path: '/order',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PPatientIdRoute = PPatientIdRouteImport.update({
+  id: '/p/$patientId',
+  path: '/p/$patientId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RTokenRoute = RTokenRouteImport.update({
   id: '/r/$token',
   path: '/r/$token',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/lab': typeof LabRoute
   '/order': typeof OrderRoute
+  '/p/$patientId': typeof PPatientIdRoute
   '/r/$token': typeof RTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/lab': typeof LabRoute
   '/order': typeof OrderRoute
+  '/p/$patientId': typeof PPatientIdRoute
   '/r/$token': typeof RTokenRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/lab': typeof LabRoute
   '/order': typeof OrderRoute
+  '/p/$patientId': typeof PPatientIdRoute
   '/r/$token': typeof RTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/lab' | '/order' | '/r/$token'
+  fullPaths: '/' | '/lab' | '/order' | '/p/$patientId' | '/r/$token'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/lab' | '/order' | '/r/$token'
-  id: '__root__' | '/' | '/lab' | '/order' | '/r/$token'
+  to: '/' | '/lab' | '/order' | '/p/$patientId' | '/r/$token'
+  id: '__root__' | '/' | '/lab' | '/order' | '/p/$patientId' | '/r/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LabRoute: typeof LabRoute
   OrderRoute: typeof OrderRoute
+  PPatientIdRoute: typeof PPatientIdRoute
   RTokenRoute: typeof RTokenRoute
 }
 
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/p/$patientId': {
+      id: '/p/$patientId'
+      path: '/p/$patientId'
+      fullPath: '/p/$patientId'
+      preLoaderRoute: typeof PPatientIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/r/$token': {
       id: '/r/$token'
       path: '/r/$token'
@@ -106,6 +123,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LabRoute: LabRoute,
   OrderRoute: OrderRoute,
+  PPatientIdRoute: PPatientIdRoute,
   RTokenRoute: RTokenRoute,
 }
 export const routeTree = rootRouteImport
