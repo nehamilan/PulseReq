@@ -5,6 +5,7 @@ import type {
   Practitioner,
   Requisition,
 } from "./domain";
+import { buildReport, type DiagnosticReportRecord } from "./results";
 
 /**
  * Synthetic seed data. No real PHI — names, health numbers and licence
@@ -338,6 +339,77 @@ REQUISITIONS.push(
   },
 );
 
+/** Completed orders that exercise each release policy on first load. */
+REQUISITIONS.push(
+  {
+    id: "rq-8",
+    token: "req-71f4aa",
+    status: "completed",
+    patientId: "pat-2",
+    practitionerId: "prac-1",
+    centerId: "ctr-1",
+    appointmentAt: todayAt(8, 0),
+    priority: "routine",
+    linkLifetimeDays: LINK_LIFETIME_DAYS,
+    issuedAt: "2026-07-24T15:00:00.000Z",
+    expiresAt: "2026-07-31T15:00:00.000Z",
+    clinicalNotes: "Excisional biopsy, left forearm lesion.",
+    tests: [
+      {
+        id: "ot-10",
+        coding: {
+          system: "http://loinc.org",
+          code: "60568-3",
+          display: "Pathology Synoptic report",
+        },
+        specimen: "Tissue in formalin",
+        modality: "lab",
+        releasePolicy: "CLINICIAN_HOLD",
+      },
+    ],
+  },
+  {
+    id: "rq-9",
+    token: "req-2ab660",
+    status: "completed",
+    patientId: "pat-3",
+    practitionerId: "prac-1",
+    centerId: "ctr-2",
+    appointmentAt: todayAt(11, 15),
+    priority: "routine",
+    linkLifetimeDays: LINK_LIFETIME_DAYS,
+    issuedAt: "2026-07-26T17:20:00.000Z",
+    expiresAt: "2026-08-02T17:20:00.000Z",
+    clinicalNotes: "Right upper quadrant pain.",
+    tests: [
+      {
+        id: "ot-11",
+        coding: {
+          system: "http://loinc.org",
+          code: "24916-9",
+          display: "US Abdomen",
+        },
+        instruction: "Nothing by mouth 6 hours before scan",
+        modality: "imaging",
+        releasePolicy: "EMBARGO_DELAY",
+        embargoDays: 7,
+      },
+    ],
+  },
+);
+
+/** One report per policy so all three patient states are visible immediately. */
+function seedReport(requisitionId: string, hoursAgo: number) {
+  const req = REQUISITIONS.find((r) => r.id === requisitionId)!;
+  return buildReport(req, new Date(Date.now() - hoursAgo * 3_600_000));
+}
+
+export const REPORTS: DiagnosticReportRecord[] = [
+  seedReport("rq-5", 3), // routine A1c — auto-released
+  seedReport("rq-8", 20), // pathology — held for clinician review
+  seedReport("rq-9", 6), // ultrasound — embargoed
+];
+
 /** One pending request so the clinician queue is populated on first load. */
 export const EXTENSION_REQUESTS: ExtensionRequest[] = [
   {
@@ -352,7 +424,7 @@ export const EXTENSION_REQUESTS: ExtensionRequest[] = [
 
 /** Common orderable tests for the doctor portal's test picker. */
 export interface CatalogEntry {
-  category: "Blood panels" | "Imaging";
+  category: "Blood panels" | "Imaging" | "Pathology";
   code: string;
   display: string;
   /** Short clinician-facing label used in the picker. */
@@ -420,6 +492,18 @@ export const TEST_CATALOG: CatalogEntry[] = [
     instruction: "Nothing by mouth 6 hours before scan",
     modality: "imaging",
   },
+  {
+    category: "Pathology",
+    code: "60568-3",
+    display: "Pathology Synoptic report",
+    label: "Tissue biopsy — pathology",
+    specimen: "Tissue in formalin",
+    modality: "lab",
+  },
 ];
 
-export const CATALOG_CATEGORIES = ["Blood panels", "Imaging"] as const;
+export const CATALOG_CATEGORIES = [
+  "Blood panels",
+  "Imaging",
+  "Pathology",
+] as const;
