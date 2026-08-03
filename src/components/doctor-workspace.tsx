@@ -249,133 +249,66 @@ function NeedsAttention() {
                 <ul className="divide-y divide-border rounded-md border border-border">
                   {open.map(({ report, req }) => {
                     const patient = getPatient(req!.patientId);
-                    const visible = isVisibleToPatient(report, clock);
-                    const abnormal = abnormalCount(report);
                     return (
-                      <li key={report.id} className="px-3 py-2.5">
-                        <div className="flex flex-wrap items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium text-foreground">
-                              {patient ? patientName(patient) : "Unknown patient"}
-                              <span className="ml-2 text-xs font-normal text-muted-foreground">
-                                {req!.tests.map((t) => t.coding.display).join(" · ")}
-                              </span>
-                            </p>
-                            <p className="mt-0.5 text-xs text-muted-foreground tabular">
-                              Published {formatClinicalDateTime(report.publishedAt)} ·{" "}
-                              {report.observations.length} observation
-                              {report.observations.length === 1 ? "" : "s"}
-                              {abnormal > 0 ? ` · ${abnormal} out of range` : ""}
-                            </p>
-                          </div>
-                          <div className="flex shrink-0 items-center gap-2">
-                            <ReleaseStateChip report={report} now={clock} />
-                            <PolicyChip report={report} />
-                          </div>
-                        </div>
-
-                        {report.observations.length > 0 || report.narrative ? (
-                          <details className="mt-2">
-                            <summary className="cursor-pointer text-xs font-medium text-primary hover:underline">
-                              View observations
-                            </summary>
-                            {report.observations.length > 0 ? (
-                              <ul className="mt-2 divide-y divide-border rounded-md border border-border">
-                                {report.observations.map((o) => (
-                                  <li
-                                    key={o.id}
-                                    className="flex flex-wrap items-center justify-between gap-2 px-3 py-2"
-                                  >
-                                    <div className="min-w-0">
-                                      <p className="text-sm text-foreground">
-                                        {o.display}
-                                      </p>
-                                      <p className="font-mono text-[11px] text-muted-foreground tabular">
-                                        LOINC {o.code} · ref {o.refLow}–{o.refHigh}{" "}
-                                        {o.unit}
-                                      </p>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-mono text-sm text-foreground tabular">
-                                        {o.value} {o.unit}
-                                      </span>
-                                      <InterpretationBadge
-                                        interpretation={o.interpretation}
-                                      />
-                                    </div>
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : null}
-                            {report.narrative ? (
-                              <p className="mt-2 whitespace-pre-line rounded-md border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
-                                {report.narrative}
-                              </p>
-                            ) : null}
-                            <p className="mt-2 text-[11px] text-muted-foreground">
-                              {report.rationale}
-                            </p>
-                          </details>
-                        ) : null}
-
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              releaseResults(report.requisitionId, "prac-1");
-                              toast.success("Signed off & released to patient", {
-                                description: visible
-                                  ? "Embargo had already lapsed — release confirmed."
-                                  : "The report is now visible in the patient portal.",
-                              });
-                            }}
-                            className="rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                          >
-                            {visible ? "Confirm release" : "Sign off & release"}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              logAudit(
-                                report.requisitionId,
-                                "result.viewed",
-                                "prac-1",
-                                "Clinician inspected raw FHIR DiagnosticReport",
-                              );
-                              setInspectId(report.id);
-                            }}
-                            className="rounded-md border border-input bg-background px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-accent"
-                          >
-                            Inspect FHIR DiagnosticReport
-                          </button>
-                        </div>
-                      </li>
+                      <ReportRow
+                        key={report.id}
+                        report={report}
+                        req={req!}
+                        patientLabel={
+                          patient ? patientName(patient) : "Unknown patient"
+                        }
+                        clock={clock}
+                        onInspect={() => {
+                          logAudit(
+                            report.requisitionId,
+                            "result.viewed",
+                            "prac-1",
+                            "Clinician inspected raw FHIR DiagnosticReport",
+                          );
+                          setInspectId(report.id);
+                        }}
+                        onRelease={() => {
+                          const visible = isVisibleToPatient(report, clock);
+                          releaseResults(report.requisitionId, "prac-1");
+                          toast.success("Signed off & released to patient", {
+                            description: visible
+                              ? "Embargo had already lapsed — release confirmed."
+                              : "The report is now visible in the patient portal.",
+                          });
+                        }}
+                      />
                     );
                   })}
                 </ul>
               )}
 
               {resolved.length > 0 ? (
-                <details className="mt-3 opacity-60">
+                <details className="mt-3">
                   <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                    Recently released · {resolved.length}
+                    Released results · {resolved.length}
                   </summary>
                   <ul className="mt-2 divide-y divide-border rounded-md border border-border">
                     {resolved.map(({ report, req }) => {
                       const patient = getPatient(req!.patientId);
                       return (
-                        <li
+                        <ReportRow
                           key={report.id}
-                          className="flex flex-wrap items-center justify-between gap-2 px-3 py-2"
-                        >
-                          <p className="min-w-0 truncate text-xs text-muted-foreground">
-                            <span className="font-medium text-foreground">
-                              {patient ? patientName(patient) : "Unknown patient"}
-                            </span>{" "}
-                            {req!.tests.map((t) => t.coding.display).join(" · ")}
-                          </p>
-                          <ReleaseStateChip report={report} now={clock} />
-                        </li>
+                          report={report}
+                          req={req!}
+                          patientLabel={
+                            patient ? patientName(patient) : "Unknown patient"
+                          }
+                          clock={clock}
+                          onInspect={() => {
+                            logAudit(
+                              report.requisitionId,
+                              "result.viewed",
+                              "prac-1",
+                              "Clinician inspected raw FHIR DiagnosticReport",
+                            );
+                            setInspectId(report.id);
+                          }}
+                        />
                       );
                     })}
                   </ul>
