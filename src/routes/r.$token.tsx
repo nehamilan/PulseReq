@@ -31,13 +31,15 @@ function formatDate(iso: string) {
 
 type ViewTab = "requisition" | "results";
 type OriginRole = "doctor";
+type OriginTab = "attention" | "log";
 
 export const Route = createFileRoute("/r/$token")({
   validateSearch: (
     search: Record<string, unknown>,
-  ): { tab?: ViewTab; from?: OriginRole } => ({
+  ): { tab?: ViewTab; from?: OriginRole; fromTab?: OriginTab } => ({
     tab: search.tab === "results" ? "results" : undefined,
     from: search.from === "doctor" ? "doctor" : undefined,
+    fromTab: search.fromTab === "log" ? "log" : undefined,
   }),
   head: () => ({
     meta: [
@@ -62,15 +64,21 @@ export const Route = createFileRoute("/r/$token")({
 function BackLink({
   patientId,
   from,
+  fromTab,
 }: {
   patientId: string;
   from?: OriginRole;
+  fromTab?: OriginTab;
 }) {
   const className =
     "mb-5 inline-flex items-center gap-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent";
   if (from === "doctor") {
     return (
-      <Link to="/order" className={className}>
+      <Link
+        to="/order"
+        search={{ tab: fromTab === "log" ? ("log" as const) : undefined }}
+        className={className}
+      >
         ← Back to Doctor Portal
       </Link>
     );
@@ -129,7 +137,7 @@ function ViewTabs({
 
 function PatientView() {
   const { token } = Route.useParams();
-  const { tab, from } = Route.useSearch();
+  const { tab, from, fromTab } = Route.useSearch();
   const navigate = Route.useNavigate();
   const {
     findByToken,
@@ -145,7 +153,7 @@ function PatientView() {
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
 
   if (!req) {
-    return <LinkProblem title="This link isn't valid" token={token} body="We couldn't find a requisition for this link. Check the message from your clinic, or ask them to reissue it." from={from} />;
+    return <LinkProblem title="This link isn't valid" token={token} body="We couldn't find a requisition for this link. Check the message from your clinic, or ask them to reissue it." from={from} fromTab={fromTab} />;
   }
 
   const status = effectiveStatus(req);
@@ -170,6 +178,7 @@ function PatientView() {
         }
         patientId={req.patientId}
         from={from}
+        fromTab={fromTab}
       >
         {status === "expired" ? <ExtensionRequestControl req={req} /> : null}
       </LinkProblem>
@@ -182,7 +191,11 @@ function PatientView() {
   const activeTab: ViewTab = report && tab === "results" ? "results" : "requisition";
   const setTab = (next: ViewTab) =>
     navigate({
-      search: (prev: { tab?: ViewTab; from?: OriginRole }) => ({
+      search: (prev: {
+        tab?: ViewTab;
+        from?: OriginRole;
+        fromTab?: OriginTab;
+      }) => ({
         ...prev,
         tab: next === "results" ? ("results" as const) : undefined,
       }),
@@ -213,7 +226,7 @@ function PatientView() {
         description="Results released to you by your clinic, with the reference ranges the lab used."
         actions={<StatusBadge status={status} />}
       >
-        <BackLink patientId={req.patientId} from={from} />
+        <BackLink patientId={req.patientId} from={from} fromTab={fromTab} />
         {tabStrip}
         <PatientResults req={req} />
       </PageShell>
@@ -235,7 +248,7 @@ function PatientView() {
         }
       actions={<StatusBadge status={status} />}
     >
-      <BackLink patientId={req.patientId} from={from} />
+      <BackLink patientId={req.patientId} from={from} fromTab={fromTab} />
       {tabStrip}
       <BookingConfirmation
           req={req}
@@ -277,7 +290,7 @@ function PatientView() {
       description="No paper form to carry. Show this link — or the check-in code from it — at the diagnostic centre."
       actions={<StatusBadge status={status} />}
     >
-      <BackLink patientId={req.patientId} from={from} />
+      <BackLink patientId={req.patientId} from={from} fromTab={fromTab} />
       {tabStrip}
       {expiredNotice}
       <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
@@ -461,6 +474,7 @@ function LinkProblem({
   token,
   patientId,
   from,
+  fromTab,
   children,
 }: {
   title: string;
@@ -468,6 +482,7 @@ function LinkProblem({
   token: string;
   patientId?: string;
   from?: OriginRole;
+  fromTab?: OriginTab;
   children?: ReactNode;
 }) {
   return (
@@ -476,7 +491,9 @@ function LinkProblem({
       title={title}
       description={body}
     >
-      {patientId ? <BackLink patientId={patientId} from={from} /> : null}
+      {patientId ? (
+        <BackLink patientId={patientId} from={from} fromTab={fromTab} />
+      ) : null}
       <Panel title="Link reference">
         <p className="font-mono text-sm text-muted-foreground tabular">{token}</p>
         {children}

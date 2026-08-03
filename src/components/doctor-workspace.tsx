@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import { FhirReportDialog } from "@/components/fhir-report-dialog";
@@ -34,7 +34,14 @@ type TabId = "attention" | "log";
 /** Doctor Portal right-hand workspace: actionable queue + issued log. */
 export function DoctorWorkspace() {
   const { requisitions, pendingExtensions, reports } = useRequisitions();
-  const [tab, setTab] = useState<TabId>("attention");
+  const search = useSearch({ from: "/order" });
+  const navigate = useNavigate({ from: "/order" });
+  const tab: TabId = search.tab === "log" ? "log" : "attention";
+  const setTab = (next: TabId) =>
+    navigate({
+      search: { tab: next === "log" ? ("log" as const) : undefined },
+      replace: true,
+    });
   const tabRefs = useRef<Record<TabId, HTMLButtonElement | null>>({
     attention: null,
     log: null,
@@ -562,7 +569,7 @@ function IssuedLog() {
                     <Link
                       to="/r/$token"
                       params={{ token: req.token }}
-                      search={{ from: "doctor" }}
+                      search={{ from: "doctor", fromTab: "log" }}
                       className="text-xs font-medium text-primary hover:underline"
                     >
                       Open →
