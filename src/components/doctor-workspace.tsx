@@ -569,7 +569,7 @@ function IssuedLog() {
                     <Link
                       to="/r/$token"
                       params={{ token: req.token }}
-                      search={{ from: "doctor" }}
+                      search={{ from: "doctor", fromTab: "log" }}
                       className="text-xs font-medium text-primary hover:underline"
                     >
                       Open →
