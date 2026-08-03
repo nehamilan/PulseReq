@@ -30,10 +30,14 @@ function formatDate(iso: string) {
 }
 
 type ViewTab = "requisition" | "results";
+type OriginRole = "doctor";
 
 export const Route = createFileRoute("/r/$token")({
-  validateSearch: (search: Record<string, unknown>): { tab?: ViewTab } => ({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { tab?: ViewTab; from?: OriginRole } => ({
     tab: search.tab === "results" ? "results" : undefined,
+    from: search.from === "doctor" ? "doctor" : undefined,
   }),
   head: () => ({
     meta: [
@@ -55,12 +59,27 @@ export const Route = createFileRoute("/r/$token")({
   component: PatientView,
 });
 
-function BackLink({ patientId }: { patientId: string }) {
+function BackLink({
+  patientId,
+  from,
+}: {
+  patientId: string;
+  from?: OriginRole;
+}) {
+  const className =
+    "mb-5 inline-flex items-center gap-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent";
+  if (from === "doctor") {
+    return (
+      <Link to="/order" className={className}>
+        ← Back to Doctor Portal
+      </Link>
+    );
+  }
   return (
     <Link
       to="/p/$patientId"
       params={{ patientId }}
-      className="mb-5 inline-flex items-center gap-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+      className={className}
     >
       ← Back to portal
     </Link>
