@@ -129,7 +129,7 @@ function ViewTabs({
 
 function PatientView() {
   const { token } = Route.useParams();
-  const { tab } = Route.useSearch();
+  const { tab, from } = Route.useSearch();
   const navigate = Route.useNavigate();
   const {
     findByToken,
@@ -145,7 +145,7 @@ function PatientView() {
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
 
   if (!req) {
-    return <LinkProblem title="This link isn't valid" token={token} body="We couldn't find a requisition for this link. Check the message from your clinic, or ask them to reissue it." />;
+    return <LinkProblem title="This link isn't valid" token={token} body="We couldn't find a requisition for this link. Check the message from your clinic, or ask them to reissue it." from={from} />;
   }
 
   const status = effectiveStatus(req);
@@ -169,6 +169,7 @@ function PatientView() {
             : "Your clinician withdrew this requisition. Contact the clinic if you think this is a mistake."
         }
         patientId={req.patientId}
+        from={from}
       >
         {status === "expired" ? <ExtensionRequestControl req={req} /> : null}
       </LinkProblem>
@@ -181,7 +182,10 @@ function PatientView() {
   const activeTab: ViewTab = report && tab === "results" ? "results" : "requisition";
   const setTab = (next: ViewTab) =>
     navigate({
-      search: { tab: next === "results" ? "results" : undefined },
+      search: (prev) => ({
+        ...prev,
+        tab: next === "results" ? ("results" as const) : undefined,
+      }),
       replace: true,
     });
   const tabStrip = report ? (
@@ -209,7 +213,7 @@ function PatientView() {
         description="Results released to you by your clinic, with the reference ranges the lab used."
         actions={<StatusBadge status={status} />}
       >
-        <BackLink patientId={req.patientId} />
+        <BackLink patientId={req.patientId} from={from} />
         {tabStrip}
         <PatientResults req={req} />
       </PageShell>
@@ -231,7 +235,7 @@ function PatientView() {
         }
       actions={<StatusBadge status={status} />}
     >
-      <BackLink patientId={req.patientId} />
+      <BackLink patientId={req.patientId} from={from} />
       {tabStrip}
       <BookingConfirmation
           req={req}
@@ -273,7 +277,7 @@ function PatientView() {
       description="No paper form to carry. Show this link — or the check-in code from it — at the diagnostic centre."
       actions={<StatusBadge status={status} />}
     >
-      <BackLink patientId={req.patientId} />
+      <BackLink patientId={req.patientId} from={from} />
       {tabStrip}
       {expiredNotice}
       <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
@@ -456,12 +460,14 @@ function LinkProblem({
   body,
   token,
   patientId,
+  from,
   children,
 }: {
   title: string;
   body: string;
   token: string;
   patientId?: string;
+  from?: OriginRole;
   children?: ReactNode;
 }) {
   return (
@@ -470,7 +476,7 @@ function LinkProblem({
       title={title}
       description={body}
     >
-      {patientId ? <BackLink patientId={patientId} /> : null}
+      {patientId ? <BackLink patientId={patientId} from={from} /> : null}
       <Panel title="Link reference">
         <p className="font-mono text-sm text-muted-foreground tabular">{token}</p>
         {children}
