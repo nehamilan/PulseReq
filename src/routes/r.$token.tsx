@@ -182,7 +182,7 @@ function PatientView() {
   const activeTab: ViewTab = report && tab === "results" ? "results" : "requisition";
   const setTab = (next: ViewTab) =>
     navigate({
-      search: (prev) => ({
+      search: (prev: { tab?: ViewTab; from?: OriginRole }) => ({
         ...prev,
         tab: next === "results" ? ("results" as const) : undefined,
       }),
