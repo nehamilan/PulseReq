@@ -6,6 +6,11 @@ import { DoctorWorkspace } from "@/components/doctor-workspace";
 
 
 export const Route = createFileRoute("/order")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { tab?: "attention" | "log" } => ({
+    tab: search.tab === "log" ? "log" : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Doctor Portal — PulseReq" },
