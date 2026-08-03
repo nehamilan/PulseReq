@@ -562,6 +562,7 @@ function IssuedLog() {
                     <Link
                       to="/r/$token"
                       params={{ token: req.token }}
+                      search={{ from: "doctor" }}
                       className="text-xs font-medium text-primary hover:underline"
                     >
                       Open →
