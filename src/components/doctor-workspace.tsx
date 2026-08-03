@@ -19,9 +19,14 @@ import {
   isExpired,
   patientName,
   waitingLabel,
+  type Requisition,
   type RequisitionStatus,
 } from "@/lib/domain";
-import { abnormalCount, isVisibleToPatient } from "@/lib/results";
+import {
+  abnormalCount,
+  isVisibleToPatient,
+  type DiagnosticReportRecord,
+} from "@/lib/results";
 import { useRequisitions } from "@/lib/requisition-store";
 
 type TabId = "attention" | "log";
