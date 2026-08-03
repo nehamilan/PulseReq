@@ -34,7 +34,14 @@ type TabId = "attention" | "log";
 /** Doctor Portal right-hand workspace: actionable queue + issued log. */
 export function DoctorWorkspace() {
   const { requisitions, pendingExtensions, reports } = useRequisitions();
-  const [tab, setTab] = useState<TabId>("attention");
+  const search = useSearch({ from: "/order" });
+  const navigate = useNavigate({ from: "/order" });
+  const tab: TabId = search.tab === "log" ? "log" : "attention";
+  const setTab = (next: TabId) =>
+    navigate({
+      search: { tab: next === "log" ? ("log" as const) : undefined },
+      replace: true,
+    });
   const tabRefs = useRef<Record<TabId, HTMLButtonElement | null>>({
     attention: null,
     log: null,
