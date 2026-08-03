@@ -1,21 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
 import { Field, Panel, PageShell } from "@/components/page-shell";
 import { OrderForm } from "@/components/order-form";
-import { StatusBadge } from "@/components/status-badge";
-import { PriorityBadge } from "@/components/priority-badge";
-import { ExtensionRequestsPanel } from "@/components/extension-requests-panel";
-import { ResultsInbox } from "@/components/results-inbox";
-import {
-  effectiveStatus,
-  expiryLabel,
-  formatClinicalDate,
-  formatClinicalDateTime,
-  patientName,
-  formatDob,
-  formatAddress,
-} from "@/lib/domain";
-import { useRequisitions } from "@/lib/requisition-store";
+import { DoctorWorkspace } from "@/components/doctor-workspace";
+
 
 export const Route = createFileRoute("/order")({
   head: () => ({
@@ -38,8 +26,6 @@ export const Route = createFileRoute("/order")({
 });
 
 function OrderPage() {
-  const { requisitions, getPatient, getPractitioner } = useRequisitions();
-
   return (
     <PageShell
       eyebrow="Role · Ordering clinician"
@@ -65,77 +51,7 @@ function OrderPage() {
           </Panel>
         </div>
 
-        <div className="space-y-5">
-        <ExtensionRequestsPanel />
-        <ResultsInbox />
-        <Panel title="Issued requisitions" hint={`${requisitions.length} total`}>
-          <ul className="divide-y divide-border">
-            {requisitions.map((req) => {
-              const patient = getPatient(req.patientId);
-              const practitioner = getPractitioner(req.practitionerId);
-              const status = effectiveStatus(req);
-              return (
-                <li key={req.id} className="py-3.5 first:pt-0 last:pb-0">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">
-                        {patient ? patientName(patient) : "Unknown patient"}
-                        <span className="ml-2 font-mono text-xs font-normal text-muted-foreground tabular">
-                          PHN {patient?.phn}
-                        </span>
-                      </p>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
-                        DOB {patient ? formatDob(patient.birthDate) : "—"} ·{" "}
-                        {patient ? formatAddress(patient.address) : "—"}
-                      </p>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
-                        Ordered by {practitioner?.name} ·{" "}
-                        <span className="font-mono tabular">{req.token}</span>
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        <span className="font-medium text-foreground">
-                          Issued {formatClinicalDateTime(req.issuedAt)}
-                        </span>{" "}
-                        · {req.linkLifetimeDays}-day link ·{" "}
-                        {status === "expired"
-                          ? `expired ${formatClinicalDate(req.expiresAt)}`
-                          : `${expiryLabel(req)} (${formatClinicalDate(req.expiresAt)})`}
-                        {req.extensionCount
-                          ? ` · extended ${req.extensionCount === 1 ? "once" : `${req.extensionCount}×`}`
-                          : ""}
-                      </p>
-                      <ul className="mt-2 flex flex-wrap gap-1.5">
-                        {req.tests.map((t) => (
-                          <li
-                            key={t.id}
-                            className="rounded border border-border bg-surface px-2 py-0.5 text-[11px] text-muted-foreground"
-                          >
-                            <span className="font-mono tabular">
-                              {t.coding.code}
-                            </span>{" "}
-                            {t.coding.display}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <StatusBadge status={status} />
-                      <PriorityBadge priority={req.priority} routineHidden />
-                      <Link
-                        to="/r/$token"
-                        params={{ token: req.token }}
-                        className="text-xs font-medium text-primary hover:underline"
-                      >
-                        Open patient link →
-                      </Link>
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </Panel>
-        </div>
+        <DoctorWorkspace />
       </div>
     </PageShell>
   );
