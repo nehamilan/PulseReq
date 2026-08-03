@@ -56,6 +56,9 @@ export function RequisitionCreatedDialog({
               {requisition.token}
             </span>{" "}
             · valid {requisition.linkLifetimeDays} days · no paper copy required.
+            <span className="mt-1 block text-xs text-muted-foreground">
+              In production, the patient is notified automatically through their registered portal or email.
+            </span>
           </DialogDescription>
         </DialogHeader>
 
@@ -75,7 +78,7 @@ export function RequisitionCreatedDialog({
                 onClick={() => copy(shareUrl, "Patient link copied")}
                 className="shrink-0 rounded bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground hover:opacity-90"
               >
-                Copy Link
+                Copy link to share manually
               </button>
             </div>
             <Link
@@ -84,8 +87,11 @@ export function RequisitionCreatedDialog({
               onClick={onClose}
               className="inline-block text-sm font-medium text-primary hover:underline"
             >
-              Open patient view →
+              Preview patient view →
             </Link>
+            <p className="text-[11px] text-muted-foreground">
+              This is a clinician preview only. In production, the patient receives the link automatically through their registered portal or email.
+            </p>
             <p className="text-[11px] text-muted-foreground">
               The pulsereq.ca domain is illustrative; in this prototype the link
               resolves locally at /r/{requisition.token}.
