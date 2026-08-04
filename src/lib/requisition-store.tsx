@@ -66,6 +66,8 @@ interface RequisitionStore {
     actor: string,
     reason?: string,
   ) => void;
+  /** Clinician extends a link's validity without a patient request. */
+  extendRequisition: (requisitionId: string, days: number) => void;
   getPatient: (id: string) => Patient | undefined;
   getPractitioner: (id: string) => Practitioner | undefined;
   getCenter: (id?: string) => DiagnosticCenter | undefined;
@@ -396,6 +398,19 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
             e.id === extensionId && e.status === "pending"
               ? { ...e, status: "declined", resolvedAt: new Date().toISOString() }
               : e,
+          ),
+        ),
+      extendRequisition: (requisitionId, days) =>
+        setRequisitions((prev) =>
+          prev.map((r) =>
+            r.id === requisitionId
+              ? {
+                  ...r,
+                  status: r.status === "expired" ? "active" : r.status,
+                  expiresAt: extendExpiry(r, days),
+                  extensionCount: (r.extensionCount ?? 0) + 1,
+                }
+              : r,
           ),
         ),
     }),

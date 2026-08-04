@@ -13,6 +13,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { PriorityBadge } from "@/components/priority-badge";
 import {
   STATUS_LABEL,
+  EXTENSION_DAY_OPTIONS,
   canRevoke,
   effectiveStatus,
   formatClinicalDate,
@@ -461,12 +462,13 @@ const FILTERS: RequisitionStatus[] = [
 ];
 
 function IssuedLog() {
-  const { requisitions, getPatient, reportFor, revokeRequisition } =
+  const { requisitions, getPatient, reportFor, revokeRequisition, extendRequisition } =
     useRequisitions();
   const [filter, setFilter] = useState<RequisitionStatus | "all">("all");
   const [query, setQuery] = useState("");
   const [revoking, setRevoking] = useState<Requisition | null>(null);
   const [reason, setReason] = useState("");
+  const [extending, setExtending] = useState<Requisition | null>(null);
 
   const decorated = useMemo(
     () =>
@@ -577,8 +579,17 @@ function IssuedLog() {
                         search={{ from: "doctor", fromTab: "log" }}
                         className="text-xs font-medium text-primary hover:underline"
                       >
-                        Open →
+                        Open
                       </Link>
+                      {status === "expired" && !reportFor(req.id) ? (
+                        <button
+                          type="button"
+                          onClick={() => setExtending(req)}
+                          className="text-xs font-medium text-primary hover:underline"
+                        >
+                          Extend
+                        </button>
+                      ) : null}
                       {canRevoke(req, Boolean(reportFor(req.id))) ? (
                         <button
                           type="button"
@@ -627,7 +638,93 @@ function IssuedLog() {
           }}
         />
       ) : null}
+
+      {extending ? (
+        <ExtendDialog
+          req={extending}
+          patientLabel={
+            getPatient(extending.patientId)
+              ? patientName(getPatient(extending.patientId)!)
+              : "Unknown patient"
+          }
+          onCancel={() => setExtending(null)}
+          onConfirm={(days) => {
+            extendRequisition(extending.id, days);
+            toast.success("Link extended", {
+              description: `Booking link reopened for ${days} more days.`,
+            });
+            setExtending(null);
+          }}
+        />
+      ) : null}
     </Panel>
+  );
+}
+
+function ExtendDialog({
+  req,
+  patientLabel,
+  onCancel,
+  onConfirm,
+}: {
+  req: Requisition;
+  patientLabel: string;
+  onCancel: () => void;
+  onConfirm: (days: number) => void;
+}) {
+  const [days, setDays] = useState<number>(7);
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Extend requisition link"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4"
+    >
+      <div className="w-full max-w-md rounded-lg border border-border bg-background p-5 shadow-lg">
+        <h2 className="text-sm font-semibold text-foreground">
+          Extend this booking link?
+        </h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {patientLabel} · {req.tests.map((t) => t.coding.display).join(" · ")}
+        </p>
+        <p className="mt-3 text-xs text-muted-foreground">
+          The link becomes active again so the patient can book. No new
+          requisition is issued.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {EXTENSION_DAY_OPTIONS.map((d) => (
+            <button
+              key={d}
+              type="button"
+              onClick={() => setDays(d)}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                days === d
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-input bg-background text-foreground hover:bg-accent"
+              }`}
+            >
+              +{d} days
+            </button>
+          ))}
+        </div>
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => onConfirm(days)}
+            className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Extend link
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
