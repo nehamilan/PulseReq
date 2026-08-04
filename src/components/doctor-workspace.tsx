@@ -627,6 +627,10 @@ function IssuedLog() {
               ? patientName(getPatient(revoking.patientId)!)
               : "Unknown patient"
           }
+          centerName={revokingCenter?.name}
+          hasBooking={
+            revoking.status === "booked" || revoking.status === "checked-in"
+          }
           reason={reason}
           onReason={setReason}
           onCancel={() => setRevoking(null)}
