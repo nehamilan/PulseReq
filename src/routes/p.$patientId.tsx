@@ -10,12 +10,6 @@ import { PriorityBadge } from "@/components/priority-badge";
 import { SortHeader, type SortState } from "@/components/sort-header";
 import { StatusBadge } from "@/components/status-badge";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
   STATUS_LABEL,
   effectiveStatus,
   expiryLabel,
@@ -106,6 +100,9 @@ function PatientPortal() {
       description="All your requisitions in one place. Open one to book an appointment or view the check-in code."
     >
       <Panel title="Requisitions" hint={`${requisitions.length} order${requisitions.length === 1 ? "" : "s"}`}>
+        <p className="mb-3 text-xs text-muted-foreground">
+          Extensions open 48 hours before a requisition expires.
+        </p>
         {requisitions.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No requisitions have been issued for this patient yet.
@@ -138,11 +135,11 @@ function PatientPortal() {
                     .map((t) => t.coding.display)
                     .join(" · ");
                   const report = reportFor(req.id);
-                  const resultsVisible = report
-                    ? isVisibleToPatient(report, now())
-                    : false;
-                  // Expiry only blocks booking — a published report stays reachable.
-                  const showResults = Boolean(report) && status !== "revoked";
+                  // Expiry only blocks booking — a released report stays reachable.
+                  const resultsReady =
+                    Boolean(report) &&
+                    status !== "revoked" &&
+                    isVisibleToPatient(report!, now());
                   const extension = latestExtensionFor(req.id);
                   return (
                     <tr key={req.id} className="align-top">
@@ -174,48 +171,31 @@ function PatientPortal() {
                         ) : null}
                       </td>
                       <td className="py-3">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex min-h-[30px] items-center justify-end gap-2">
+                          {resultsReady ? (
+                            <Link
+                              to="/r/$token"
+                              params={{ token: req.token }}
+                              search={{ tab: "results" }}
+                              className="inline-flex whitespace-nowrap rounded-full border border-success/35 bg-success/15 px-2.5 py-1 text-xs font-medium text-success transition-colors hover:bg-success/25"
+                            >
+                              Results ready
+                            </Link>
+                          ) : (
+                            <ExtensionRequestControl
+                              req={req}
+                              compact
+                              hidePill
+                              variant="pill"
+                            />
+                          )}
                           <Link
                             to="/r/$token"
                             params={{ token: req.token }}
                             className="inline-flex whitespace-nowrap rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                           >
-                            Open
+                            View
                           </Link>
-                          {showResults && resultsVisible ? (
-                            <Link
-                              to="/r/$token"
-                              params={{ token: req.token }}
-                              search={{ tab: "results" }}
-                              className="inline-flex whitespace-nowrap rounded-md border border-success/40 bg-success/10 px-3 py-1.5 text-xs font-medium text-success transition-colors hover:bg-success/20"
-                            >
-                              View results
-                            </Link>
-                          ) : null}
-                          {showResults && !resultsVisible && report ? (
-                            <TooltipProvider delayDuration={200}>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="inline-flex cursor-not-allowed whitespace-nowrap rounded-md border border-warning/40 bg-warning/10 px-3 py-1.5 text-xs font-medium text-warning-foreground opacity-80">
-                                    View results
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent
-                                  side="top"
-                                  sideOffset={4}
-                                  className="max-w-xs"
-                                >
-                                  <p>
-                                    {report.policy === "EMBARGO_DELAY" &&
-                                    report.embargoLiftsAt
-                                      ? `Available ${formatClinicalDate(report.embargoLiftsAt)}`
-                                      : "Pending clinician release"}
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          ) : null}
-                          <ExtensionRequestControl req={req} compact hidePill />
                         </div>
                       </td>
                     </tr>
