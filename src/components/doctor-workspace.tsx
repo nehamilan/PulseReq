@@ -564,14 +564,30 @@ function IssuedLog() {
           <table className="w-full border-collapse text-left">
             <thead>
               <tr className="border-b border-border">
-                {["Patient", "Test", "Status", "Issued", ""].map((h) => (
-                  <th
-                    key={h}
-                    className="py-2 pr-3 text-[11px] font-medium uppercase tracking-wide text-muted-foreground"
-                  >
-                    {h}
-                  </th>
-                ))}
+                <SortHeader
+                  label="Patient"
+                  sortKey="patient"
+                  sort={sort}
+                  onSort={setSort}
+                />
+                <th className="py-2 pr-3 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Test
+                </th>
+                <SortHeader
+                  label="Status"
+                  sortKey="status"
+                  sort={sort}
+                  onSort={setSort}
+                />
+                <SortHeader
+                  label="Issued"
+                  sortKey="issued"
+                  sort={sort}
+                  onSort={setSort}
+                />
+                <th className="py-2 pr-3 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  {/* Actions */}
+                </th>
               </tr>
             </thead>
             <tbody>
