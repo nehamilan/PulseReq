@@ -181,7 +181,9 @@ function PatientView() {
         from={from}
         fromTab={fromTab}
       >
-        {status === "expired" ? <ExtensionRequestControl req={req} /> : null}
+        {status === "expired" && !isClinicianView ? (
+          <ExtensionRequestControl req={req} />
+        ) : null}
       </LinkProblem>
     );
   }
