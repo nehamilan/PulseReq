@@ -14,7 +14,7 @@ export function PatientResults({
   req: Requisition;
   clinicianView?: boolean;
 }) {
-  const { reportFor, now, logAudit } = useRequisitions();
+  const { reportFor, now, logAudit, releaseResults } = useRequisitions();
   const report = reportFor(req.id);
   const clock = now();
   const [raw, setRaw] = useState(false);
@@ -24,7 +24,7 @@ export function PatientResults({
   const visible = report ? isVisibleToPatient(report, clock) : false;
 
   useEffect(() => {
-    if (!report || !visible || logged.current) return;
+    if (clinicianView || !report || !visible || logged.current) return;
     logged.current = true;
     logAudit(
       req.id,
@@ -32,11 +32,11 @@ export function PatientResults({
       "patient",
       "Patient opened released DiagnosticReport in portal",
     );
-  }, [report, visible, req.id, logAudit]);
+  }, [clinicianView, report, visible, req.id, logAudit]);
 
   if (!report) return null;
 
-  if (!visible) {
+  if (!visible && !clinicianView) {
     return (
       <div className="mt-5">
         <Panel
