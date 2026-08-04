@@ -461,11 +461,15 @@ const FILTERS: RequisitionStatus[] = [
   "revoked",
 ];
 
+type SortKey = "patient" | "status" | "issued";
+type SortDir = "asc" | "desc";
+
 function IssuedLog() {
   const { requisitions, getPatient, getCenter, reportFor, revokeRequisition, extendRequisition } =
     useRequisitions();
   const [filter, setFilter] = useState<RequisitionStatus | "all">("all");
   const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<{ key: SortKey; dir: SortDir } | null>(null);
   const [revoking, setRevoking] = useState<Requisition | null>(null);
   const [reason, setReason] = useState("");
   const [extending, setExtending] = useState<Requisition | null>(null);
@@ -488,19 +492,40 @@ function IssuedLog() {
   }, [decorated]);
 
   const q = query.trim().toLowerCase();
-  const rows = decorated.filter((row) => {
-    if (filter !== "all" && row.status !== filter) return false;
-    if (!q) return true;
-    const haystack = [
-      row.patient ? patientName(row.patient) : "",
-      row.patient?.phn ?? "",
-      row.req.token,
-      ...row.req.tests.map((t) => t.coding.display),
-    ]
-      .join(" ")
-      .toLowerCase();
-    return haystack.includes(q);
-  });
+  const rows = decorated
+    .filter((row) => {
+      if (filter !== "all" && row.status !== filter) return false;
+      if (!q) return true;
+      const haystack = [
+        row.patient ? patientName(row.patient) : "",
+        row.patient?.phn ?? "",
+        row.req.token,
+        ...row.req.tests.map((t) => t.coding.display),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(q);
+    })
+    .sort((a, b) => {
+      if (!sort) return 0;
+      const dir = sort.dir === "asc" ? 1 : -1;
+      switch (sort.key) {
+        case "patient": {
+          const pa = patientName(a.patient) || "";
+          const pb = patientName(b.patient) || "";
+          return pa.localeCompare(pb) * dir;
+        }
+        case "status": {
+          return STATUS_LABEL[a.status].localeCompare(STATUS_LABEL[b.status]) * dir;
+        }
+        case "issued": {
+          return (
+            (new Date(a.req.issuedAt).getTime() - new Date(b.req.issuedAt).getTime()) * dir
+          );
+        }
+      }
+      return 0;
+    });
 
   return (
     <Panel title="Issued requisitions" hint={`${requisitions.length} total`}>
