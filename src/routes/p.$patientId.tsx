@@ -10,6 +10,12 @@ import { PriorityBadge } from "@/components/priority-badge";
 import { SortHeader, type SortState } from "@/components/sort-header";
 import { StatusBadge } from "@/components/status-badge";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   STATUS_LABEL,
   effectiveStatus,
   expiryLabel,
