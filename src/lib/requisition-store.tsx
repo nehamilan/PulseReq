@@ -60,6 +60,12 @@ interface RequisitionStore {
   checkInPatient: (requisitionId: string, actor: string) => void;
   /** Checked-in → completed: labels printed, order handed to the LIS/worklist. */
   completeIntake: (requisitionId: string, actor: string) => void;
+  /** Clinician withdraws an unresulted order; kills the patient link. */
+  revokeRequisition: (
+    requisitionId: string,
+    actor: string,
+    reason?: string,
+  ) => void;
   getPatient: (id: string) => Patient | undefined;
   getPractitioner: (id: string) => Practitioner | undefined;
   getCenter: (id?: string) => DiagnosticCenter | undefined;
@@ -288,6 +294,36 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
         ]);
       },
       getPatient: (id) => PATIENTS.find((p) => p.id === id),
+      revokeRequisition: (requisitionId, actor, reason) => {
+        const req = requisitions.find((r) => r.id === requisitionId);
+        if (!req || req.status === "revoked") return;
+        setRequisitions((prev) =>
+          prev.map((r) =>
+            r.id === requisitionId ? { ...r, status: "revoked" } : r,
+          ),
+        );
+        setExtensionRequests((prev) =>
+          prev.map((e) =>
+            e.requisitionId === requisitionId && e.status === "pending"
+              ? {
+                  ...e,
+                  status: "declined",
+                  resolvedAt: new Date().toISOString(),
+                }
+              : e,
+          ),
+        );
+        append([
+          {
+            requisitionId,
+            action: "order.revoked",
+            actor,
+            detail: `ServiceRequest revoked · patient link disabled${
+              reason?.trim() ? ` · reason: ${reason.trim().slice(0, 140)}` : ""
+            }`,
+          },
+        ]);
+      },
       getPractitioner: (id) => PRACTITIONERS.find((p) => p.id === id),
       getCenter: (id) => (id ? CENTERS.find((c) => c.id === id) : undefined),
       findByToken: (token) =>

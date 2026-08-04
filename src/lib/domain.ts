@@ -427,7 +427,9 @@ export type AuditAction =
   | "result.published"
   | "result.auto-released"
   | "result.released"
-  | "result.viewed";
+  | "result.viewed"
+  | "order.revoked";
+
 
 export interface AuditEvent {
   id: string;
@@ -452,7 +454,15 @@ export const AUDIT_LABEL: Record<AuditAction, string> = {
   "result.auto-released": "RESULT AUTO-RELEASED",
   "result.released": "RESULT RELEASED BY CLINICIAN",
   "result.viewed": "PHI ACCESS · RESULT VIEWED",
+  "order.revoked": "ORDER REVOKED",
 };
+
+/** A clinician may withdraw an order only while it is still open and unresulted. */
+export function canRevoke(req: Requisition, hasReport: boolean): boolean {
+  if (hasReport) return false;
+  const status = effectiveStatus(req);
+  return status === "active" || status === "booked" || status === "checked-in";
+}
 
 /** Simulated content hash — deterministic, chained to the previous entry. */
 export function auditHash(payload: string, prevHash: string): string {
