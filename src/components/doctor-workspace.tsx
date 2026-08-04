@@ -462,13 +462,14 @@ const FILTERS: RequisitionStatus[] = [
 ];
 
 function IssuedLog() {
-  const { requisitions, getPatient, reportFor, revokeRequisition, extendRequisition } =
+  const { requisitions, getPatient, getCenter, reportFor, revokeRequisition, extendRequisition } =
     useRequisitions();
   const [filter, setFilter] = useState<RequisitionStatus | "all">("all");
   const [query, setQuery] = useState("");
   const [revoking, setRevoking] = useState<Requisition | null>(null);
   const [reason, setReason] = useState("");
   const [extending, setExtending] = useState<Requisition | null>(null);
+  const revokingCenter = revoking ? getCenter(revoking.centerId) : undefined;
 
   const decorated = useMemo(
     () =>
