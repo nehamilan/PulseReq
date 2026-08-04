@@ -71,6 +71,21 @@ function Index() {
       title="Paper requisitions, replaced by a link"
       description="A paper requisition is a data handoff pretending to be a document. PulseReq keeps the same three actors and removes the paper: the clinician issues a coded order, the patient gets an expiring link, the diagnostic centre receives structured data."
     >
+      <div className="mb-4">
+        <TooltipProvider>
+          <Tooltip open={true}>
+            <TooltipTrigger asChild>
+              <button className="rounded-md border border-input bg-background px-3 py-1.5 text-sm">
+                Test tooltip
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>This is a forced-open tooltip</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+
       <div className="grid gap-5 md:grid-cols-3">
         {ROLES.map((role) => (
           <Panel key={role.to} title={role.label}>
