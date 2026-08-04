@@ -11,6 +11,7 @@ import {
 } from "@/components/result-chips";
 import { StatusBadge } from "@/components/status-badge";
 import { PriorityBadge } from "@/components/priority-badge";
+import { SortHeader, type SortDir } from "@/components/sort-header";
 import {
   STATUS_LABEL,
   EXTENSION_DAY_OPTIONS,
