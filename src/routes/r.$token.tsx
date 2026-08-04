@@ -170,16 +170,27 @@ function PatientView() {
   if (expiredWithoutReport || status === "revoked") {
     return (
       <LinkProblem
-        title={status === "expired" ? "This link has expired" : "This link was withdrawn"}
+        title={
+          status === "expired"
+            ? "This link has expired"
+            : isClinicianView
+              ? "This requisition was withdrawn"
+              : "This link was withdrawn"
+        }
         token={token}
         body={
           status === "expired"
-            ? `This link was issued with a ${req.linkLifetimeDays}-day window (14 days is the current default). Contact your clinic to have a new one issued.`
-            : "Your clinician withdrew this requisition. Contact the clinic if you think this is a mistake."
+            ? isClinicianView
+              ? `The booking window closed on this requisition (issued with a ${req.linkLifetimeDays}-day window; 14 days is the current default). Extend or reissue it from the Doctor Portal.`
+              : `This link was issued with a ${req.linkLifetimeDays}-day window (14 days is the current default). Contact your clinic to have a new one issued.`
+            : isClinicianView
+              ? "This order was revoked, so the patient link is disabled."
+              : "Your clinician withdrew this requisition. Contact the clinic if you think this is a mistake."
         }
         patientId={req.patientId}
         from={from}
         fromTab={fromTab}
+        clinicianView={isClinicianView}
       >
         {status === "expired" && !isClinicianView ? (
           <ExtensionRequestControl req={req} />
