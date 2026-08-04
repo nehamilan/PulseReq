@@ -514,6 +514,7 @@ function LinkProblem({
   patientId,
   from,
   fromTab,
+  clinicianView = false,
   children,
 }: {
   title: string;
@@ -522,11 +523,14 @@ function LinkProblem({
   patientId?: string;
   from?: OriginRole;
   fromTab?: OriginTab;
+  clinicianView?: boolean;
   children?: ReactNode;
 }) {
   return (
     <PageShell
-      eyebrow="Role · Patient"
+      eyebrow={
+        clinicianView ? "Role · Clinician · read-only preview" : "Role · Patient"
+      }
       title={title}
       description={body}
     >
