@@ -117,35 +117,37 @@ export function ExtensionRequestControl({
           </div>
         </div>
       ) : (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            {disabled ? (
-              <span
-                tabIndex={0}
-                className="inline-flex cursor-not-allowed select-none whitespace-nowrap rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground opacity-60"
+        <TooltipProvider delayDuration={200}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              {disabled ? (
+                <span
+                  tabIndex={0}
+                  className="inline-flex cursor-not-allowed select-none whitespace-nowrap rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground opacity-60"
+                >
+                  Request Extension
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setOpen(true)}
+                  className="inline-flex whitespace-nowrap rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+                >
+                  Request Extension
+                </button>
+              )}
+            </TooltipTrigger>
+            {disabled && tooltip ? (
+              <TooltipContent
+                side={compact ? "top" : "bottom"}
+                sideOffset={4}
+                className="max-w-xs"
               >
-                Request Extension
-              </span>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setOpen(true)}
-                className="inline-flex whitespace-nowrap rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
-              >
-                Request Extension
-              </button>
-            )}
-          </TooltipTrigger>
-          {disabled && tooltip ? (
-            <TooltipContent
-              side={compact ? "top" : "bottom"}
-              sideOffset={4}
-              className="max-w-xs"
-            >
-              <p>{tooltip}</p>
-            </TooltipContent>
-          ) : null}
-        </Tooltip>
+                <p>{tooltip}</p>
+              </TooltipContent>
+            ) : null}
+          </Tooltip>
+        </TooltipProvider>
       )}
     </div>
   );
