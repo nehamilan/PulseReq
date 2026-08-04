@@ -38,7 +38,7 @@ function OrderPage() {
       description="Issue a diagnostic requisition as a secure, expiring link. The patient chooses where and when; the lab receives structured LOINC-coded orders."
       actions={
         <span className="rounded-md border border-border bg-surface px-3 py-1.5 text-xs text-muted-foreground">
-          Link lifetime: 7 days default
+          Link lifetime: 14 days default
         </span>
       }
     >

@@ -37,7 +37,7 @@ export function OrderForm() {
   const [patientId, setPatientId] = useState<string>(patients[0]?.id ?? "");
   const [selected, setSelected] = useState<string[]>([]);
   const [priority, setPriority] = useState<"routine" | "stat">("routine");
-  const [linkLifetimeDays, setLinkLifetimeDays] = useState<3 | 7 | 14 | 21>(7);
+  const [linkLifetimeDays, setLinkLifetimeDays] = useState<3 | 7 | 14 | 21>(14);
   const [notes, setNotes] = useState("");
   const [created, setCreated] = useState<Requisition | null>(null);
 
@@ -102,7 +102,7 @@ export function OrderForm() {
     setSelected([]);
     setNotes("");
     setPriority("routine");
-    setLinkLifetimeDays(7);
+    setLinkLifetimeDays(14);
   }
 
   return (

@@ -71,7 +71,7 @@ function BackLink({
   fromTab?: OriginTab;
 }) {
   const className =
-    "mb-5 inline-flex items-center gap-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent";
+    "inline-flex items-center gap-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent";
   if (from === "doctor") {
     return (
       <Link
@@ -243,7 +243,9 @@ function PatientView() {
         description="Results released to you by your clinic, with the reference ranges the lab used."
         actions={<StatusBadge status={status} />}
       >
-        <BackLink patientId={req.patientId} from={from} fromTab={fromTab} />
+        <div className="mb-5">
+          <BackLink patientId={req.patientId} from={from} fromTab={fromTab} />
+        </div>
         {tabStrip}
         <PatientResults req={req} />
       </PageShell>
@@ -265,7 +267,9 @@ function PatientView() {
         }
       actions={<StatusBadge status={status} />}
     >
-      <BackLink patientId={req.patientId} from={from} fromTab={fromTab} />
+      <div className="mb-5">
+        <BackLink patientId={req.patientId} from={from} fromTab={fromTab} />
+      </div>
       {tabStrip}
       {clinicianNotice}
       <BookingConfirmation
@@ -309,7 +313,9 @@ function PatientView() {
       description="No paper form to carry. Show this link — or the check-in code from it — at the diagnostic centre."
       actions={<StatusBadge status={status} />}
     >
-      <BackLink patientId={req.patientId} from={from} fromTab={fromTab} />
+      <div className="mb-5">
+        <BackLink patientId={req.patientId} from={from} fromTab={fromTab} />
+      </div>
       {tabStrip}
       {clinicianNotice}
       {expiredNotice}
