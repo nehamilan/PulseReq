@@ -95,7 +95,7 @@ export function PatientResults({
           </div>
         ) : null}
         {clinicianView && visible ? (
-          <p className="mb-4 rounded-md border border-success/35 bg-success/10 p-3 text-sm font-medium text-success-foreground">
+          <p className="mb-4 rounded-md border border-success/35 bg-success/10 p-3 text-sm font-medium text-foreground">
             Released to the patient on {releasedLabel}.
           </p>
         ) : null}
