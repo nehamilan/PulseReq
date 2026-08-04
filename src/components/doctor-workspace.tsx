@@ -11,6 +11,7 @@ import {
 } from "@/components/result-chips";
 import { StatusBadge } from "@/components/status-badge";
 import { PriorityBadge } from "@/components/priority-badge";
+import { SortHeader, type SortDir } from "@/components/sort-header";
 import {
   STATUS_LABEL,
   EXTENSION_DAY_OPTIONS,
@@ -119,51 +120,6 @@ export function DoctorWorkspace() {
 }
 
 /* ------------------------------- Tab 1 -------------------------------- */
-
-function SortHeader({
-  label,
-  sortKey,
-  sort,
-  onSort,
-}: {
-  label: string;
-  sortKey: SortKey;
-  sort: { key: SortKey; dir: SortDir } | null;
-  onSort: (next: { key: SortKey; dir: SortDir } | null) => void;
-}) {
-  const active = sort?.key === sortKey;
-  const ariaSort = active ? (sort.dir === "asc" ? "ascending" : "descending") : "none";
-
-  function onClick() {
-    if (!active) {
-      onSort({ key: sortKey, dir: "asc" });
-    } else if (sort!.dir === "asc") {
-      onSort({ key: sortKey, dir: "desc" });
-    } else {
-      onSort(null);
-    }
-  }
-
-  return (
-    <th className="py-2 pr-3 text-left" aria-sort={ariaSort}>
-      <button
-        type="button"
-        onClick={onClick}
-        className="group inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        {label}
-        <span
-          className={`inline-flex h-4 w-4 items-center justify-center rounded transition-colors ${
-            active ? "text-primary" : "text-muted-foreground"
-          }`}
-          aria-hidden="true"
-        >
-          {active ? (sort.dir === "asc" ? "↑" : "↓") : "↕"}
-        </span>
-      </button>
-    </th>
-  );
-}
 
 function SubHeading({ children }: { children: React.ReactNode }) {
   return (
@@ -507,7 +463,6 @@ const FILTERS: RequisitionStatus[] = [
 ];
 
 type SortKey = "patient" | "status" | "issued";
-type SortDir = "asc" | "desc";
 
 function IssuedLog() {
   const { requisitions, getPatient, getCenter, reportFor, revokeRequisition, extendRequisition } =

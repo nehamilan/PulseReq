@@ -1,19 +1,25 @@
+import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { PageShell, Panel } from "@/components/page-shell";
-import { ExtensionRequestControl } from "@/components/extension-request-dialog";
+import {
+  ExtensionPill,
+  ExtensionRequestControl,
+} from "@/components/extension-request-dialog";
 import { PriorityBadge } from "@/components/priority-badge";
+import { SortHeader, type SortState } from "@/components/sort-header";
 import { StatusBadge } from "@/components/status-badge";
 import {
+  STATUS_LABEL,
   effectiveStatus,
   expiryLabel,
   formatClinicalDate,
-  formatClinicalDateTime,
-  handoffDetail,
   patientName,
 } from "@/lib/domain";
 import { useRequisitions } from "@/lib/requisition-store";
 import { isVisibleToPatient } from "@/lib/results";
+
+type SortKey = "status" | "issued" | "expiry";
 
 export const Route = createFileRoute("/p/$patientId")({
   head: () => ({
@@ -38,9 +44,40 @@ export const Route = createFileRoute("/p/$patientId")({
 
 function PatientPortal() {
   const { patientId } = Route.useParams();
-  const { getPatient, findByPatientId, reportFor, now } = useRequisitions();
+  const { getPatient, findByPatientId, reportFor, now, latestExtensionFor } =
+    useRequisitions();
   const patient = getPatient(patientId);
   const requisitions = findByPatientId(patientId);
+  const [sort, setSort] = useState<SortState<SortKey>>(null);
+
+  const rows = useMemo(() => {
+    const list = [...requisitions];
+    if (!sort) return list;
+    const dir = sort.dir === "asc" ? 1 : -1;
+    return list.sort((a, b) => {
+      switch (sort.key) {
+        case "status":
+          return (
+            dir *
+            STATUS_LABEL[effectiveStatus(a)].localeCompare(
+              STATUS_LABEL[effectiveStatus(b)],
+            )
+          );
+        case "issued":
+          return (
+            dir *
+            (new Date(a.issuedAt).getTime() - new Date(b.issuedAt).getTime())
+          );
+        case "expiry":
+          return (
+            dir *
+            (new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime())
+          );
+        default:
+          return 0;
+      }
+    });
+  }, [requisitions, sort]);
 
   if (!patient) {
     return (
@@ -68,84 +105,113 @@ function PatientPortal() {
             No requisitions have been issued for this patient yet.
           </p>
         ) : (
-          <ul className="divide-y divide-border">
-            {requisitions.map((req) => {
-              const status = effectiveStatus(req);
-              const testNames = req.tests.map((t) => t.coding.display).join(" · ");
-              const report = reportFor(req.id);
-              const resultsVisible = report
-                ? isVisibleToPatient(report, now())
-                : false;
-              // Expiry only blocks booking — a published report stays reachable.
-              const showResults = Boolean(report) && status !== "revoked";
-              return (
-                <li key={req.id} className="py-4 first:pt-0 last:pb-0">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-foreground">{testNames}</p>
-                      <p className="mt-1 font-mono text-xs text-muted-foreground tabular">
-                        LOINC {req.tests.map((t) => t.coding.code).join(" · ")}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <StatusBadge status={status} />
-                      <PriorityBadge priority={req.priority} />
-                    </div>
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                    <span className="tabular">Issued {formatClinicalDate(req.issuedAt)}</span>
-                    <span className="tabular">{expiryLabel(req)}</span>
-                    {req.status === "booked" && req.appointmentAt ? (
-                      <span className="tabular text-success">
-                        Appointment {formatClinicalDateTime(req.appointmentAt)}
-                      </span>
-                    ) : null}
-                    {req.status === "completed" ? (
-                      <span className="text-success">{handoffDetail(req.tests)}</span>
-                    ) : null}
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <Link
-                      to="/r/$token"
-                      params={{ token: req.token }}
-                      className="inline-flex rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                    >
-                      Open requisition
-                    </Link>
-                    {showResults && resultsVisible ? (
-                      <Link
-                        to="/r/$token"
-                        params={{ token: req.token }}
-                        search={{ tab: "results" }}
-                        className="inline-flex rounded-md border border-success/40 bg-success/10 px-3 py-1.5 text-sm font-medium text-success transition-colors hover:bg-success/20"
-                      >
-                        View results
-                      </Link>
-                    ) : null}
-                    {showResults && !resultsVisible && report ? (
-                      <span className="inline-flex flex-col">
-                        <button
-                          type="button"
-                          disabled
-                          className="inline-flex cursor-not-allowed rounded-md border border-warning/40 bg-warning/10 px-3 py-1.5 text-sm font-medium text-warning-foreground opacity-80"
-                        >
-                          View results
-                        </button>
-                        <span className="mt-1 text-[11px] text-muted-foreground">
-                          {report.policy === "EMBARGO_DELAY" && report.embargoLiftsAt
-                            ? `Available ${formatClinicalDate(report.embargoLiftsAt)}`
-                            : "Pending clinician release"}
-                        </span>
-                      </span>
-                    ) : null}
-                  </div>
-                  <ExtensionRequestControl req={req} />
-                </li>
-              );
-            })}
-          </ul>
+          <div className="-mx-1 overflow-x-auto px-1">
+            <table className="w-full border-collapse text-left">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="py-2 pr-3 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                    Test
+                  </th>
+                  <SortHeader label="Status" sortKey="status" sort={sort} onSort={setSort} />
+                  <SortHeader label="Issued" sortKey="issued" sort={sort} onSort={setSort} />
+                  <SortHeader
+                    label="Expired status"
+                    sortKey="expiry"
+                    sort={sort}
+                    onSort={setSort}
+                  />
+                  <th className="py-2 text-right text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {rows.map((req) => {
+                  const status = effectiveStatus(req);
+                  const testNames = req.tests
+                    .map((t) => t.coding.display)
+                    .join(" · ");
+                  const report = reportFor(req.id);
+                  const resultsVisible = report
+                    ? isVisibleToPatient(report, now())
+                    : false;
+                  // Expiry only blocks booking — a published report stays reachable.
+                  const showResults = Boolean(report) && status !== "revoked";
+                  const extension = latestExtensionFor(req.id);
+                  return (
+                    <tr key={req.id} className="align-top">
+                      <td className="py-3 pr-3">
+                        <p className="text-sm font-medium text-foreground">
+                          {testNames}
+                        </p>
+                        <p className="mt-1 font-mono text-xs text-muted-foreground tabular">
+                          LOINC {req.tests.map((t) => t.coding.code).join(" · ")}
+                        </p>
+                      </td>
+                      <td className="py-3 pr-3">
+                        <div className="flex flex-col items-start gap-1">
+                          <StatusBadge status={status} />
+                          <PriorityBadge priority={req.priority} />
+                        </div>
+                      </td>
+                      <td className="py-3 pr-3 text-xs text-muted-foreground tabular">
+                        {formatClinicalDate(req.issuedAt)}
+                      </td>
+                      <td className="py-3 pr-3">
+                        <p className="text-xs text-muted-foreground tabular">
+                          {expiryLabel(req)}
+                        </p>
+                        {extension ? (
+                          <div className="mt-1">
+                            <ExtensionPill request={extension} req={req} compact />
+                          </div>
+                        ) : null}
+                      </td>
+                      <td className="py-3">
+                        <div className="flex flex-wrap items-center justify-end gap-2">
+                          <Link
+                            to="/r/$token"
+                            params={{ token: req.token }}
+                            className="inline-flex rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                          >
+                            Open
+                          </Link>
+                          {showResults && resultsVisible ? (
+                            <Link
+                              to="/r/$token"
+                              params={{ token: req.token }}
+                              search={{ tab: "results" }}
+                              className="inline-flex rounded-md border border-success/40 bg-success/10 px-3 py-1.5 text-xs font-medium text-success transition-colors hover:bg-success/20"
+                            >
+                              View results
+                            </Link>
+                          ) : null}
+                          {showResults && !resultsVisible && report ? (
+                            <span className="inline-flex flex-col items-end">
+                              <button
+                                type="button"
+                                disabled
+                                className="inline-flex cursor-not-allowed rounded-md border border-warning/40 bg-warning/10 px-3 py-1.5 text-xs font-medium text-warning-foreground opacity-80"
+                              >
+                                View results
+                              </button>
+                              <span className="mt-1 text-[11px] text-muted-foreground">
+                                {report.policy === "EMBARGO_DELAY" &&
+                                report.embargoLiftsAt
+                                  ? `Available ${formatClinicalDate(report.embargoLiftsAt)}`
+                                  : "Pending clinician release"}
+                              </span>
+                            </span>
+                          ) : null}
+                          <ExtensionRequestControl req={req} compact hidePill />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </Panel>
     </PageShell>
