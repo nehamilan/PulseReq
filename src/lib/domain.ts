@@ -210,15 +210,25 @@ export function formatAddress(a: PatientAddress): string {
 /** Age in whole years at `now`. */
 export function ageInYears(birthDate: string, now: Date = new Date()): number {
   const b = new Date(birthDate);
-  let age = now.getFullYear() - b.getFullYear();
-  const m = now.getMonth() - b.getMonth();
-  if (m < 0 || (m === 0 && now.getDate() < b.getDate())) age--;
+  let age = now.getUTCFullYear() - b.getUTCFullYear();
+  const m = now.getUTCMonth() - b.getUTCMonth();
+  if (m < 0 || (m === 0 && now.getUTCDate() < b.getUTCDate())) age--;
   return age;
 }
 
 /** "Mar 14, 1987 (39y)" — identity check line used across role views. */
 export function formatDob(birthDate: string): string {
-  return `${formatClinicalDate(birthDate)} (${ageInYears(birthDate)}y)`;
+  return `${formatDateOnly(birthDate)} (${ageInYears(birthDate)}y)`;
+}
+
+/** Date-only ISO ("1987-03-14") rendered in UTC so SSR and client agree. */
+export function formatDateOnly(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-CA", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }
 
 /** Short clinical date, e.g. "Jul 30, 2026". */

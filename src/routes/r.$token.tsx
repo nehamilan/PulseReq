@@ -151,6 +151,7 @@ function PatientView() {
   const req = findByToken(token);
   const [selectedCenterId, setSelectedCenterId] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const isClinicianView = from === "doctor";
 
   if (!req) {
     return <LinkProblem title="This link isn't valid" token={token} body="We couldn't find a requisition for this link. Check the message from your clinic, or ask them to reissue it." from={from} fromTab={fromTab} />;
@@ -214,14 +215,28 @@ function PatientView() {
           Contact your clinic to have a new requisition issued. Any results
           already released to you stay available in the Results tab.
         </p>
-        <ExtensionRequestControl req={req} />
+        {isClinicianView ? null : <ExtensionRequestControl req={req} />}
       </div>
     ) : null;
+  const clinicianNotice = isClinicianView ? (
+    <div className="mb-5 rounded-md border border-border bg-muted/40 p-3">
+      <p className="text-sm font-medium text-foreground">
+        Clinician preview — read-only
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        This is what the patient sees. Booking actions are disabled in clinician
+        view.
+      </p>
+    </div>
+  ) : null;
+  const eyebrow = isClinicianView
+    ? "Role · Clinician · read-only preview"
+    : "Role · Patient";
 
   if (activeTab === "results" && report) {
     return (
       <PageShell
-        eyebrow="Role · Patient"
+        eyebrow={eyebrow}
         title="Your diagnostic results"
         description="Results released to you by your clinic, with the reference ranges the lab used."
         actions={<StatusBadge status={status} />}
@@ -237,7 +252,7 @@ function PatientView() {
     const isHistorical = Boolean(report);
     return (
       <PageShell
-        eyebrow="Role · Patient"
+        eyebrow={eyebrow}
         title={
           isHistorical ? "Your appointment is complete" : "Your appointment is booked"
         }
@@ -250,10 +265,12 @@ function PatientView() {
     >
       <BackLink patientId={req.patientId} from={from} fromTab={fromTab} />
       {tabStrip}
+      {clinicianNotice}
       <BookingConfirmation
           req={req}
           center={center}
           completed={isHistorical}
+          readOnly={isClinicianView}
           onViewResults={isHistorical ? () => setTab("results") : undefined}
           onChange={() => {
             setSelectedCenterId(null);
@@ -285,13 +302,14 @@ function PatientView() {
 
   return (
     <PageShell
-      eyebrow="Role · Patient"
+      eyebrow={eyebrow}
       title="Your diagnostic requisition"
       description="No paper form to carry. Show this link — or the check-in code from it — at the diagnostic centre."
       actions={<StatusBadge status={status} />}
     >
       <BackLink patientId={req.patientId} from={from} fromTab={fromTab} />
       {tabStrip}
+      {clinicianNotice}
       {expiredNotice}
       <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
         <Panel title="Requisition details">
@@ -341,11 +359,13 @@ function PatientView() {
               </li>
             ))}
           </ul>
-          {status === "expired" ? null : <ExtensionRequestControl req={req} />}
+          {status === "expired" || isClinicianView ? null : (
+            <ExtensionRequestControl req={req} />
+          )}
         </Panel>
       </div>
 
-      {status === "expired" ? null : (
+      {status === "expired" || isClinicianView ? null : (
       <div className="mt-5">
         <Panel
           title="Choose a diagnostic centre"
