@@ -14,7 +14,7 @@ export function PatientResults({
   req: Requisition;
   clinicianView?: boolean;
 }) {
-  const { reportFor, now, logAudit } = useRequisitions();
+  const { reportFor, now, logAudit, releaseResults } = useRequisitions();
   const report = reportFor(req.id);
   const clock = now();
   const [raw, setRaw] = useState(false);
@@ -24,7 +24,7 @@ export function PatientResults({
   const visible = report ? isVisibleToPatient(report, clock) : false;
 
   useEffect(() => {
-    if (!report || !visible || logged.current) return;
+    if (clinicianView || !report || !visible || logged.current) return;
     logged.current = true;
     logAudit(
       req.id,
@@ -32,11 +32,11 @@ export function PatientResults({
       "patient",
       "Patient opened released DiagnosticReport in portal",
     );
-  }, [report, visible, req.id, logAudit]);
+  }, [clinicianView, report, visible, req.id, logAudit]);
 
   if (!report) return null;
 
-  if (!visible) {
+  if (!visible && !clinicianView) {
     return (
       <div className="mt-5">
         <Panel
@@ -59,13 +59,47 @@ export function PatientResults({
   }
 
   const json = JSON.stringify(toFhirResultBundle(report, req, clock), null, 2);
+  const releasedLabel = formatClinicalDate(
+    report.releasedAt ?? report.embargoLiftsAt ?? report.publishedAt,
+  );
 
   return (
     <div className="mt-5">
       <Panel
         title={clinicianView ? "Patient's diagnostic results" : "My diagnostic results"}
-        hint={`Released ${formatClinicalDate(report.releasedAt ?? report.embargoLiftsAt ?? report.publishedAt)}`}
+        hint={
+          clinicianView && !visible
+            ? "not yet visible to patient"
+            : `Released ${releasedLabel}`
+        }
       >
+        {clinicianView && !visible ? (
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-warning/35 bg-warning/10 p-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-warning-foreground">
+                {report.policy === "EMBARGO_DELAY" && report.embargoLiftsAt
+                  ? `Auto-releases to the patient on ${formatClinicalDate(report.embargoLiftsAt)}.`
+                  : "Not yet visible to the patient — held for your review."}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {report.rationale}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => releaseResults(req.id, "prac-1")}
+              className="shrink-0 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition hover:opacity-90"
+            >
+              Release to patient
+            </button>
+          </div>
+        ) : null}
+        {clinicianView && visible ? (
+          <p className="mb-4 rounded-md border border-success/35 bg-success/10 p-3 text-sm font-medium text-foreground">
+            Released to the patient on {releasedLabel}.
+          </p>
+        ) : null}
+
         <div
           role="tablist"
           aria-label="Result view"
