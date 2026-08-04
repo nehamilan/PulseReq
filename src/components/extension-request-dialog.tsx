@@ -52,9 +52,7 @@ export function ExtensionRequestControl({
   let tooltip = "";
   if (pending) {
     tooltip = "An extension request is already pending review.";
-  } else if (req.status !== "active") {
-    tooltip = "Extensions are not available for this order.";
-  } else if (hoursRemaining(req, now()) > 48) {
+  } else if (!eligible) {
     tooltip = "Available once your requisition is within 48 hours of expiry.";
   }
 
