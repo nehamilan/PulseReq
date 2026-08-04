@@ -511,8 +511,8 @@ function IssuedLog() {
       const dir = sort.dir === "asc" ? 1 : -1;
       switch (sort.key) {
         case "patient": {
-          const pa = patientName(a.patient) || "";
-          const pb = patientName(b.patient) || "";
+          const pa = a.patient ? patientName(a.patient) : "";
+          const pb = b.patient ? patientName(b.patient) : "";
           return pa.localeCompare(pb) * dir;
         }
         case "status": {
