@@ -23,10 +23,10 @@ const URGENCY = [
 ];
 
 const LINK_LIFETIME_DAYS = [
-  { key: 3 as const, label: "3 days" },
   { key: 7 as const, label: "7 days" },
   { key: 14 as const, label: "14 days" },
   { key: 21 as const, label: "21 days" },
+  { key: 28 as const, label: "28 days" },
 ];
 
 export function OrderForm() {
@@ -37,7 +37,7 @@ export function OrderForm() {
   const [patientId, setPatientId] = useState<string>(patients[0]?.id ?? "");
   const [selected, setSelected] = useState<string[]>([]);
   const [priority, setPriority] = useState<"routine" | "stat">("routine");
-  const [linkLifetimeDays, setLinkLifetimeDays] = useState<3 | 7 | 14 | 21>(14);
+  const [linkLifetimeDays, setLinkLifetimeDays] = useState<7 | 14 | 21 | 28>(14);
   const [notes, setNotes] = useState("");
   const [created, setCreated] = useState<Requisition | null>(null);
 

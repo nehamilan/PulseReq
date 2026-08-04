@@ -114,7 +114,7 @@ export interface Requisition {
   clinicalNotes?: string;
   priority: "routine" | "urgent" | "stat";
   /** Configurable patient-link lifetime, in days. */
-  linkLifetimeDays: 3 | 7 | 14 | 21;
+  linkLifetimeDays: 7 | 14 | 21 | 28;
   issuedAt: string;
   expiresAt: string;
   /** How many times a clinician has granted an expiry extension. */
