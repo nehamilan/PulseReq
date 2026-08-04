@@ -400,6 +400,19 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
               : e,
           ),
         ),
+      extendRequisition: (requisitionId, days) =>
+        setRequisitions((prev) =>
+          prev.map((r) =>
+            r.id === requisitionId
+              ? {
+                  ...r,
+                  status: r.status === "expired" ? "active" : r.status,
+                  expiresAt: extendExpiry(r, days),
+                  extensionCount: (r.extensionCount ?? 0) + 1,
+                }
+              : r,
+          ),
+        ),
     }),
     [requisitions, extensionRequests, auditEvents, reports, clockOffsetDays],
   );
