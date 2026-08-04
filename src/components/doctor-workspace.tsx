@@ -461,9 +461,12 @@ const FILTERS: RequisitionStatus[] = [
 ];
 
 function IssuedLog() {
-  const { requisitions, getPatient } = useRequisitions();
+  const { requisitions, getPatient, reportFor, revokeRequisition } =
+    useRequisitions();
   const [filter, setFilter] = useState<RequisitionStatus | "all">("all");
   const [query, setQuery] = useState("");
+  const [revoking, setRevoking] = useState<Requisition | null>(null);
+  const [reason, setReason] = useState("");
 
   const decorated = useMemo(
     () =>
@@ -567,14 +570,35 @@ function IssuedLog() {
                     {formatClinicalDate(req.issuedAt)}
                   </td>
                   <td className="py-2 align-top">
-                    <Link
-                      to="/r/$token"
-                      params={{ token: req.token }}
-                      search={{ from: "doctor", fromTab: "log" }}
-                      className="text-xs font-medium text-primary hover:underline"
-                    >
-                      Open →
-                    </Link>
+                    <div className="flex items-center gap-3">
+                      <Link
+                        to="/r/$token"
+                        params={{ token: req.token }}
+                        search={{ from: "doctor", fromTab: "log" }}
+                        className="text-xs font-medium text-primary hover:underline"
+                      >
+                        Open →
+                      </Link>
+                      {canRevoke(req, Boolean(reportFor(req.id))) ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setReason("");
+                            setRevoking(req);
+                          }}
+                          className="text-xs font-medium text-destructive hover:underline"
+                        >
+                          Revoke
+                        </button>
+                      ) : reportFor(req.id) ? (
+                        <span
+                          title="A published report requires an amendment, not a revocation."
+                          className="text-xs text-muted-foreground"
+                        >
+                          Resulted
+                        </span>
+                      ) : null}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -582,7 +606,91 @@ function IssuedLog() {
           </table>
         </div>
       )}
+
+      {revoking ? (
+        <RevokeDialog
+          req={revoking}
+          patientLabel={
+            getPatient(revoking.patientId)
+              ? patientName(getPatient(revoking.patientId)!)
+              : "Unknown patient"
+          }
+          reason={reason}
+          onReason={setReason}
+          onCancel={() => setRevoking(null)}
+          onConfirm={() => {
+            revokeRequisition(revoking.id, "prac-1", reason);
+            toast.success("Requisition revoked", {
+              description: "The patient link is now disabled.",
+            });
+            setRevoking(null);
+          }}
+        />
+      ) : null}
     </Panel>
+  );
+}
+
+function RevokeDialog({
+  req,
+  patientLabel,
+  reason,
+  onReason,
+  onCancel,
+  onConfirm,
+}: {
+  req: Requisition;
+  patientLabel: string;
+  reason: string;
+  onReason: (v: string) => void;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Revoke requisition"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4"
+    >
+      <div className="w-full max-w-md rounded-lg border border-border bg-background p-5 shadow-lg">
+        <h2 className="text-sm font-semibold text-foreground">
+          Revoke this requisition?
+        </h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {patientLabel} · {req.tests.map((t) => t.coding.display).join(" · ")}
+        </p>
+        <p className="mt-3 text-xs text-muted-foreground">
+          The patient link stops working immediately and the order is withdrawn
+          from the lab queue. Any pending extension request is declined.
+        </p>
+        <label className="mt-4 block text-xs font-medium text-foreground">
+          Reason (optional)
+          <input
+            value={reason}
+            onChange={(e) => onReason(e.target.value)}
+            placeholder="Ordered in error, duplicate order…"
+            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:border-primary"
+          />
+        </label>
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="rounded-md bg-destructive px-3 py-1.5 text-xs font-medium text-destructive-foreground transition-colors hover:bg-destructive/90"
+          >
+            Revoke requisition
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
