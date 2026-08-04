@@ -120,6 +120,51 @@ export function DoctorWorkspace() {
 
 /* ------------------------------- Tab 1 -------------------------------- */
 
+function SortHeader({
+  label,
+  sortKey,
+  sort,
+  onSort,
+}: {
+  label: string;
+  sortKey: SortKey;
+  sort: { key: SortKey; dir: SortDir } | null;
+  onSort: (next: { key: SortKey; dir: SortDir } | null) => void;
+}) {
+  const active = sort?.key === sortKey;
+  const ariaSort = active ? (sort.dir === "asc" ? "ascending" : "descending") : "none";
+
+  function onClick() {
+    if (!active) {
+      onSort({ key: sortKey, dir: "asc" });
+    } else if (sort!.dir === "asc") {
+      onSort({ key: sortKey, dir: "desc" });
+    } else {
+      onSort(null);
+    }
+  }
+
+  return (
+    <th className="py-2 pr-3 text-left" aria-sort={ariaSort}>
+      <button
+        type="button"
+        onClick={onClick}
+        className="group inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        {label}
+        <span
+          className={`inline-flex h-4 w-4 items-center justify-center rounded transition-colors ${
+            active ? "text-primary" : "text-muted-foreground/0 group-hover:text-muted-foreground"
+          }`}
+          aria-hidden="true"
+        >
+          {active ? (sort.dir === "asc" ? "↑" : "↓") : "↕"}
+        </span>
+      </button>
+    </th>
+  );
+}
+
 function SubHeading({ children }: { children: React.ReactNode }) {
   return (
     <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
@@ -461,11 +506,15 @@ const FILTERS: RequisitionStatus[] = [
   "revoked",
 ];
 
+type SortKey = "patient" | "status" | "issued";
+type SortDir = "asc" | "desc";
+
 function IssuedLog() {
   const { requisitions, getPatient, getCenter, reportFor, revokeRequisition, extendRequisition } =
     useRequisitions();
   const [filter, setFilter] = useState<RequisitionStatus | "all">("all");
   const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<{ key: SortKey; dir: SortDir } | null>(null);
   const [revoking, setRevoking] = useState<Requisition | null>(null);
   const [reason, setReason] = useState("");
   const [extending, setExtending] = useState<Requisition | null>(null);
@@ -488,19 +537,40 @@ function IssuedLog() {
   }, [decorated]);
 
   const q = query.trim().toLowerCase();
-  const rows = decorated.filter((row) => {
-    if (filter !== "all" && row.status !== filter) return false;
-    if (!q) return true;
-    const haystack = [
-      row.patient ? patientName(row.patient) : "",
-      row.patient?.phn ?? "",
-      row.req.token,
-      ...row.req.tests.map((t) => t.coding.display),
-    ]
-      .join(" ")
-      .toLowerCase();
-    return haystack.includes(q);
-  });
+  const rows = decorated
+    .filter((row) => {
+      if (filter !== "all" && row.status !== filter) return false;
+      if (!q) return true;
+      const haystack = [
+        row.patient ? patientName(row.patient) : "",
+        row.patient?.phn ?? "",
+        row.req.token,
+        ...row.req.tests.map((t) => t.coding.display),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(q);
+    })
+    .sort((a, b) => {
+      if (!sort) return 0;
+      const dir = sort.dir === "asc" ? 1 : -1;
+      switch (sort.key) {
+        case "patient": {
+          const pa = a.patient ? patientName(a.patient) : "";
+          const pb = b.patient ? patientName(b.patient) : "";
+          return pa.localeCompare(pb) * dir;
+        }
+        case "status": {
+          return STATUS_LABEL[a.status].localeCompare(STATUS_LABEL[b.status]) * dir;
+        }
+        case "issued": {
+          return (
+            (new Date(a.req.issuedAt).getTime() - new Date(b.req.issuedAt).getTime()) * dir
+          );
+        }
+      }
+      return 0;
+    });
 
   return (
     <Panel title="Issued requisitions" hint={`${requisitions.length} total`}>
@@ -539,14 +609,30 @@ function IssuedLog() {
           <table className="w-full border-collapse text-left">
             <thead>
               <tr className="border-b border-border">
-                {["Patient", "Test", "Status", "Issued", ""].map((h) => (
-                  <th
-                    key={h}
-                    className="py-2 pr-3 text-[11px] font-medium uppercase tracking-wide text-muted-foreground"
-                  >
-                    {h}
-                  </th>
-                ))}
+                <SortHeader
+                  label="Patient"
+                  sortKey="patient"
+                  sort={sort}
+                  onSort={setSort}
+                />
+                <th className="py-2 pr-3 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Test
+                </th>
+                <SortHeader
+                  label="Status"
+                  sortKey="status"
+                  sort={sort}
+                  onSort={setSort}
+                />
+                <SortHeader
+                  label="Issued"
+                  sortKey="issued"
+                  sort={sort}
+                  onSort={setSort}
+                />
+                <th className="py-2 pr-3 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  {/* Actions */}
+                </th>
               </tr>
             </thead>
             <tbody>
