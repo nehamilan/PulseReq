@@ -120,14 +120,25 @@ export function ExtensionRequestControl({
         <TooltipProvider delayDuration={200}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
-                type="button"
-                onClick={() => setOpen(true)}
-                disabled={disabled}
-                className="inline-flex whitespace-nowrap rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Request Extension
-              </button>
+              {disabled ? (
+                <span className="inline-flex cursor-not-allowed">
+                  <button
+                    type="button"
+                    disabled
+                    className="inline-flex whitespace-nowrap rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground opacity-60"
+                  >
+                    Request Extension
+                  </button>
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setOpen(true)}
+                  className="inline-flex whitespace-nowrap rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+                >
+                  Request Extension
+                </button>
+              )}
             </TooltipTrigger>
             {disabled && tooltip ? (
               <TooltipContent
