@@ -7,7 +7,13 @@ import { isVisibleToPatient } from "@/lib/results";
 import { toFhirResultBundle } from "@/lib/fhir";
 import { useRequisitions } from "@/lib/requisition-store";
 
-export function PatientResults({ req }: { req: Requisition }) {
+export function PatientResults({
+  req,
+  clinicianView = false,
+}: {
+  req: Requisition;
+  clinicianView?: boolean;
+}) {
   const { reportFor, now, logAudit } = useRequisitions();
   const report = reportFor(req.id);
   const clock = now();
@@ -33,11 +39,14 @@ export function PatientResults({ req }: { req: Requisition }) {
   if (!visible) {
     return (
       <div className="mt-5">
-        <Panel title="My diagnostic results" hint="pending release">
+        <Panel
+          title={clinicianView ? "Patient's diagnostic results" : "My diagnostic results"}
+          hint="pending release"
+        >
           <div className="rounded-md border border-warning/35 bg-warning/10 p-3">
             <p className="text-sm font-medium text-warning-foreground">
               {report.policy === "EMBARGO_DELAY" && report.embargoLiftsAt
-                ? `Available ${formatClinicalDate(report.embargoLiftsAt)} unless your clinician releases it sooner`
+                ? `Available ${formatClinicalDate(report.embargoLiftsAt)} ${clinicianView ? "unless released sooner" : "unless your clinician releases it sooner"}`
                 : "Results received by clinic — pending physician review"}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -54,7 +63,7 @@ export function PatientResults({ req }: { req: Requisition }) {
   return (
     <div className="mt-5">
       <Panel
-        title="My diagnostic results"
+        title={clinicianView ? "Patient's diagnostic results" : "My diagnostic results"}
         hint={`Released ${formatClinicalDate(report.releasedAt ?? report.embargoLiftsAt ?? report.publishedAt)}`}
       >
         <div
@@ -131,10 +140,12 @@ export function PatientResults({ req }: { req: Requisition }) {
               </p>
             ) : null}
 
-            <p className="mt-3 text-xs text-muted-foreground">
-              These values are not a diagnosis. Discuss them with your clinician
-              before acting on anything you see here.
-            </p>
+            {clinicianView ? null : (
+              <p className="mt-3 text-xs text-muted-foreground">
+                These values are not a diagnosis. Discuss them with your
+                clinician before acting on anything you see here.
+              </p>
+            )}
           </>
         )}
       </Panel>

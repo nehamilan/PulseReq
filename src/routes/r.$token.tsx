@@ -154,7 +154,20 @@ function PatientView() {
   const isClinicianView = from === "doctor";
 
   if (!req) {
-    return <LinkProblem title="This link isn't valid" token={token} body="We couldn't find a requisition for this link. Check the message from your clinic, or ask them to reissue it." from={from} fromTab={fromTab} />;
+    return (
+      <LinkProblem
+        title="This link isn't valid"
+        token={token}
+        body={
+          isClinicianView
+            ? "No requisition matches this link. It may have been reissued under a new token."
+            : "We couldn't find a requisition for this link. Check the message from your clinic, or ask them to reissue it."
+        }
+        from={from}
+        fromTab={fromTab}
+        clinicianView={isClinicianView}
+      />
+    );
   }
 
   const status = effectiveStatus(req);
@@ -170,16 +183,27 @@ function PatientView() {
   if (expiredWithoutReport || status === "revoked") {
     return (
       <LinkProblem
-        title={status === "expired" ? "This link has expired" : "This link was withdrawn"}
+        title={
+          status === "expired"
+            ? "This link has expired"
+            : isClinicianView
+              ? "This requisition was withdrawn"
+              : "This link was withdrawn"
+        }
         token={token}
         body={
           status === "expired"
-            ? `This link was issued with a ${req.linkLifetimeDays}-day window (14 days is the current default). Contact your clinic to have a new one issued.`
-            : "Your clinician withdrew this requisition. Contact the clinic if you think this is a mistake."
+            ? isClinicianView
+              ? `The booking window closed on this requisition (issued with a ${req.linkLifetimeDays}-day window; 14 days is the current default). Extend or reissue it from the Doctor Portal.`
+              : `This link was issued with a ${req.linkLifetimeDays}-day window (14 days is the current default). Contact your clinic to have a new one issued.`
+            : isClinicianView
+              ? "This order was revoked, so the patient link is disabled."
+              : "Your clinician withdrew this requisition. Contact the clinic if you think this is a mistake."
         }
         patientId={req.patientId}
         from={from}
         fromTab={fromTab}
+        clinicianView={isClinicianView}
       >
         {status === "expired" && !isClinicianView ? (
           <ExtensionRequestControl req={req} />
@@ -214,8 +238,9 @@ function PatientView() {
           This booking link has expired
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Contact your clinic to have a new requisition issued. Any results
-          already released to you stay available in the Results tab.
+          {isClinicianView
+            ? "The patient can no longer book. Extend or reissue this requisition from the Doctor Portal. Any released results stay available in the Results tab."
+            : "Contact your clinic to have a new requisition issued. Any results already released to you stay available in the Results tab."}
         </p>
         {isClinicianView ? null : <ExtensionRequestControl req={req} />}
       </div>
@@ -239,15 +264,19 @@ function PatientView() {
     return (
       <PageShell
         eyebrow={eyebrow}
-        title="Your diagnostic results"
-        description="Results released to you by your clinic, with the reference ranges the lab used."
+        title={isClinicianView ? "Diagnostic results" : "Your diagnostic results"}
+        description={
+          isClinicianView
+            ? "Released report for this patient, with the reference ranges the lab used."
+            : "Results released to you by your clinic, with the reference ranges the lab used."
+        }
         actions={<StatusBadge status={status} />}
       >
         <div className="mb-5">
           <BackLink patientId={req.patientId} from={from} fromTab={fromTab} />
         </div>
         {tabStrip}
-        <PatientResults req={req} />
+        <PatientResults req={req} clinicianView={isClinicianView} />
       </PageShell>
     );
   }
@@ -258,12 +287,22 @@ function PatientView() {
       <PageShell
         eyebrow={eyebrow}
         title={
-          isHistorical ? "Your appointment is complete" : "Your appointment is booked"
+          isClinicianView
+            ? isHistorical
+              ? "Visit complete"
+              : "Appointment booked"
+            : isHistorical
+              ? "Your appointment is complete"
+              : "Your appointment is booked"
         }
         description={
-          isHistorical
-            ? "This visit has been processed by the lab. Your report is in the Results tab."
-            : "Bring the check-in code below — the diagnostic centre already has your order."
+          isClinicianView
+            ? isHistorical
+              ? "The lab has processed this visit. The report is in the Results tab."
+              : "The patient has booked this requisition at the centre below."
+            : isHistorical
+              ? "This visit has been processed by the lab. Your report is in the Results tab."
+              : "Bring the check-in code below — the diagnostic centre already has your order."
         }
       actions={<StatusBadge status={status} />}
     >
@@ -309,8 +348,12 @@ function PatientView() {
   return (
     <PageShell
       eyebrow={eyebrow}
-      title="Your diagnostic requisition"
-      description="No paper form to carry. Show this link — or the check-in code from it — at the diagnostic centre."
+      title={isClinicianView ? "Requisition detail" : "Your diagnostic requisition"}
+      description={
+        isClinicianView
+          ? "The patient has not booked yet. This is the link they received."
+          : "No paper form to carry. Show this link — or the check-in code from it — at the diagnostic centre."
+      }
       actions={<StatusBadge status={status} />}
     >
       <div className="mb-5">
@@ -503,6 +546,7 @@ function LinkProblem({
   patientId,
   from,
   fromTab,
+  clinicianView = false,
   children,
 }: {
   title: string;
@@ -511,11 +555,14 @@ function LinkProblem({
   patientId?: string;
   from?: OriginRole;
   fromTab?: OriginTab;
+  clinicianView?: boolean;
   children?: ReactNode;
 }) {
   return (
     <PageShell
-      eyebrow="Role · Patient"
+      eyebrow={
+        clinicianView ? "Role · Clinician · read-only preview" : "Role · Patient"
+      }
       title={title}
       description={body}
     >
