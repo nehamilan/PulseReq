@@ -264,15 +264,19 @@ function PatientView() {
     return (
       <PageShell
         eyebrow={eyebrow}
-        title="Your diagnostic results"
-        description="Results released to you by your clinic, with the reference ranges the lab used."
+        title={isClinicianView ? "Diagnostic results" : "Your diagnostic results"}
+        description={
+          isClinicianView
+            ? "Released report for this patient, with the reference ranges the lab used."
+            : "Results released to you by your clinic, with the reference ranges the lab used."
+        }
         actions={<StatusBadge status={status} />}
       >
         <div className="mb-5">
           <BackLink patientId={req.patientId} from={from} fromTab={fromTab} />
         </div>
         {tabStrip}
-        <PatientResults req={req} />
+        <PatientResults req={req} clinicianView={isClinicianView} />
       </PageShell>
     );
   }
@@ -283,12 +287,22 @@ function PatientView() {
       <PageShell
         eyebrow={eyebrow}
         title={
-          isHistorical ? "Your appointment is complete" : "Your appointment is booked"
+          isClinicianView
+            ? isHistorical
+              ? "Visit complete"
+              : "Appointment booked"
+            : isHistorical
+              ? "Your appointment is complete"
+              : "Your appointment is booked"
         }
         description={
-          isHistorical
-            ? "This visit has been processed by the lab. Your report is in the Results tab."
-            : "Bring the check-in code below — the diagnostic centre already has your order."
+          isClinicianView
+            ? isHistorical
+              ? "The lab has processed this visit. The report is in the Results tab."
+              : "The patient has booked this requisition at the centre below."
+            : isHistorical
+              ? "This visit has been processed by the lab. Your report is in the Results tab."
+              : "Bring the check-in code below — the diagnostic centre already has your order."
         }
       actions={<StatusBadge status={status} />}
     >
@@ -334,8 +348,12 @@ function PatientView() {
   return (
     <PageShell
       eyebrow={eyebrow}
-      title="Your diagnostic requisition"
-      description="No paper form to carry. Show this link — or the check-in code from it — at the diagnostic centre."
+      title={isClinicianView ? "Requisition detail" : "Your diagnostic requisition"}
+      description={
+        isClinicianView
+          ? "The patient has not booked yet. This is the link they received."
+          : "No paper form to carry. Show this link — or the check-in code from it — at the diagnostic centre."
+      }
       actions={<StatusBadge status={status} />}
     >
       <div className="mb-5">
