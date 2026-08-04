@@ -154,7 +154,7 @@ function SortHeader({
         {label}
         <span
           className={`inline-flex h-4 w-4 items-center justify-center rounded transition-colors ${
-            active ? "text-primary" : "text-muted-foreground/0 group-hover:text-muted-foreground"
+            active ? "text-primary" : "text-muted-foreground"
           }`}
           aria-hidden="true"
         >
