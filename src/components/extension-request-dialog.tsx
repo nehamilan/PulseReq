@@ -119,14 +119,8 @@ export function ExtensionRequestControl({
         <Tooltip>
           <TooltipTrigger asChild>
             {disabled ? (
-              <span className="inline-flex cursor-not-allowed">
-                <button
-                  type="button"
-                  disabled
-                  className="pointer-events-none inline-flex whitespace-nowrap rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground opacity-60"
-                >
-                  Request Extension
-                </button>
+              <span className="inline-flex cursor-not-allowed select-none whitespace-nowrap rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground opacity-60">
+                Request Extension
               </span>
             ) : (
               <button
