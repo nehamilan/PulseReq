@@ -10,12 +10,6 @@ import { PriorityBadge } from "@/components/priority-badge";
 import { SortHeader, type SortState } from "@/components/sort-header";
 import { StatusBadge } from "@/components/status-badge";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
   STATUS_LABEL,
   effectiveStatus,
   expiryLabel,
@@ -106,6 +100,9 @@ function PatientPortal() {
       description="All your requisitions in one place. Open one to book an appointment or view the check-in code."
     >
       <Panel title="Requisitions" hint={`${requisitions.length} order${requisitions.length === 1 ? "" : "s"}`}>
+        <p className="mb-3 text-xs text-muted-foreground">
+          Extensions open 48 hours before a requisition expires.
+        </p>
         {requisitions.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No requisitions have been issued for this patient yet.
