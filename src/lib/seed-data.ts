@@ -758,7 +758,7 @@ export const EXTENSION_REQUESTS: ExtensionRequest[] = [
   {
     id: "ext-3",
     requisitionId: "rq-3",
-    requestedDays: 3,
+    requestedDays: 7,
     reason: "Could not fast before the last two appointments",
     status: "approved",
     requestedAt: relDayAt(-3, 12, 0),
