@@ -123,7 +123,7 @@ export function ExtensionRequestControl({
                 <button
                   type="button"
                   disabled
-                  className="inline-flex whitespace-nowrap rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground opacity-60"
+                  className="pointer-events-none inline-flex whitespace-nowrap rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground opacity-60"
                 >
                   Request Extension
                 </button>
