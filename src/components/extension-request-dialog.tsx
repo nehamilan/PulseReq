@@ -27,12 +27,15 @@ export function ExtensionRequestControl({
   req,
   compact = false,
   hidePill = false,
+  variant = "button",
 }: {
   req: Requisition;
   /** Inline variant for table cells: no top margin, "Request Extension" label. */
   compact?: boolean;
   /** Suppress the pending/approved/declined pill (shown elsewhere). */
   hidePill?: boolean;
+  /** "pill" renders an amber pill trigger and nothing at all when ineligible. */
+  variant?: "button" | "pill";
 }) {
   const { latestExtensionFor, requestExtension, now } = useRequisitions();
   const latest = latestExtensionFor(req.id);
@@ -64,6 +67,8 @@ export function ExtensionRequestControl({
       description: `Your clinician will review a ${days}-day extension.`,
     });
   }
+
+  if (variant === "pill" && disabled && !open) return null;
 
   return (
     <div className={compact ? "inline-flex" : "mt-3"}>
@@ -116,6 +121,14 @@ export function ExtensionRequestControl({
             </button>
           </div>
         </div>
+      ) : variant === "pill" ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="inline-flex whitespace-nowrap rounded-full border border-warning/35 bg-warning/15 px-2.5 py-1 text-xs font-medium text-warning-foreground transition-colors hover:bg-warning/25"
+        >
+          Extension available
+        </button>
       ) : (
         <TooltipProvider delayDuration={200}>
           <Tooltip>
