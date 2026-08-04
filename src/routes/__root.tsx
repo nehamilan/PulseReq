@@ -141,14 +141,12 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <RequisitionProvider>
-        <TooltipProvider delayDuration={200}>
-          <div className="min-h-screen bg-background">
-            <AppHeader />
-            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-            <Outlet />
-          </div>
-          <Toaster />
-        </TooltipProvider>
+        <div className="min-h-screen bg-background">
+          <AppHeader />
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+        </div>
+        <Toaster />
       </RequisitionProvider>
     </QueryClientProvider>
   );
