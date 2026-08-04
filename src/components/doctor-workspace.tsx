@@ -462,13 +462,14 @@ const FILTERS: RequisitionStatus[] = [
 ];
 
 function IssuedLog() {
-  const { requisitions, getPatient, reportFor, revokeRequisition, extendRequisition } =
+  const { requisitions, getPatient, getCenter, reportFor, revokeRequisition, extendRequisition } =
     useRequisitions();
   const [filter, setFilter] = useState<RequisitionStatus | "all">("all");
   const [query, setQuery] = useState("");
   const [revoking, setRevoking] = useState<Requisition | null>(null);
   const [reason, setReason] = useState("");
   const [extending, setExtending] = useState<Requisition | null>(null);
+  const revokingCenter = revoking ? getCenter(revoking.centerId) : undefined;
 
   const decorated = useMemo(
     () =>
@@ -626,6 +627,10 @@ function IssuedLog() {
               ? patientName(getPatient(revoking.patientId)!)
               : "Unknown patient"
           }
+          centerName={revokingCenter?.name}
+          hasBooking={
+            revoking.status === "booked" || revoking.status === "checked-in"
+          }
           reason={reason}
           onReason={setReason}
           onCancel={() => setRevoking(null)}
@@ -731,6 +736,8 @@ function ExtendDialog({
 function RevokeDialog({
   req,
   patientLabel,
+  centerName,
+  hasBooking,
   reason,
   onReason,
   onCancel,
@@ -738,6 +745,8 @@ function RevokeDialog({
 }: {
   req: Requisition;
   patientLabel: string;
+  centerName?: string;
+  hasBooking: boolean;
   reason: string;
   onReason: (v: string) => void;
   onCancel: () => void;
@@ -757,16 +766,35 @@ function RevokeDialog({
         <p className="mt-1 text-xs text-muted-foreground">
           {patientLabel} · {req.tests.map((t) => t.coding.display).join(" · ")}
         </p>
-        <p className="mt-3 text-xs text-muted-foreground">
-          The patient link stops working immediately and the order is withdrawn
-          from the lab queue. Any pending extension request is declined.
-        </p>
+        {hasBooking ? (
+          <div className="mt-3 rounded-md border border-warning/30 bg-warning/10 p-3 text-xs text-warning-foreground">
+            <p className="font-semibold">The patient has already booked an appointment.</p>
+            <p className="mt-1">
+              {centerName ? `${centerName} · ` : ""}
+              {req.appointmentAt
+                ? formatClinicalDateTime(req.appointmentAt)
+                : "Appointment time unknown"}
+            </p>
+            <p className="mt-1">
+              Revoking will cancel the appointment and withdraw the order from the lab queue.
+            </p>
+          </div>
+        ) : (
+          <p className="mt-3 text-xs text-muted-foreground">
+            The patient link stops working immediately and the order is withdrawn
+            from the lab queue. Any pending extension request is declined.
+          </p>
+        )}
         <label className="mt-4 block text-xs font-medium text-foreground">
-          Reason (optional)
+          Reason {hasBooking ? "(required for cancellation)" : "(optional)"}
           <input
             value={reason}
             onChange={(e) => onReason(e.target.value)}
-            placeholder="Ordered in error, duplicate order…"
+            placeholder={
+              hasBooking
+                ? "Ordered in error, duplicate order, patient unable to attend…"
+                : "Ordered in error, duplicate order…"
+            }
             className="mt-1 w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:border-primary"
           />
         </label>
