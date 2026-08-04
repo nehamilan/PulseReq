@@ -108,36 +108,39 @@ export function ExtensionRequestControl({
           onClick={() => setOpen(true)}
           className="rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
         >
-          Request more time
+          Request Extension
         </button>
       )}
     </div>
   );
 }
 
-function ExtensionPill({
+export function ExtensionPill({
   request,
   req,
+  compact = false,
 }: {
   request: ExtensionRequest;
   req: Requisition;
+  compact?: boolean;
 }) {
+  const margin = compact ? "" : "mt-3 ";
   if (request.status === "pending") {
     return (
-      <p className="mt-3 inline-block rounded-full border border-warning/35 bg-warning/15 px-2.5 py-1 text-xs text-warning-foreground">
+      <p className={`${margin}inline-block rounded-full border border-warning/35 bg-warning/15 px-2.5 py-1 text-xs text-warning-foreground`}>
         Extension requested · +{request.requestedDays} days · awaiting clinician
       </p>
     );
   }
   if (request.status === "approved") {
     return (
-      <p className="mt-3 inline-block rounded-full border border-success/35 bg-success/15 px-2.5 py-1 text-xs text-success">
+      <p className={`${margin}inline-block rounded-full border border-success/35 bg-success/15 px-2.5 py-1 text-xs text-success`}>
         Extended to {formatClinicalDate(req.expiresAt)}
       </p>
     );
   }
   return (
-    <p className="mt-3 inline-block rounded-full border border-destructive/35 bg-destructive/10 px-2.5 py-1 text-xs text-destructive">
+    <p className={`${margin}inline-block rounded-full border border-destructive/35 bg-destructive/10 px-2.5 py-1 text-xs text-destructive`}>
       Extension declined — contact the clinic
     </p>
   );
