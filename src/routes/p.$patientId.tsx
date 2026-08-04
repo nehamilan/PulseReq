@@ -121,7 +121,7 @@ function PatientPortal() {
                     onSort={setSort}
                   />
                   <th className="py-2 text-right text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                    Action
+                    &nbsp;
                   </th>
                 </tr>
               </thead>
