@@ -14,7 +14,17 @@ import { useRequisitions } from "@/lib/requisition-store";
  * Patient-facing "request more time" control plus the outcome pill for a
  * request that is already pending, approved or declined.
  */
-export function ExtensionRequestControl({ req }: { req: Requisition }) {
+export function ExtensionRequestControl({
+  req,
+  compact = false,
+  hidePill = false,
+}: {
+  req: Requisition;
+  /** Inline variant for table cells: no top margin, "Request Extension" label. */
+  compact?: boolean;
+  /** Suppress the pending/approved/declined pill (shown elsewhere). */
+  hidePill?: boolean;
+}) {
   const { latestExtensionFor, requestExtension } = useRequisitions();
   const latest = latestExtensionFor(req.id);
   const [open, setOpen] = useState(false);
@@ -22,10 +32,13 @@ export function ExtensionRequestControl({ req }: { req: Requisition }) {
   const [reason, setReason] = useState("");
 
   if (latest?.status === "pending") {
-    return <ExtensionPill request={latest} req={req} />;
+    return hidePill ? null : <ExtensionPill request={latest} req={req} compact={compact} />;
   }
 
-  const resolvedNote = latest ? <ExtensionPill request={latest} req={req} /> : null;
+  const resolvedNote =
+    latest && !hidePill ? (
+      <ExtensionPill request={latest} req={req} compact={compact} />
+    ) : null;
 
   if (!canRequestExtension(req)) return resolvedNote;
 
@@ -39,7 +52,7 @@ export function ExtensionRequestControl({ req }: { req: Requisition }) {
   }
 
   return (
-    <div className="mt-3">
+    <div className={compact ? "" : "mt-3"}>
       {resolvedNote}
       {open ? (
         <div className="mt-2 rounded-md border border-border bg-surface p-3">
