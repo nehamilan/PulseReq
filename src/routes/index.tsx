@@ -1,14 +1,6 @@
-"use client";
-
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { PageShell, Panel } from "@/components/page-shell";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 export const Route = createFileRoute("/")({
   head: () => ({
