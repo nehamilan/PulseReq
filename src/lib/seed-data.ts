@@ -424,6 +424,54 @@ REQUISITIONS.push(
       },
     ],
   },
+  {
+    id: "rq-18",
+    token: "req-9c3d21",
+    status: "active",
+    patientId: "pat-3",
+    practitionerId: "prac-1",
+    priority: "routine",
+    linkLifetimeDays: 14,
+    issuedAt: relDayAt(-5, 9, 15),
+    expiresAt: relDayAt(1, 9, 15), // inside the 48-hour extension window
+    clinicalNotes: "Fasting lipid panel for cardiovascular risk review.",
+    tests: [
+      {
+        id: "ot-23",
+        coding: {
+          system: "http://loinc.org",
+          code: "57698-3",
+          display: "Lipid panel with direct LDL - Serum or Plasma",
+        },
+        specimen: "Serum (fasting)",
+        modality: "lab",
+      },
+    ],
+  },
+  {
+    id: "rq-19",
+    token: "req-4f8b70",
+    status: "active",
+    patientId: "pat-3",
+    practitionerId: "prac-1",
+    priority: "routine",
+    linkLifetimeDays: 14,
+    issuedAt: relDayAt(-15, 11, 40),
+    expiresAt: relDayAt(-1, 11, 40), // lapsed without ever being booked
+    clinicalNotes: "Ferritin to follow up borderline haemoglobin.",
+    tests: [
+      {
+        id: "ot-24",
+        coding: {
+          system: "http://loinc.org",
+          code: "2276-4",
+          display: "Ferritin [Mass/volume] in Serum or Plasma",
+        },
+        specimen: "Serum",
+        modality: "lab",
+      },
+    ],
+  },
 );
 
 /** Completed orders that exercise each release policy on first load. */
