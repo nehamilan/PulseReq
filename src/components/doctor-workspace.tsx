@@ -463,7 +463,6 @@ const FILTERS: RequisitionStatus[] = [
 ];
 
 type SortKey = "patient" | "status" | "issued";
-type SortDir = "asc" | "desc";
 
 function IssuedLog() {
   const { requisitions, getPatient, getCenter, reportFor, revokeRequisition, extendRequisition } =
