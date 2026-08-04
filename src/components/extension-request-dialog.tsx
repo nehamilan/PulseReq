@@ -117,7 +117,6 @@ export function ExtensionRequestControl({
           <DialogTrigger asChild>
             <button
               type="button"
-              onClick={() => setOpen(true)}
               className="inline-flex whitespace-nowrap rounded-full border border-warning/35 bg-warning/15 px-2.5 py-1 text-xs font-medium text-warning-foreground transition-colors hover:bg-warning/25"
             >
               Extension available
