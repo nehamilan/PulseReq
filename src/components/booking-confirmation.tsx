@@ -78,14 +78,12 @@ export function BookingConfirmation({
   center,
   onChange,
   completed = false,
-  onViewResults,
   readOnly = false,
 }: {
   req: Requisition;
   center?: DiagnosticCenter;
   onChange?: () => void;
   completed?: boolean;
-  onViewResults?: () => void;
   readOnly?: boolean;
 }) {
   const prep = req.tests.filter((t) => t.instruction);
@@ -117,16 +115,6 @@ export function BookingConfirmation({
           />
           <Field label="Reference" value={req.token} />
         </dl>
-
-        {onViewResults ? (
-          <button
-            type="button"
-            onClick={onViewResults}
-            className="mt-5 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            View results
-          </button>
-        ) : null}
       </Panel>
     );
   }

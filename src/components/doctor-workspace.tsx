@@ -689,12 +689,19 @@ function IssuedLog() {
                           Revoke
                         </button>
                       ) : reportFor(req.id) ? (
-                        <span
+                        <Link
+                          to="/r/$token"
+                          params={{ token: req.token }}
+                          search={{
+                            tab: "results" as const,
+                            from: "doctor" as const,
+                            fromTab: "log" as const,
+                          }}
                           title="A published report requires an amendment, not a revocation."
-                          className="text-xs text-muted-foreground"
+                          className="text-xs font-medium text-primary hover:underline"
                         >
-                          Resulted
-                        </span>
+                          View results
+                        </Link>
                       ) : null}
                     </div>
                   </td>

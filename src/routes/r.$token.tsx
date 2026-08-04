@@ -316,7 +316,6 @@ function PatientView() {
           center={center}
           completed={isHistorical}
           readOnly={isClinicianView}
-          onViewResults={isHistorical ? () => setTab("results") : undefined}
           onChange={() => {
             setSelectedCenterId(null);
             setSelectedSlot(null);
