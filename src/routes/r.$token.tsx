@@ -252,7 +252,7 @@ function PatientView() {
     const isHistorical = Boolean(report);
     return (
       <PageShell
-        eyebrow="Role · Patient"
+        eyebrow={eyebrow}
         title={
           isHistorical ? "Your appointment is complete" : "Your appointment is booked"
         }
@@ -265,10 +265,12 @@ function PatientView() {
     >
       <BackLink patientId={req.patientId} from={from} fromTab={fromTab} />
       {tabStrip}
+      {clinicianNotice}
       <BookingConfirmation
           req={req}
           center={center}
           completed={isHistorical}
+          readOnly={isClinicianView}
           onViewResults={isHistorical ? () => setTab("results") : undefined}
           onChange={() => {
             setSelectedCenterId(null);
