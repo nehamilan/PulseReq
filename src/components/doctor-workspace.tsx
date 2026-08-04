@@ -564,7 +564,7 @@ function IssuedLog() {
                     {req.tests.map((t) => t.coding.display).join(" · ")}
                   </td>
                   <td className="py-2 pr-3 align-top">
-                    <div className="flex flex-wrap items-center gap-1.5">
+                    <div className="flex flex-col items-start gap-1.5">
                       <StatusBadge status={status} />
                       <PriorityBadge priority={req.priority} routineHidden />
                     </div>
