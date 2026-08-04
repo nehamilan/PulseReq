@@ -135,11 +135,11 @@ function PatientPortal() {
                     .map((t) => t.coding.display)
                     .join(" · ");
                   const report = reportFor(req.id);
-                  const resultsVisible = report
-                    ? isVisibleToPatient(report, now())
-                    : false;
-                  // Expiry only blocks booking — a published report stays reachable.
-                  const showResults = Boolean(report) && status !== "revoked";
+                  // Expiry only blocks booking — a released report stays reachable.
+                  const resultsReady =
+                    Boolean(report) &&
+                    status !== "revoked" &&
+                    isVisibleToPatient(report!, now());
                   const extension = latestExtensionFor(req.id);
                   return (
                     <tr key={req.id} className="align-top">
