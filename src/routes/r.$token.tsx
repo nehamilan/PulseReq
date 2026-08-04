@@ -302,13 +302,14 @@ function PatientView() {
 
   return (
     <PageShell
-      eyebrow="Role · Patient"
+      eyebrow={eyebrow}
       title="Your diagnostic requisition"
       description="No paper form to carry. Show this link — or the check-in code from it — at the diagnostic centre."
       actions={<StatusBadge status={status} />}
     >
       <BackLink patientId={req.patientId} from={from} fromTab={fromTab} />
       {tabStrip}
+      {clinicianNotice}
       {expiredNotice}
       <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
         <Panel title="Requisition details">
@@ -358,11 +359,13 @@ function PatientView() {
               </li>
             ))}
           </ul>
-          {status === "expired" ? null : <ExtensionRequestControl req={req} />}
+          {status === "expired" || isClinicianView ? null : (
+            <ExtensionRequestControl req={req} />
+          )}
         </Panel>
       </div>
 
-      {status === "expired" ? null : (
+      {status === "expired" || isClinicianView ? null : (
       <div className="mt-5">
         <Panel
           title="Choose a diagnostic centre"
