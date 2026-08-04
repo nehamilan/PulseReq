@@ -126,7 +126,8 @@ export function ExtensionRequestControl({
             <DialogHeader>
               <DialogTitle>Request more time</DialogTitle>
               <DialogDescription>
-                How much more time do you need?
+                {req.tests.map((t) => t.coding.display).join(" · ")} — LOINC{" "}
+                {req.tests.map((t) => t.coding.code).join(" · ")}
               </DialogDescription>
             </DialogHeader>
             <div className="py-2">{formBody}</div>
