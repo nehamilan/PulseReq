@@ -80,7 +80,7 @@ interface RequisitionStore {
   pendingExtensions: () => ExtensionRequest[];
   requestExtension: (
     requisitionId: string,
-    requestedDays: 3 | 7 | 14,
+    requestedDays: 7 | 14 | 21 | 28,
     reason?: string,
   ) => void;
   approveExtension: (extensionId: string) => void;

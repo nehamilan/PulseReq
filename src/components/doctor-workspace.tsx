@@ -677,7 +677,7 @@ function ExtendDialog({
   onCancel: () => void;
   onConfirm: (days: number) => void;
 }) {
-  const [days, setDays] = useState<number>(7);
+  const [days, setDays] = useState<number>(14);
   return (
     <div
       role="dialog"

@@ -18,7 +18,7 @@ export function ExtensionRequestControl({ req }: { req: Requisition }) {
   const { latestExtensionFor, requestExtension } = useRequisitions();
   const latest = latestExtensionFor(req.id);
   const [open, setOpen] = useState(false);
-  const [days, setDays] = useState<3 | 7 | 14>(7);
+  const [days, setDays] = useState<7 | 14 | 21 | 28>(14);
   const [reason, setReason] = useState("");
 
   if (latest?.status === "pending") {

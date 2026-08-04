@@ -130,14 +130,14 @@ export type ExtensionStatus = "pending" | "approved" | "declined";
 export interface ExtensionRequest {
   id: string;
   requisitionId: string;
-  requestedDays: 3 | 7 | 14;
+  requestedDays: 7 | 14 | 21 | 28;
   reason?: string;
   status: ExtensionStatus;
   requestedAt: string;
   resolvedAt?: string;
 }
 
-export const EXTENSION_DAY_OPTIONS = [3, 7, 14] as const;
+export const EXTENSION_DAY_OPTIONS = [7, 14, 21, 28] as const;
 
 /** New expiry ISO after granting `days`, measured from now if already lapsed. */
 export function extendExpiry(
