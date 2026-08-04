@@ -125,7 +125,7 @@ export function ExtensionRequestControl({
               {disabled ? (
                 <span
                   tabIndex={0}
-                  className="inline-flex cursor-not-allowed select-none whitespace-nowrap rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground opacity-60"
+                  className="inline-flex cursor-not-allowed select-none whitespace-nowrap rounded-md border border-input bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground opacity-80"
                 >
                   Request Extension
                 </span>
