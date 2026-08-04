@@ -79,18 +79,23 @@ export function BookingConfirmation({
   onChange,
   completed = false,
   onViewResults,
+  readOnly = false,
 }: {
   req: Requisition;
   center?: DiagnosticCenter;
   onChange?: () => void;
   completed?: boolean;
   onViewResults?: () => void;
+  readOnly?: boolean;
 }) {
   const prep = req.tests.filter((t) => t.instruction);
 
-  if (completed) {
+  if (completed || readOnly) {
     return (
-      <Panel title="Appointment completed" hint="This visit is done">
+      <Panel
+        title={completed ? "Appointment completed" : "Appointment booked"}
+        hint={completed ? "This visit is done" : "Read-only"}
+      >
         <div className="rounded-md border border-border bg-muted/40 p-4">
           <p className="text-sm font-semibold text-foreground">
             {center?.name ?? "Diagnostic centre"}
