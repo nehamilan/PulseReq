@@ -106,7 +106,7 @@ export function ExtensionRequestControl({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+          className="inline-flex whitespace-nowrap rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
         >
           Request Extension
         </button>
