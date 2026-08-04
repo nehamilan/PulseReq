@@ -15,7 +15,7 @@ import { buildReport, type DiagnosticReportRecord } from "./results";
 const ISSUED_AT = "2026-07-30T14:10:00.000Z";
 const EXPIRES_AT = "2026-08-06T14:10:00.000Z"; // +7 days
 
-const LINK_LIFETIME_DAYS = 7 as const;
+const LINK_LIFETIME_DAYS = 14 as const;
 
 /** Today at a given local 24h time — keeps the lab queue populated forever. */
 function todayAt(hour: number, minute: number): string {
