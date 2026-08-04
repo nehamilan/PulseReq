@@ -10,6 +10,12 @@ import { PriorityBadge } from "@/components/priority-badge";
 import { SortHeader, type SortState } from "@/components/sort-header";
 import { StatusBadge } from "@/components/status-badge";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   STATUS_LABEL,
   effectiveStatus,
   expiryLabel,
@@ -187,21 +193,27 @@ function PatientPortal() {
                             </Link>
                           ) : null}
                           {showResults && !resultsVisible && report ? (
-                            <span className="inline-flex flex-col items-end">
-                              <button
-                                type="button"
-                                disabled
-                                className="inline-flex cursor-not-allowed whitespace-nowrap rounded-md border border-warning/40 bg-warning/10 px-3 py-1.5 text-xs font-medium text-warning-foreground opacity-80"
-                              >
-                                View results
-                              </button>
-                              <span className="mt-1 text-[11px] text-muted-foreground">
-                                {report.policy === "EMBARGO_DELAY" &&
-                                report.embargoLiftsAt
-                                  ? `Available ${formatClinicalDate(report.embargoLiftsAt)}`
-                                  : "Pending clinician release"}
-                              </span>
-                            </span>
+                            <TooltipProvider delayDuration={200}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-flex cursor-not-allowed whitespace-nowrap rounded-md border border-warning/40 bg-warning/10 px-3 py-1.5 text-xs font-medium text-warning-foreground opacity-80">
+                                    View results
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent
+                                  side="top"
+                                  sideOffset={4}
+                                  className="max-w-xs"
+                                >
+                                  <p>
+                                    {report.policy === "EMBARGO_DELAY" &&
+                                    report.embargoLiftsAt
+                                      ? `Available ${formatClinicalDate(report.embargoLiftsAt)}`
+                                      : "Pending clinician release"}
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           ) : null}
                           <ExtensionRequestControl req={req} compact hidePill />
                         </div>
