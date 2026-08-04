@@ -2,9 +2,16 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   EXTENSION_DAY_OPTIONS,
   canRequestExtension,
   formatClinicalDate,
+  hoursRemaining,
   type ExtensionRequest,
   type Requisition,
 } from "@/lib/domain";
@@ -25,22 +32,29 @@ export function ExtensionRequestControl({
   /** Suppress the pending/approved/declined pill (shown elsewhere). */
   hidePill?: boolean;
 }) {
-  const { latestExtensionFor, requestExtension } = useRequisitions();
+  const { latestExtensionFor, requestExtension, now } = useRequisitions();
   const latest = latestExtensionFor(req.id);
   const [open, setOpen] = useState(false);
   const [days, setDays] = useState<7 | 14 | 21 | 28>(14);
   const [reason, setReason] = useState("");
 
-  if (latest?.status === "pending") {
-    return hidePill ? null : <ExtensionPill request={latest} req={req} compact={compact} />;
-  }
+  const pending = latest?.status === "pending";
+  const eligible = canRequestExtension(req, now());
+  const disabled = pending || !eligible;
 
   const resolvedNote =
     latest && !hidePill ? (
       <ExtensionPill request={latest} req={req} compact={compact} />
     ) : null;
 
-  if (!canRequestExtension(req)) return resolvedNote;
+  let tooltip = "";
+  if (pending) {
+    tooltip = "An extension request is already pending review.";
+  } else if (req.status !== "active") {
+    tooltip = "Extensions are not available for this order.";
+  } else if (hoursRemaining(req, now()) > 48) {
+    tooltip = "Available once your requisition is within 48 hours of expiry.";
+  }
 
   function submit() {
     requestExtension(req.id, days, reason);
@@ -52,7 +66,7 @@ export function ExtensionRequestControl({
   }
 
   return (
-    <div className={compact ? "" : "mt-3"}>
+    <div className={compact ? "inline-flex" : "mt-3"}>
       {resolvedNote}
       {open ? (
         <div className="mt-2 rounded-md border border-border bg-surface p-3">
@@ -103,13 +117,29 @@ export function ExtensionRequestControl({
           </div>
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="inline-flex whitespace-nowrap rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
-        >
-          Request Extension
-        </button>
+        <TooltipProvider delayDuration={200}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={() => setOpen(true)}
+                disabled={disabled}
+                className="inline-flex whitespace-nowrap rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Request Extension
+              </button>
+            </TooltipTrigger>
+            {disabled && tooltip ? (
+              <TooltipContent
+                side={compact ? "top" : "bottom"}
+                sideOffset={4}
+                className="max-w-xs"
+              >
+                <p>{tooltip}</p>
+              </TooltipContent>
+            ) : null}
+          </Tooltip>
+        </TooltipProvider>
       )}
     </div>
   );
