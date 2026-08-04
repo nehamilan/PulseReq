@@ -154,7 +154,20 @@ function PatientView() {
   const isClinicianView = from === "doctor";
 
   if (!req) {
-    return <LinkProblem title="This link isn't valid" token={token} body="We couldn't find a requisition for this link. Check the message from your clinic, or ask them to reissue it." from={from} fromTab={fromTab} />;
+    return (
+      <LinkProblem
+        title="This link isn't valid"
+        token={token}
+        body={
+          isClinicianView
+            ? "No requisition matches this link. It may have been reissued under a new token."
+            : "We couldn't find a requisition for this link. Check the message from your clinic, or ask them to reissue it."
+        }
+        from={from}
+        fromTab={fromTab}
+        clinicianView={isClinicianView}
+      />
+    );
   }
 
   const status = effectiveStatus(req);
@@ -225,8 +238,9 @@ function PatientView() {
           This booking link has expired
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Contact your clinic to have a new requisition issued. Any results
-          already released to you stay available in the Results tab.
+          {isClinicianView
+            ? "The patient can no longer book. Extend or reissue this requisition from the Doctor Portal. Any released results stay available in the Results tab."
+            : "Contact your clinic to have a new requisition issued. Any results already released to you stay available in the Results tab."}
         </p>
         {isClinicianView ? null : <ExtensionRequestControl req={req} />}
       </div>
