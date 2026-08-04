@@ -572,7 +572,7 @@ REQUISITIONS.push(
     centerId: "ctr-1",
     appointmentAt: todayAt(11, 45),
     priority: "stat",
-    linkLifetimeDays: 3,
+    linkLifetimeDays: 7,
     issuedAt: relDayAt(-1, 7, 50),
     expiresAt: relDayAt(2, 7, 50),
     clinicalNotes: "Chest tightness in ER follow-up. STAT troponin protocol at collection.",
@@ -710,7 +710,7 @@ REQUISITIONS.push(
     patientId: "pat-2",
     practitionerId: "prac-2",
     priority: "routine",
-    linkLifetimeDays: 3,
+    linkLifetimeDays: 7,
     issuedAt: relDayAt(-4, 10, 5),
     expiresAt: relDayAt(-1, 10, 5), // lapsed without ever being booked
     clinicalNotes: "Pre-operative screen. Reissue if the patient is still awaiting surgery.",
