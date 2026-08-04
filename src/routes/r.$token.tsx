@@ -174,7 +174,7 @@ function PatientView() {
         token={token}
         body={
           status === "expired"
-            ? `Requisition links stay active for up to ${req.linkLifetimeDays} days. Contact your clinic to have a new one issued.`
+            ? `This link was issued with a ${req.linkLifetimeDays}-day window (14 days is the current default). Contact your clinic to have a new one issued.`
             : "Your clinician withdrew this requisition. Contact the clinic if you think this is a mistake."
         }
         patientId={req.patientId}
