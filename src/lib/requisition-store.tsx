@@ -66,6 +66,8 @@ interface RequisitionStore {
     actor: string,
     reason?: string,
   ) => void;
+  /** Clinician extends a link's validity without a patient request. */
+  extendRequisition: (requisitionId: string, days: number) => void;
   getPatient: (id: string) => Patient | undefined;
   getPractitioner: (id: string) => Practitioner | undefined;
   getCenter: (id?: string) => DiagnosticCenter | undefined;
