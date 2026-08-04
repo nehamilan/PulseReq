@@ -4,6 +4,15 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -13,7 +22,6 @@ import {
   EXTENSION_DAY_OPTIONS,
   canRequestExtension,
   formatClinicalDate,
-  hoursRemaining,
   type ExtensionRequest,
   type Requisition,
 } from "@/lib/domain";
@@ -70,40 +78,82 @@ export function ExtensionRequestControl({
 
   if (variant === "pill" && disabled && !open) return null;
 
+  const formBody = (
+    <>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {EXTENSION_DAY_OPTIONS.map((d) => (
+          <button
+            key={d}
+            type="button"
+            onClick={() => setDays(d)}
+            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+              days === d
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-input bg-background text-foreground hover:bg-accent"
+            }`}
+          >
+            +{d} days
+          </button>
+        ))}
+      </div>
+      <label className="mt-3 block text-xs text-muted-foreground">
+        Reason (optional)
+        <input
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          maxLength={140}
+          placeholder="Away for work, missed the window…"
+          className="mt-1 w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-primary"
+        />
+      </label>
+    </>
+  );
+
   return (
     <div className={compact ? "inline-flex" : "mt-3"}>
       {resolvedNote}
-      {open ? (
+      {variant === "pill" ? (
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <button
+              type="button"
+              className="inline-flex whitespace-nowrap rounded-full border border-warning/35 bg-warning/15 px-2.5 py-1 text-xs font-medium text-warning-foreground transition-colors hover:bg-warning/25"
+            >
+              Extension available
+            </button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Request more time</DialogTitle>
+              <DialogDescription>
+                How much more time do you need?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-2">{formBody}</div>
+            <DialogFooter>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={submit}
+                className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                Send request
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      ) : open ? (
         <div className="mt-2 rounded-md border border-border bg-surface p-3">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             How much more time do you need?
           </p>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {EXTENSION_DAY_OPTIONS.map((d) => (
-              <button
-                key={d}
-                type="button"
-                onClick={() => setDays(d)}
-                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                  days === d
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-input bg-background text-foreground hover:bg-accent"
-                }`}
-              >
-                +{d} days
-              </button>
-            ))}
-          </div>
-          <label className="mt-3 block text-xs text-muted-foreground">
-            Reason (optional)
-            <input
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              maxLength={140}
-              placeholder="Away for work, missed the window…"
-              className="mt-1 w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-primary"
-            />
-          </label>
+          {formBody}
           <div className="mt-3 flex gap-2">
             <button
               type="button"
@@ -121,14 +171,6 @@ export function ExtensionRequestControl({
             </button>
           </div>
         </div>
-      ) : variant === "pill" ? (
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="inline-flex whitespace-nowrap rounded-full border border-warning/35 bg-warning/15 px-2.5 py-1 text-xs font-medium text-warning-foreground transition-colors hover:bg-warning/25"
-        >
-          Extension available
-        </button>
       ) : (
         <TooltipProvider delayDuration={200}>
           <Tooltip>
