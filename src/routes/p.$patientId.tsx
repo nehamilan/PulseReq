@@ -168,11 +168,11 @@ function PatientPortal() {
                         ) : null}
                       </td>
                       <td className="py-3">
-                        <div className="flex flex-wrap items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-2">
                           <Link
                             to="/r/$token"
                             params={{ token: req.token }}
-                            className="inline-flex rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                            className="inline-flex whitespace-nowrap rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                           >
                             Open
                           </Link>
@@ -181,7 +181,7 @@ function PatientPortal() {
                               to="/r/$token"
                               params={{ token: req.token }}
                               search={{ tab: "results" }}
-                              className="inline-flex rounded-md border border-success/40 bg-success/10 px-3 py-1.5 text-xs font-medium text-success transition-colors hover:bg-success/20"
+                              className="inline-flex whitespace-nowrap rounded-md border border-success/40 bg-success/10 px-3 py-1.5 text-xs font-medium text-success transition-colors hover:bg-success/20"
                             >
                               View results
                             </Link>
@@ -191,7 +191,7 @@ function PatientPortal() {
                               <button
                                 type="button"
                                 disabled
-                                className="inline-flex cursor-not-allowed rounded-md border border-warning/40 bg-warning/10 px-3 py-1.5 text-xs font-medium text-warning-foreground opacity-80"
+                                className="inline-flex cursor-not-allowed whitespace-nowrap rounded-md border border-warning/40 bg-warning/10 px-3 py-1.5 text-xs font-medium text-warning-foreground opacity-80"
                               >
                                 View results
                               </button>
