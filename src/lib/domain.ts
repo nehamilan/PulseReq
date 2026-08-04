@@ -454,6 +454,7 @@ export const AUDIT_LABEL: Record<AuditAction, string> = {
   "result.auto-released": "RESULT AUTO-RELEASED",
   "result.released": "RESULT RELEASED BY CLINICIAN",
   "result.viewed": "PHI ACCESS · RESULT VIEWED",
+  "order.revoked": "ORDER REVOKED",
 };
 
 /** A clinician may withdraw an order only while it is still open and unresulted. */
