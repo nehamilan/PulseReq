@@ -2,13 +2,18 @@ import { useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { toast } from "sonner";
 
+import { ChevronDown, ChevronRight, Code2 } from "lucide-react";
+
 import { FhirReportDialog } from "@/components/fhir-report-dialog";
 import { Panel } from "@/components/page-shell";
 import {
   InterpretationBadge,
-  PolicyChip,
-  ReleaseStateChip,
 } from "@/components/result-chips";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { StatusBadge } from "@/components/status-badge";
 import { PriorityBadge } from "@/components/priority-badge";
 import { SortHeader, type SortDir } from "@/components/sort-header";
@@ -363,6 +368,23 @@ function ReportRow({
   const visible = isVisibleToPatient(report, clock);
   const abnormal = abnormalCount(report);
   const released = report.status === "released";
+  const embargoed = !visible && report.policy === "EMBARGO_DELAY";
+  const needsDecision = !visible;
+  const [open, setOpen] = useState(needsDecision);
+  const hasBody = report.observations.length > 0 || Boolean(report.narrative);
+
+  const pill = visible
+    ? {
+        label:
+          report.status === "released" && report.releasedBy !== "policy:auto"
+            ? "Released to patient"
+            : "Auto-released to patient",
+        className: "border-success/25 bg-success/10 text-success",
+      }
+    : {
+        label: embargoed ? "Embargoed" : "Held for review",
+        className: "border-warning/35 bg-warning/15 text-warning-foreground",
+      };
 
   return (
     <li className="px-3 py-2.5">
@@ -378,6 +400,9 @@ function ReportRow({
             Published {formatClinicalDateTime(report.publishedAt)}
             {released && report.releasedAt
               ? ` · released ${formatClinicalDateTime(report.releasedAt)}`
+              : ""}
+            {embargoed && report.embargoLiftsAt
+              ? ` · releases ${formatClinicalDate(report.embargoLiftsAt)} if untouched`
               : ""}{" "}
             · {report.observations.length} observation
             {report.observations.length === 1 ? "" : "s"}
@@ -385,16 +410,16 @@ function ReportRow({
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <ReleaseStateChip report={report} now={clock} />
-          <PolicyChip report={report} />
+          <span
+            className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${pill.className}`}
+          >
+            {pill.label}
+          </span>
         </div>
       </div>
 
-      {report.observations.length > 0 || report.narrative ? (
-        <details className="mt-2">
-          <summary className="cursor-pointer text-xs font-medium text-primary hover:underline">
-            View observations
-          </summary>
+      {hasBody && open ? (
+        <div className="mt-2">
           {report.observations.length > 0 ? (
             <ul className="mt-2 divide-y divide-border rounded-md border border-border">
               {report.observations.map((o) => (
@@ -426,26 +451,54 @@ function ReportRow({
           <p className="mt-2 text-[11px] text-muted-foreground">
             {report.rationale}
           </p>
-        </details>
+        </div>
       ) : null}
 
-      <div className="mt-2 flex flex-wrap gap-2">
-        {onRelease ? (
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+        {hasBody ? (
           <button
             type="button"
-            onClick={onRelease}
-            className="rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            onClick={() => setOpen((v) => !v)}
+            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
           >
-            {visible ? "Confirm release" : "Sign off & release"}
+            {open ? (
+              <ChevronDown className="size-3.5" />
+            ) : (
+              <ChevronRight className="size-3.5" />
+            )}
+            {open ? "Hide report" : "View report"}
           </button>
-        ) : null}
-        <button
-          type="button"
-          onClick={onInspect}
-          className="rounded-md border border-input bg-background px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-accent"
-        >
-          Inspect FHIR DiagnosticReport
-        </button>
+        ) : (
+          <span />
+        )}
+        <div className="flex items-center gap-2">
+          {onRelease ? (
+            <button
+              type="button"
+              onClick={onRelease}
+              className={
+                needsDecision
+                  ? "rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                  : "rounded-md border border-input bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              }
+            >
+              {needsDecision ? "Sign off & release" : "Acknowledge"}
+            </button>
+          ) : null}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={onInspect}
+                aria-label="Inspect FHIR DiagnosticReport"
+                className="inline-flex size-7 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              >
+                <Code2 className="size-3.5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Inspect FHIR DiagnosticReport</TooltipContent>
+          </Tooltip>
+        </div>
       </div>
     </li>
   );
