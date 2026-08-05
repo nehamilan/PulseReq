@@ -108,10 +108,11 @@ function LabPage() {
         (r) =>
           r.centerId === centerId &&
           r.appointmentAt &&
-          isSameDay(r.appointmentAt),
+          isSameDay(r.appointmentAt, now()),
       ),
-    [requisitions, centerId],
+    [requisitions, centerId, now],
   );
+
 
   const openReq: Requisition | undefined = openId
     ? requisitions.find((r) => r.id === openId)
