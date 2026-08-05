@@ -254,6 +254,18 @@ export function IntakeDrawer({
                     ? "Release to imaging worklist"
                     : "Print labels & complete intake"}
                 </Button>
+              ) : req.status === "active" ? (
+                <Button
+                  onClick={() => {
+                    checkInPatient(req.id, "lab-tech", centerId, now().toISOString());
+                    toast.success("Patient checked in as walk-in", {
+                      description:
+                        "Identity verified · order ready for collection.",
+                    });
+                  }}
+                >
+                  Check in as walk-in
+                </Button>
               ) : (
                 <Button
                   onClick={() => {
