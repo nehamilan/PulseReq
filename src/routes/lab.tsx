@@ -127,7 +127,6 @@ function LabPage() {
     const future = new Date(simulatedNow.getTime() + days * 86_400_000);
     const after = reports.filter((r) => isVisibleToPatient(r, future)).length;
     const newlyVisible = after - before;
-    console.log("advanceClock", { days, before, after, newlyVisible, simulatedNow });
     advanceClock(days);
     if (newlyVisible > 0) {
       toast.success(
@@ -142,6 +141,7 @@ function LabPage() {
       });
     }
   };
+
 
 
   return (
