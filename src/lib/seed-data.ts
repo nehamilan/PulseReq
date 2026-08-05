@@ -531,7 +531,36 @@ REQUISITIONS.push(
       },
     ],
   },
+  {
+    id: "rq-20",
+    token: "req-8b47c2",
+    status: "completed",
+    patientId: "pat-5",
+    practitionerId: "prac-2",
+    centerId: "ctr-1",
+    appointmentAt: todayAt(13, 30),
+    priority: "urgent",
+    linkLifetimeDays: 14,
+    issuedAt: relDayAt(-8, 10, 0),
+    expiresAt: relDayAt(6, 10, 0),
+    clinicalNotes: "Shortness of breath; rule out pulmonary embolism.",
+    tests: [
+      {
+        id: "ot-25",
+        coding: {
+          system: "http://loinc.org",
+          code: "24627-2",
+          display: "CT Chest W contrast IV",
+        },
+        instruction: "Nothing by mouth 4 hours before scan",
+        modality: "imaging",
+        releasePolicy: "EMBARGO_DELAY",
+        embargoDays: 7,
+      },
+    ],
+  },
 );
+
 
 /** One report per policy so all three patient states are visible immediately. */
 function seedReport(requisitionId: string, hoursAgo: number) {
@@ -783,7 +812,9 @@ export const REPORTS: DiagnosticReportRecord[] = [
   seedReport("rq-9", 6), // ultrasound — embargoed
   seedReport("rq-14", 24 * 9), // CT chest — embargo already lapsed, link expired
   seedReport("rq-15", 24 * 3), // repeat A1c — auto-released
+  seedReport("rq-20", 24 * 6 + 20), // CT chest — embargo lifts in ~4 hours
 ];
+
 
 /** One pending request so the clinician queue is populated on first load. */
 export const EXTENSION_REQUESTS: ExtensionRequest[] = [
