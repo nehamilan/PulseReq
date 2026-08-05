@@ -118,6 +118,28 @@ function LabPage() {
   const match = trimmed ? findByToken(trimmed) : undefined;
   const matchPatient = match ? getPatient(match.patientId) : undefined;
 
+  const simulatedNow = now();
+
+  const advanceWithFeedback = (days: number) => {
+    const before = reports.filter((r) => isVisibleToPatient(r, simulatedNow)).length;
+    const future = new Date(simulatedNow.getTime() + days * 86_400_000);
+    const after = reports.filter((r) => isVisibleToPatient(r, future)).length;
+    const newlyVisible = after - before;
+    advanceClock(days);
+    if (newlyVisible > 0) {
+      toast.success(
+        `${newlyVisible} report${newlyVisible === 1 ? "" : "s"} now visible to patient${newlyVisible === 1 ? "" : "s"}`,
+        {
+          description: "Embargo lifted after advancing the demo clock.",
+        },
+      );
+    } else {
+      toast("Demo clock advanced", {
+        description: `Simulated time is now ${future.toLocaleDateString("en-CA", { dateStyle: "medium" })}. No reports changed state yet.`,
+      });
+    }
+  };
+
   return (
     <PageShell
       eyebrow="Role · Diagnostic centre"
@@ -125,26 +147,37 @@ function LabPage() {
       description="Today's booked appointments arrive as structured FHIR orders — no handwriting, no faxed forms, no re-keying at intake."
       actions={
         <div className="flex flex-wrap items-end gap-3">
-        <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          Centre
-          <select
-            value={centerId}
-            onChange={(e) => setCenterId(e.target.value)}
-            className="mt-1 block rounded-md border border-input bg-background px-3 py-2 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/25"
-          >
-            {centers.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </label>
+          <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Centre
+            <select
+              value={centerId}
+              onChange={(e) => setCenterId(e.target.value)}
+              className="mt-1 block rounded-md border border-input bg-background px-3 py-2 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/25"
+            >
+              {centers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Simulated now
+            <div className="mt-1 flex items-center gap-1.5 rounded-md border border-input bg-background px-2.5 py-2 text-xs font-normal normal-case tracking-normal text-foreground tabular">
+              {simulatedNow.toLocaleDateString("en-CA", {
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </div>
+          </div>
           <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
             Embargo clock
             <div className="mt-1 flex items-center gap-1.5">
               <button
                 type="button"
-                onClick={() => advanceClock(3)}
+                onClick={() => advanceWithFeedback(3)}
                 className="rounded-md border border-input bg-background px-2.5 py-2 text-xs font-normal normal-case tracking-normal text-foreground transition hover:bg-accent"
               >
                 +3 days
@@ -158,10 +191,14 @@ function LabPage() {
                 {clockOffsetDays === 0 ? "now" : `+${clockOffsetDays}d · reset`}
               </button>
             </div>
+            <p className="mt-1 max-w-[16rem] text-[10px] font-normal normal-case tracking-normal text-muted-foreground">
+              Fast-forward demo time to see embargoed results become visible to patients.
+            </p>
           </div>
         </div>
       }
     >
+
       <LabImpactBanner queue={todaysQueue} />
 
       <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
