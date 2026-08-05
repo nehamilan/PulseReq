@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import { IntakeDrawer } from "@/components/intake-drawer";
 import { LabImpactBanner } from "@/components/lab-impact-banner";
@@ -17,6 +18,8 @@ import {
   type Requisition,
 } from "@/lib/domain";
 import { useRequisitions } from "@/lib/requisition-store";
+import { isVisibleToPatient } from "@/lib/results";
+
 
 export const Route = createFileRoute("/lab")({
   head: () => ({
