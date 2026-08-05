@@ -17,27 +17,37 @@ const EXPIRES_AT = "2026-08-06T14:10:00.000Z"; // +7 days
 
 const LINK_LIFETIME_DAYS = 14 as const;
 
-/** Today at a given local 24h time — keeps the lab queue populated forever. */
+/**
+ * Fixed demo anchor. All relative dates are computed from this moment so the
+ * prototype is deterministic across SSR and hydration, and the demo still
+ * works no matter when the preview is opened.
+ */
+const DEMO_ANCHOR = new Date("2026-08-05T06:00:00.000Z");
+
+/** Demo "today" at a given local 24h time — keeps the lab queue populated. */
 function todayAt(hour: number, minute: number): string {
-  const d = new Date();
+  const d = new Date(DEMO_ANCHOR);
   d.setHours(hour, minute, 0, 0);
   return d.toISOString();
 }
 
 function tomorrowAt(hour: number, minute: number): string {
-  const d = new Date();
+  const d = new Date(DEMO_ANCHOR);
   d.setDate(d.getDate() + 1);
   d.setHours(hour, minute, 0, 0);
   return d.toISOString();
 }
 
-/** N days from now (negative = in the past) at a given local time. */
+/** N days from the demo anchor (negative = in the past) at a given local time. */
 function relDayAt(offsetDays: number, hour: number, minute = 0): string {
-  const d = new Date();
+  const d = new Date(DEMO_ANCHOR);
   d.setDate(d.getDate() + offsetDays);
   d.setHours(hour, minute, 0, 0);
   return d.toISOString();
 }
+
+export { DEMO_ANCHOR };
+
 
 export const PATIENTS: Patient[] = [
   {
