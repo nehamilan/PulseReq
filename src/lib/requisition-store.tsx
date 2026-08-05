@@ -24,12 +24,14 @@ import {
 } from "./results";
 import {
   CENTERS,
+  DEMO_ANCHOR,
   EXTENSION_REQUESTS,
   PATIENTS,
   PRACTITIONERS,
   REPORTS,
   REQUISITIONS,
 } from "./seed-data";
+
 
 interface RequisitionStore {
   requisitions: Requisition[];
@@ -166,7 +168,8 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
   const [reports, setReports] = useState<DiagnosticReportRecord[]>(REPORTS);
   const [clockOffsetDays, setClockOffsetDays] = useState(0);
 
-  const now = () => new Date(Date.now() + clockOffsetDays * 86_400_000);
+  const now = () => new Date(DEMO_ANCHOR.getTime() + clockOffsetDays * 86_400_000);
+
 
   const append = (
     entries: {

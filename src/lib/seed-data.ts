@@ -17,27 +17,37 @@ const EXPIRES_AT = "2026-08-06T14:10:00.000Z"; // +7 days
 
 const LINK_LIFETIME_DAYS = 14 as const;
 
-/** Today at a given local 24h time — keeps the lab queue populated forever. */
+/**
+ * Fixed demo anchor. All relative dates are computed from this moment so the
+ * prototype is deterministic across SSR and hydration, and the demo still
+ * works no matter when the preview is opened.
+ */
+const DEMO_ANCHOR = new Date("2026-08-05T06:00:00.000Z");
+
+/** Demo "today" at a given local 24h time — keeps the lab queue populated. */
 function todayAt(hour: number, minute: number): string {
-  const d = new Date();
+  const d = new Date(DEMO_ANCHOR);
   d.setHours(hour, minute, 0, 0);
   return d.toISOString();
 }
 
 function tomorrowAt(hour: number, minute: number): string {
-  const d = new Date();
+  const d = new Date(DEMO_ANCHOR);
   d.setDate(d.getDate() + 1);
   d.setHours(hour, minute, 0, 0);
   return d.toISOString();
 }
 
-/** N days from now (negative = in the past) at a given local time. */
+/** N days from the demo anchor (negative = in the past) at a given local time. */
 function relDayAt(offsetDays: number, hour: number, minute = 0): string {
-  const d = new Date();
+  const d = new Date(DEMO_ANCHOR);
   d.setDate(d.getDate() + offsetDays);
   d.setHours(hour, minute, 0, 0);
   return d.toISOString();
 }
+
+export { DEMO_ANCHOR };
+
 
 export const PATIENTS: Patient[] = [
   {
@@ -531,7 +541,36 @@ REQUISITIONS.push(
       },
     ],
   },
+  {
+    id: "rq-20",
+    token: "req-8b47c2",
+    status: "completed",
+    patientId: "pat-5",
+    practitionerId: "prac-2",
+    centerId: "ctr-1",
+    appointmentAt: todayAt(13, 30),
+    priority: "urgent",
+    linkLifetimeDays: 14,
+    issuedAt: relDayAt(-8, 10, 0),
+    expiresAt: relDayAt(6, 10, 0),
+    clinicalNotes: "Shortness of breath; rule out pulmonary embolism.",
+    tests: [
+      {
+        id: "ot-25",
+        coding: {
+          system: "http://loinc.org",
+          code: "24627-2",
+          display: "CT Chest W contrast IV",
+        },
+        instruction: "Nothing by mouth 4 hours before scan",
+        modality: "imaging",
+        releasePolicy: "EMBARGO_DELAY",
+        embargoDays: 7,
+      },
+    ],
+  },
 );
+
 
 /** One report per policy so all three patient states are visible immediately. */
 function seedReport(requisitionId: string, hoursAgo: number) {
@@ -783,7 +822,9 @@ export const REPORTS: DiagnosticReportRecord[] = [
   seedReport("rq-9", 6), // ultrasound — embargoed
   seedReport("rq-14", 24 * 9), // CT chest — embargo already lapsed, link expired
   seedReport("rq-15", 24 * 3), // repeat A1c — auto-released
+  seedReport("rq-20", 24 * 6 + 20), // CT chest — embargo lifts in ~4 hours
 ];
+
 
 /** One pending request so the clinician queue is populated on first load. */
 export const EXTENSION_REQUESTS: ExtensionRequest[] = [
