@@ -119,6 +119,8 @@ export interface Requisition {
   expiresAt: string;
   /** How many times a clinician has granted an expiry extension. */
   extensionCount?: number;
+  /** True when the patient was checked in at the lab without a prior appointment. */
+  isWalkIn?: boolean;
 }
 
 export type ExtensionStatus = "pending" | "approved" | "declined";
