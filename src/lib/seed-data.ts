@@ -571,8 +571,31 @@ REQUISITIONS.push(
   },
 );
 
-
-/** One report per policy so all three patient states are visible immediately. */
+/** Active requisition at APL Chinook that has never been booked — demo the walk-in path. */
+REQUISITIONS.push({
+  id: "rq-21",
+  token: "req-2a5b8c",
+  status: "active",
+  patientId: "pat-7",
+  practitionerId: "prac-3",
+  priority: "routine",
+  linkLifetimeDays: 14,
+  issuedAt: relDayAt(-2, 10, 0),
+  expiresAt: relDayAt(12, 10, 0),
+  clinicalNotes: "Pre-operative creatinine and electrolytes.",
+  tests: [
+    {
+      id: "ot-26",
+      coding: {
+        system: "http://loinc.org",
+        code: "24323-8",
+        display: "Comprehensive metabolic 2000 panel - Serum or Plasma",
+      },
+      specimen: "Serum",
+      modality: "lab",
+    },
+  ],
+});
 function seedReport(requisitionId: string, hoursAgo: number) {
   const req = REQUISITIONS.find((r) => r.id === requisitionId)!;
   return buildReport(req, new Date(Date.now() - hoursAgo * 3_600_000));
