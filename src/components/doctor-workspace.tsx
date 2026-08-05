@@ -12,6 +12,7 @@ import {
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { StatusBadge } from "@/components/status-badge";
@@ -485,6 +486,7 @@ function ReportRow({
               {needsDecision ? "Sign off & release" : "Acknowledge"}
             </button>
           ) : null}
+          <TooltipProvider delayDuration={200}>
           <Tooltip>
             <TooltipTrigger asChild>
               <button
@@ -498,6 +500,7 @@ function ReportRow({
             </TooltipTrigger>
             <TooltipContent>Inspect FHIR DiagnosticReport</TooltipContent>
           </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
     </li>
