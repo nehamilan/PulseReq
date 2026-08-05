@@ -24,12 +24,14 @@ import {
 } from "./results";
 import {
   CENTERS,
+  DEMO_ANCHOR,
   EXTENSION_REQUESTS,
   PATIENTS,
   PRACTITIONERS,
   REPORTS,
   REQUISITIONS,
 } from "./seed-data";
+
 
 interface RequisitionStore {
   requisitions: Requisition[];
