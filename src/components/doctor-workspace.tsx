@@ -42,7 +42,7 @@ type TabId = "attention" | "log";
 
 /** Doctor Portal right-hand workspace: actionable queue + issued log. */
 export function DoctorWorkspace() {
-  const { requisitions, pendingExtensions, reports } = useRequisitions();
+  const { requisitions, pendingExtensions, reports, now } = useRequisitions();
   const search = useSearch({ from: "/order" });
   const navigate = useNavigate({ from: "/order" });
   const tab: TabId = search.tab === "log" ? "log" : "attention";
@@ -58,7 +58,7 @@ export function DoctorWorkspace() {
 
   const attentionCount =
     pendingExtensions().length +
-    reports.filter((r) => r.status !== "released").length;
+    reports.filter((r) => !isVisibleToPatient(r, now())).length;
 
   const tabs: { id: TabId; label: string; count: number }[] = [
     { id: "attention", label: "Needs attention", count: attentionCount },
@@ -179,14 +179,20 @@ function NeedsAttention() {
       });
   }, [reports, requisitions]);
 
-  const open = rows.filter((r) => r.report.status !== "released");
-  const resolved = rows.filter((r) => r.report.status === "released");
+  // Group by what the patient can actually see, not by whether a clinician
+  // clicked sign-off: auto-released (embargo lapsed) reports belong with the
+  // released ones, and only true decisions stay at the top.
+  const open = rows.filter((r) => !isVisibleToPatient(r.report, clock));
+  const resolved = rows.filter((r) => isVisibleToPatient(r.report, clock));
+  const unacknowledged = resolved.filter(
+    (r) => r.report.status !== "released",
+  ).length;
   const inspect = rows.find((r) => r.report.id === inspectId);
 
   return (
     <Panel
       title="Needs attention"
-      hint={`${pending.length} extension${pending.length === 1 ? "" : "s"} · ${open.length} awaiting release`}
+      hint={`${pending.length} extension${pending.length === 1 ? "" : "s"} · ${open.length} awaiting decision`}
     >
       <div className="space-y-6">
         <section>
@@ -264,7 +270,8 @@ function NeedsAttention() {
             <>
               {open.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Nothing awaiting sign-off.
+                  Nothing awaiting your decision — every published report is
+                  visible to the patient.
                 </p>
               ) : (
                 <ul className="divide-y divide-border rounded-md border border-border">
@@ -306,7 +313,10 @@ function NeedsAttention() {
               {resolved.length > 0 ? (
                 <details className="mt-3">
                   <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                    Released results · {resolved.length}
+                    Released to patient · {resolved.length}
+                    {unacknowledged > 0
+                      ? ` · ${unacknowledged} unacknowledged`
+                      : ""}
                   </summary>
                   <ul className="mt-2 divide-y divide-border rounded-md border border-border">
                     {resolved.map(({ report, req }) => {
@@ -329,6 +339,20 @@ function NeedsAttention() {
                             );
                             setInspectId(report.id);
                           }}
+                          onRelease={
+                            report.status === "released"
+                              ? undefined
+                              : () => {
+                                  releaseResults(
+                                    report.requisitionId,
+                                    "prac-1",
+                                  );
+                                  toast.success("Acknowledged", {
+                                    description:
+                                      "Auto-released report marked as reviewed.",
+                                  });
+                                }
+                          }
                         />
                       );
                     })}
