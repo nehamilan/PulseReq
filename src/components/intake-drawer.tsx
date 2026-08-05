@@ -40,9 +40,11 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 export function IntakeDrawer({
   req,
+  centerId,
   onOpenChange,
 }: {
   req?: Requisition;
+  centerId?: string;
   onOpenChange: (open: boolean) => void;
 }) {
   const {
@@ -131,7 +133,9 @@ export function IntakeDrawer({
                     label="Appointment"
                     value={
                       req.appointmentAt
-                        ? formatClinicalDateTime(req.appointmentAt)
+                        ? req.isWalkIn
+                          ? `${formatClinicalDateTime(req.appointmentAt)} · Walk-in`
+                          : formatClinicalDateTime(req.appointmentAt)
                         : "Not booked"
                     }
                   />
