@@ -102,9 +102,8 @@ function LabPage() {
       );
   }, [requisitions, patients, centerId, tab, search, now]);
 
-
-
   const todaysQueue = useMemo(
+
     () =>
       requisitions.filter(
         (r) =>
