@@ -246,9 +246,15 @@ function LabPage() {
                   DOB {formatDob(matchPatient.birthDate)} ·{" "}
                   {formatAddress(matchPatient.address)}
                 </p>
-                <p className="mt-1.5 text-xs font-medium text-success">
-                  Open intake sheet →
-                </p>
+                {match.status === "active" ? (
+                  <p className="mt-1.5 text-xs font-medium text-warning-foreground">
+                    No appointment booked — check in as walk-in
+                  </p>
+                ) : (
+                  <p className="mt-1.5 text-xs font-medium text-success">
+                    Open intake sheet →
+                  </p>
+                )}
               </button>
             ) : (
               <div className="rounded-md border border-destructive/25 bg-destructive/10 p-3 text-destructive">
@@ -350,6 +356,11 @@ function LabPage() {
                       </td>
                       <td className="py-3">
                         <StatusBadge status={effectiveStatus(req)} />
+                        {req.isWalkIn ? (
+                          <span className="ml-1.5 inline-flex rounded-full border border-border bg-muted/50 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                            Walk-in
+                          </span>
+                        ) : null}
                       </td>
                       <td className="py-3">
                         {report ? (
@@ -379,6 +390,7 @@ function LabPage() {
 
       <IntakeDrawer
         req={openReq}
+        centerId={centerId}
         onOpenChange={(open) => {
           if (!open) setOpenId(null);
         }}

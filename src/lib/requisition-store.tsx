@@ -58,8 +58,15 @@ interface RequisitionStore {
     actor: string,
     detail: string,
   ) => void;
-  /** Booked → checked-in: patient has arrived and been identity-verified. */
-  checkInPatient: (requisitionId: string, actor: string) => void;
+  /** Booked → checked-in: patient has arrived and been identity-verified.
+   *  When centerId and appointmentAt are supplied, the patient is treated as a walk-in.
+   */
+  checkInPatient: (
+    requisitionId: string,
+    actor: string,
+    centerId?: string,
+    appointmentAt?: string,
+  ) => void;
   /** Checked-in → completed: labels printed, order handed to the LIS/worklist. */
   completeIntake: (requisitionId: string, actor: string) => void;
   /** Clinician withdraws an unresulted order; kills the patient link. */
@@ -261,10 +268,18 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
           .sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime()),
       logAudit: (requisitionId, action, actor, detail) =>
         append([{ requisitionId, action, actor, detail }]),
-      checkInPatient: (requisitionId, actor) => {
+      checkInPatient: (requisitionId, actor, centerId, appointmentAt) => {
         setRequisitions((prev) =>
           prev.map((r) =>
-            r.id === requisitionId ? { ...r, status: "checked-in" } : r,
+            r.id === requisitionId
+              ? {
+                  ...r,
+                  status: "checked-in",
+                  centerId: centerId ?? r.centerId,
+                  appointmentAt: appointmentAt ?? r.appointmentAt,
+                  isWalkIn: !r.appointmentAt ? true : r.isWalkIn,
+                }
+              : r,
           ),
         );
         append([
@@ -272,7 +287,10 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
             requisitionId,
             action: "patient.checked-in",
             actor,
-            detail: "Patient arrived · identity verified at intake",
+            detail:
+              !centerId && !appointmentAt
+                ? "Patient arrived · identity verified at intake"
+                : "Patient arrived · identity verified at intake · walk-in · no prior appointment",
           },
         ]);
       },

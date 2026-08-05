@@ -40,9 +40,11 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 export function IntakeDrawer({
   req,
+  centerId,
   onOpenChange,
 }: {
   req?: Requisition;
+  centerId?: string;
   onOpenChange: (open: boolean) => void;
 }) {
   const {
@@ -131,7 +133,9 @@ export function IntakeDrawer({
                     label="Appointment"
                     value={
                       req.appointmentAt
-                        ? formatClinicalDateTime(req.appointmentAt)
+                        ? req.isWalkIn
+                          ? `${formatClinicalDateTime(req.appointmentAt)} · Walk-in`
+                          : formatClinicalDateTime(req.appointmentAt)
                         : "Not booked"
                     }
                   />
@@ -249,6 +253,18 @@ export function IntakeDrawer({
                   {imagingOnly
                     ? "Release to imaging worklist"
                     : "Print labels & complete intake"}
+                </Button>
+              ) : req.status === "active" ? (
+                <Button
+                  onClick={() => {
+                    checkInPatient(req.id, "lab-tech", centerId, now().toISOString());
+                    toast.success("Patient checked in as walk-in", {
+                      description:
+                        "Identity verified · order ready for collection.",
+                    });
+                  }}
+                >
+                  Check in as walk-in
                 </Button>
               ) : (
                 <Button
