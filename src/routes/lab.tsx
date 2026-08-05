@@ -144,9 +144,8 @@ function LabPage() {
     }
   };
 
-
-
   return (
+
     <PageShell
       eyebrow="Role · Diagnostic centre"
       title={`Lab Tech Dashboard — ${center?.name ?? "Diagnostic centre"}`}
