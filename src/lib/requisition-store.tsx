@@ -277,7 +277,7 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
                   status: "checked-in",
                   centerId: centerId ?? r.centerId,
                   appointmentAt: appointmentAt ?? r.appointmentAt,
-                  isWalkIn: !r.appointmentAt && !r.centerId ? true : r.isWalkIn,
+                  isWalkIn: !r.appointmentAt ? true : r.isWalkIn,
                 }
               : r,
           ),
