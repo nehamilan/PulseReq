@@ -103,19 +103,20 @@ function LabPage() {
   }, [requisitions, patients, centerId, tab, search, now]);
 
   const todaysQueue = useMemo(
-
     () =>
       requisitions.filter(
         (r) =>
           r.centerId === centerId &&
           r.appointmentAt &&
-          isSameDay(r.appointmentAt, now()),
+          (isSameDay(r.appointmentAt, now()) ||
+            r.status === "completed" ||
+            r.status === "checked-in"),
       ),
     [requisitions, centerId, now],
   );
 
-
   const openReq: Requisition | undefined = openId
+
     ? requisitions.find((r) => r.id === openId)
     : undefined;
 
