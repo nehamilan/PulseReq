@@ -59,10 +59,12 @@ function LabPage() {
     findByToken,
     reportFor,
     now,
+    reports,
     clockOffsetDays,
     advanceClock,
     resetClock,
   } = useRequisitions();
+
   const [query, setQuery] = useState("");
   const [centerId, setCenterId] = useState("ctr-1");
   const [tab, setTab] = useState<QueueTab>("today");
