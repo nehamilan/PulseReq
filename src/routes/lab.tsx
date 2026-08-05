@@ -81,8 +81,9 @@ function LabPage() {
       .filter((r) => {
         if (tab === "all") return true;
         const today = isSameDay(r.appointmentAt!, simulatedNow);
+        const inProgress = r.status === "completed" || r.status === "checked-in";
         return tab === "today"
-          ? today
+          ? today || inProgress
           : !today && new Date(r.appointmentAt!).getTime() > simulatedNow.getTime();
       })
       .filter((r) => {
@@ -100,6 +101,7 @@ function LabPage() {
           new Date(b.appointmentAt!).getTime(),
       );
   }, [requisitions, patients, centerId, tab, search, now]);
+
 
 
   const todaysQueue = useMemo(
