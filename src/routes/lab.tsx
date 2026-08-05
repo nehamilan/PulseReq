@@ -74,16 +74,16 @@ function LabPage() {
   const center = getCenter(centerId);
 
   const scoped = useMemo(() => {
-    const now = new Date();
+    const simulatedNow = now();
     const term = search.trim().toLowerCase();
     return requisitions
       .filter((r) => r.centerId === centerId && r.appointmentAt)
       .filter((r) => {
         if (tab === "all") return true;
-        const today = isSameDay(r.appointmentAt!, now);
+        const today = isSameDay(r.appointmentAt!, simulatedNow);
         return tab === "today"
           ? today
-          : !today && new Date(r.appointmentAt!).getTime() > now.getTime();
+          : !today && new Date(r.appointmentAt!).getTime() > simulatedNow.getTime();
       })
       .filter((r) => {
         if (!term) return true;
@@ -99,7 +99,8 @@ function LabPage() {
           new Date(a.appointmentAt!).getTime() -
           new Date(b.appointmentAt!).getTime(),
       );
-  }, [requisitions, patients, centerId, tab, search]);
+  }, [requisitions, patients, centerId, tab, search, now]);
+
 
   const todaysQueue = useMemo(
     () =>
