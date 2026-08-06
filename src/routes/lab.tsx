@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Info } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -8,6 +9,12 @@ import { Panel, PageShell } from "@/components/page-shell";
 import { ReleaseStateChip } from "@/components/result-chips";
 import { StatusBadge } from "@/components/status-badge";
 import { PriorityBadge } from "@/components/priority-badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   effectiveStatus,
   formatAddress,
