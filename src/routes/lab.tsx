@@ -187,7 +187,27 @@ function LabPage() {
             </div>
           </div>
           <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-            Embargo clock
+            <div className="flex items-center gap-1">
+              Embargo clock
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="inline-flex items-center justify-center rounded-full p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground"
+                      aria-label="What is the embargo clock?"
+                    >
+                      <Info className="h-3.5 w-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" sideOffset={4}>
+                    <p className="max-w-[16rem]">
+                      Fast-forward demo time to see embargoed results become visible to patients.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
             <div className="mt-1 flex items-center gap-1.5">
               <button
                 type="button"
@@ -205,9 +225,6 @@ function LabPage() {
                 {clockOffsetDays === 0 ? "now" : `+${clockOffsetDays}d · reset`}
               </button>
             </div>
-            <p className="mt-1 max-w-[16rem] text-[10px] font-normal normal-case tracking-normal text-muted-foreground">
-              Fast-forward demo time to see embargoed results become visible to patients.
-            </p>
           </div>
         </div>
       }
