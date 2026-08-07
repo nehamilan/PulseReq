@@ -319,8 +319,8 @@ function LabPage() {
             <div className="mt-4 flex items-start gap-2 rounded-md border border-border bg-muted/50 p-3 text-xs text-muted-foreground">
               <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               <p>
-                {center?.name ?? "This centre"} is appointment-only. Walk-in
-                patients need a booked requisition link before intake.
+                {center?.name ?? "This centre"} is appointment-only. Walk-ins
+                not allowed.
               </p>
             </div>
           )}
