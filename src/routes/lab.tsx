@@ -299,6 +299,31 @@ function LabPage() {
               </div>
             )}
           </div>
+
+          {center?.walkInsAccepted ? (
+            <>
+              <div className="my-4 flex items-center gap-3">
+                <span className="h-px flex-1 bg-border" />
+                <span className="text-xs text-muted-foreground">or</span>
+                <span className="h-px flex-1 bg-border" />
+              </div>
+              <Link
+                to="/order"
+                className="flex w-full items-center justify-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium text-foreground transition hover:bg-accent"
+              >
+                <FilePlus2 className="h-4 w-4" />
+                Enter requisition manually (walk-in)
+              </Link>
+            </>
+          ) : (
+            <div className="mt-4 flex items-start gap-2 rounded-md border border-border bg-muted/50 p-3 text-xs text-muted-foreground">
+              <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <p>
+                {center?.name ?? "This centre"} is appointment-only. Walk-in
+                patients need a booked requisition link before intake.
+              </p>
+            </div>
+          )}
         </Panel>
 
         <Panel
