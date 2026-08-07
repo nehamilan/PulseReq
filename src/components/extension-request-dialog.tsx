@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ClockPlus } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -117,9 +118,10 @@ export function ExtensionRequestControl({
           <DialogTrigger asChild>
             <button
               type="button"
-              className="inline-flex whitespace-nowrap rounded-full border border-warning/35 bg-warning/15 px-2.5 py-1 text-xs font-medium text-warning-foreground transition-colors hover:bg-warning/25"
+              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-sm text-xs font-medium text-primary underline underline-offset-2 transition-colors hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              Extension available
+              <ClockPlus className="size-3.5 shrink-0" aria-hidden />
+              Request extension
             </button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">

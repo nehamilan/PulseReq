@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Eye } from "lucide-react";
 
 import { PageShell, Panel } from "@/components/page-shell";
 import {
@@ -177,9 +178,10 @@ function PatientPortal() {
                               to="/r/$token"
                               params={{ token: req.token }}
                               search={{ tab: "results" }}
-                              className="inline-flex whitespace-nowrap rounded-full border border-success/35 bg-success/15 px-2.5 py-1 text-xs font-medium text-success transition-colors hover:bg-success/25"
+                              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-sm text-xs font-medium text-primary underline underline-offset-2 transition-colors hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                             >
-                              Results ready
+                              <Eye className="size-3.5 shrink-0" aria-hidden />
+                              View results
                             </Link>
                           ) : (
                             <ExtensionRequestControl
