@@ -191,6 +191,7 @@ export const CENTERS: DiagnosticCenter[] = [
     capabilities: ["Phlebotomy", "Urinalysis", "ECG"],
     nextAvailable: "2026-07-31T14:30:00.000Z",
     distanceKm: 1.2,
+    walkInsAccepted: true,
   },
   {
     id: "ctr-2",
@@ -201,6 +202,7 @@ export const CENTERS: DiagnosticCenter[] = [
     capabilities: ["Phlebotomy", "X-Ray", "Ultrasound"],
     nextAvailable: "2026-08-01T09:00:00.000Z",
     distanceKm: 4.5,
+    walkInsAccepted: false,
   },
   {
     id: "ctr-3",
@@ -211,6 +213,7 @@ export const CENTERS: DiagnosticCenter[] = [
     capabilities: ["Phlebotomy", "Urinalysis"],
     nextAvailable: "2026-07-31T16:15:00.000Z",
     distanceKm: 6.1,
+    walkInsAccepted: false,
   },
   {
     id: "ctr-4",
@@ -221,6 +224,7 @@ export const CENTERS: DiagnosticCenter[] = [
     capabilities: ["X-Ray", "Ultrasound", "CT", "Mammography"],
     nextAvailable: "2026-08-01T08:45:00.000Z",
     distanceKm: 9.8,
+    walkInsAccepted: true,
   },
   {
     id: "ctr-5",
@@ -231,6 +235,7 @@ export const CENTERS: DiagnosticCenter[] = [
     capabilities: ["Phlebotomy", "Urinalysis", "ECG"],
     nextAvailable: "2026-07-31T13:00:00.000Z",
     distanceKm: 2.7,
+    walkInsAccepted: false,
   },
 ];
 

@@ -99,6 +99,8 @@ export interface DiagnosticCenter {
   nextAvailable: string;
   /** Simulated distance from the patient's home address, in km. */
   distanceKm: number;
+  /** Whether this centre accepts walk-in patients without a booked slot. */
+  walkInsAccepted: boolean;
 }
 
 export interface Requisition {
