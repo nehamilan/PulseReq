@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Eye } from "lucide-react";
 
 import { PageShell, Panel } from "@/components/page-shell";
 import {
