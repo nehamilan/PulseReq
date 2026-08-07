@@ -161,7 +161,8 @@ export function canRequestExtension(
   req: Requisition,
   now: Date = new Date(),
 ): boolean {
-  if (req.status !== "active") return false;
+  // Booked requisitions can also expire (missed appointment / rebooking needed).
+  if (req.status !== "active" && req.status !== "booked") return false;
   return isExpired(req, now) || hoursRemaining(req, now) <= 48;
 }
 
