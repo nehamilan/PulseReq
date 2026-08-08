@@ -229,8 +229,8 @@ export function ExtensionPill({
             <span className="size-1.5 rounded-full bg-current" />
             Extension requested
           </span>
-          <span className="whitespace-nowrap text-xs text-muted-foreground">
-            +{request.requestedDays} days · awaiting clinician
+          <span className="text-xs text-muted-foreground">
+            +{request.requestedDays} days
           </span>
         </div>
       );
