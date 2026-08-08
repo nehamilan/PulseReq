@@ -221,6 +221,43 @@ export function ExtensionPill({
   compact?: boolean;
 }) {
   const margin = compact ? "" : "mt-3 ";
+  if (compact) {
+    if (request.status === "pending") {
+      return (
+        <div className="flex flex-col items-start gap-1">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-warning/35 bg-warning/15 px-2.5 py-0.5 text-xs font-medium text-warning-foreground">
+            <span className="size-1.5 rounded-full bg-current" />
+            Extension requested
+          </span>
+          <span className="text-xs text-muted-foreground">
+            +{request.requestedDays} days · awaiting clinician
+          </span>
+        </div>
+      );
+    }
+    if (request.status === "approved") {
+      return (
+        <div className="flex flex-col items-start gap-1">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-success/35 bg-success/10 px-2.5 py-0.5 text-xs font-medium text-success">
+            <span className="size-1.5 rounded-full bg-current" />
+            Extended
+          </span>
+          <span className="text-xs text-muted-foreground">
+            until {formatClinicalDate(req.expiresAt)}
+          </span>
+        </div>
+      );
+    }
+    return (
+      <div className="flex flex-col items-start gap-1">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-destructive/35 bg-destructive/10 px-2.5 py-0.5 text-xs font-medium text-destructive">
+          <span className="size-1.5 rounded-full bg-current" />
+          Extension declined
+        </span>
+        <span className="text-xs text-muted-foreground">Contact the clinic</span>
+      </div>
+    );
+  }
   if (request.status === "pending") {
     return (
       <p className={`${margin}inline-block rounded-full border border-warning/35 bg-warning/15 px-2.5 py-1 text-xs text-warning-foreground`}>
@@ -230,7 +267,7 @@ export function ExtensionPill({
   }
   if (request.status === "approved") {
     return (
-      <p className={`${margin}inline-block rounded-full border border-success/35 bg-success/15 px-2.5 py-1 text-xs text-success`}>
+      <p className={`${margin}inline-block rounded-full border border-success/35 bg-success/10 px-2.5 py-1 text-xs text-success`}>
         Extended to {formatClinicalDate(req.expiresAt)}
       </p>
     );
