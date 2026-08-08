@@ -242,7 +242,7 @@ export function ExtensionPill({
             <span className="size-1.5 rounded-full bg-current" />
             Extended
           </span>
-          <span className="whitespace-nowrap text-xs text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             until {formatClinicalDate(req.expiresAt)}
           </span>
         </div>
