@@ -254,7 +254,7 @@ export function ExtensionPill({
           <span className="size-1.5 rounded-full bg-current" />
           Extension declined
         </span>
-        <span className="whitespace-nowrap text-xs text-muted-foreground">Contact the clinic</span>
+        <span className="text-xs text-muted-foreground">Contact the clinic</span>
       </div>
     );
   }
