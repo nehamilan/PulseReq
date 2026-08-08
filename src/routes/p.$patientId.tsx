@@ -17,10 +17,43 @@ import {
   formatClinicalDate,
   patientName,
 } from "@/lib/domain";
+import type { OrderedTest } from "@/lib/domain";
 import { useRequisitions } from "@/lib/requisition-store";
 import { isVisibleToPatient } from "@/lib/results";
 
 type SortKey = "status" | "issued" | "expiry";
+
+/** Test cell: full first test, with inline disclosure for bundled extras. */
+function TestCell({ tests }: { tests: OrderedTest[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const extra = tests.length - 1;
+  const shown = expanded ? tests : tests.slice(0, 1);
+
+  return (
+    <div>
+      {shown.map((t) => (
+        <div key={t.id} className="mt-2 first:mt-0">
+          <p className="text-sm font-medium text-foreground">
+            {t.coding.display}
+          </p>
+          <p className="mt-1 font-mono text-xs text-muted-foreground tabular">
+            LOINC {t.coding.code}
+          </p>
+        </div>
+      ))}
+      {extra > 0 ? (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+          className="mt-1.5 inline-flex rounded-sm text-xs font-medium text-primary underline underline-offset-2 transition-colors hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          {expanded ? "Show less" : `+${extra} more test${extra === 1 ? "" : "s"}`}
+        </button>
+      ) : null}
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/p/$patientId")({
   head: () => ({
@@ -110,7 +143,14 @@ function PatientPortal() {
           </p>
         ) : (
           <div className="-mx-1 overflow-x-auto px-1">
-            <table className="w-full border-collapse text-left">
+            <table className="w-full min-w-[760px] table-fixed border-collapse text-left">
+              <colgroup>
+                <col style={{ width: "42%" }} />
+                <col style={{ width: "20%" }} />
+                <col style={{ width: "14%" }} />
+                <col style={{ width: "14%" }} />
+                <col style={{ width: "10%", minWidth: "180px" }} />
+              </colgroup>
               <thead>
                 <tr className="border-b border-border">
                   <th className="py-2 pr-3 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -132,9 +172,6 @@ function PatientPortal() {
               <tbody className="divide-y divide-border">
                 {rows.map((req) => {
                   const status = effectiveStatus(req);
-                  const testNames = req.tests
-                    .map((t) => t.coding.display)
-                    .join(" · ");
                   const report = reportFor(req.id);
                   // Expiry only blocks booking — a released report stays reachable.
                   const resultsReady =
@@ -145,12 +182,7 @@ function PatientPortal() {
                   return (
                     <tr key={req.id} className="align-top">
                       <td className="py-3 pr-3">
-                        <p className="text-sm font-medium text-foreground">
-                          {testNames}
-                        </p>
-                        <p className="mt-1 font-mono text-xs text-muted-foreground tabular">
-                          LOINC {req.tests.map((t) => t.coding.code).join(" · ")}
-                        </p>
+                        <TestCell tests={req.tests} />
                       </td>
                       <td className="py-3 pr-3">
                         <div className="flex flex-col items-start gap-1">
