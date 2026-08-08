@@ -110,7 +110,14 @@ function PatientPortal() {
           </p>
         ) : (
           <div className="-mx-1 overflow-x-auto px-1">
-            <table className="w-full border-collapse text-left">
+            <table className="w-full min-w-[760px] table-fixed border-collapse text-left">
+              <colgroup>
+                <col style={{ width: "42%" }} />
+                <col style={{ width: "20%" }} />
+                <col style={{ width: "14%" }} />
+                <col style={{ width: "14%" }} />
+                <col style={{ width: "10%", minWidth: "180px" }} />
+              </colgroup>
               <thead>
                 <tr className="border-b border-border">
                   <th className="py-2 pr-3 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -132,9 +139,6 @@ function PatientPortal() {
               <tbody className="divide-y divide-border">
                 {rows.map((req) => {
                   const status = effectiveStatus(req);
-                  const testNames = req.tests
-                    .map((t) => t.coding.display)
-                    .join(" · ");
                   const report = reportFor(req.id);
                   // Expiry only blocks booking — a released report stays reachable.
                   const resultsReady =
@@ -145,12 +149,7 @@ function PatientPortal() {
                   return (
                     <tr key={req.id} className="align-top">
                       <td className="py-3 pr-3">
-                        <p className="text-sm font-medium text-foreground">
-                          {testNames}
-                        </p>
-                        <p className="mt-1 font-mono text-xs text-muted-foreground tabular">
-                          LOINC {req.tests.map((t) => t.coding.code).join(" · ")}
-                        </p>
+                        <TestCell tests={req.tests} />
                       </td>
                       <td className="py-3 pr-3">
                         <div className="flex flex-col items-start gap-1">
