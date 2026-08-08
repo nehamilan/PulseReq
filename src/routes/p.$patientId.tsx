@@ -17,10 +17,43 @@ import {
   formatClinicalDate,
   patientName,
 } from "@/lib/domain";
+import type { OrderedTest } from "@/lib/domain";
 import { useRequisitions } from "@/lib/requisition-store";
 import { isVisibleToPatient } from "@/lib/results";
 
 type SortKey = "status" | "issued" | "expiry";
+
+/** Test cell: full first test, with inline disclosure for bundled extras. */
+function TestCell({ tests }: { tests: OrderedTest[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const extra = tests.length - 1;
+  const shown = expanded ? tests : tests.slice(0, 1);
+
+  return (
+    <div>
+      {shown.map((t) => (
+        <div key={t.id} className="mt-2 first:mt-0">
+          <p className="text-sm font-medium text-foreground">
+            {t.coding.display}
+          </p>
+          <p className="mt-1 font-mono text-xs text-muted-foreground tabular">
+            LOINC {t.coding.code}
+          </p>
+        </div>
+      ))}
+      {extra > 0 ? (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+          className="mt-1.5 inline-flex rounded-sm text-xs font-medium text-primary underline underline-offset-2 transition-colors hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          {expanded ? "Show less" : `+${extra} more test${extra === 1 ? "" : "s"}`}
+        </button>
+      ) : null}
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/p/$patientId")({
   head: () => ({
