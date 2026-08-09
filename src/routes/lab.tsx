@@ -48,6 +48,13 @@ export const Route = createFileRoute("/lab")({
 });
 
 type QueueTab = "today" | "upcoming" | "all";
+type QueueSort = "time" | "priority";
+
+const PRIORITY_RANK: Record<Requisition["priority"], number> = {
+  stat: 0,
+  urgent: 1,
+  routine: 2,
+};
 
 const TABS: { id: QueueTab; label: string }[] = [
   { id: "today", label: "Today" },
@@ -74,6 +81,7 @@ function LabPage() {
   const [query, setQuery] = useState("");
   const [centerId, setCenterId] = useState("ctr-1");
   const [tab, setTab] = useState<QueueTab>("today");
+  const [sortBy, setSortBy] = useState<QueueSort>("time");
   const [search, setSearch] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -101,12 +109,17 @@ function LabPage() {
           (p ? p.phn.toLowerCase().includes(term) : false)
         );
       })
-      .sort(
-        (a, b) =>
+      .sort((a, b) => {
+        const byTime =
           new Date(a.appointmentAt!).getTime() -
-          new Date(b.appointmentAt!).getTime(),
-      );
-  }, [requisitions, patients, centerId, tab, search, now]);
+          new Date(b.appointmentAt!).getTime();
+        if (sortBy === "priority") {
+          const rank = PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority];
+          if (rank !== 0) return rank;
+        }
+        return byTime;
+      });
+  }, [requisitions, patients, centerId, tab, search, now, sortBy]);
 
   const todaysQueue = useMemo(
     () =>
@@ -355,6 +368,40 @@ function LabPage() {
                 </button>
               ))}
             </div>
+            <div className="flex items-center gap-2">
+              <span
+                id="queue-sort-label"
+                className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground"
+              >
+                Sort by
+              </span>
+              <div
+                role="group"
+                aria-labelledby="queue-sort-label"
+                className="inline-flex rounded-md border border-border p-0.5"
+              >
+                {(
+                  [
+                    { id: "time", label: "Time" },
+                    { id: "priority", label: "Priority" },
+                  ] as { id: QueueSort; label: string }[]
+                ).map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    aria-pressed={sortBy === s.id}
+                    onClick={() => setSortBy(s.id)}
+                    className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                      sortBy === s.id
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="w-56">
               <label
                 htmlFor="queue-filter"
@@ -373,11 +420,19 @@ function LabPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full table-fixed text-left text-sm">
+              <colgroup>
+                <col className="w-[18%]" />
+                <col className="w-[12%]" />
+                <col className="w-[22%]" />
+                <col className="w-[11%]" />
+                <col className="w-[13%]" />
+                <col className="w-[12%]" />
+                <col className="w-[12%]" />
+              </colgroup>
               <thead>
                 <tr className="border-b border-border text-[11px] uppercase tracking-wide text-muted-foreground">
-                  <th className="pb-2 font-medium">Time</th>
-                  <th className="pb-2 font-medium">Token</th>
+                  <th className="pb-2 font-medium">Time / Token</th>
                   <th className="pb-2 font-medium">Priority</th>
                   <th className="pb-2 font-medium">Patient</th>
                   <th className="pb-2 font-medium">DOB</th>
@@ -408,9 +463,9 @@ function LabPage() {
                         {req.appointmentAt
                           ? formatSlotTime(req.appointmentAt)
                           : "—"}
-                      </td>
-                      <td className="py-3 font-mono text-xs text-foreground tabular">
-                        {req.token}
+                        <span className="block font-mono text-xs font-normal text-muted-foreground tabular">
+                          {req.token}
+                        </span>
                       </td>
                       <td className="py-3">
                         <PriorityBadge priority={req.priority} />
@@ -448,7 +503,7 @@ function LabPage() {
                 {scoped.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={8}
+                      colSpan={7}
                       className="py-6 text-center text-sm text-muted-foreground"
                     >
                       No appointments match this view.
