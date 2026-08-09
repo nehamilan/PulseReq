@@ -16,6 +16,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   effectiveStatus,
   formatAddress,
   formatDob,
@@ -202,24 +207,28 @@ function LabPage() {
           <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
             <div className="flex items-center gap-1">
               Embargo clock
-              <TooltipProvider delayDuration={200}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      className="inline-flex items-center justify-center rounded-full p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground"
-                      aria-label="What is the embargo clock?"
-                    >
-                      <Info className="h-3.5 w-3.5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" sideOffset={4}>
-                    <p className="max-w-[16rem]">
-                      Fast-forward demo time to see embargoed results become visible to patients.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center rounded-full p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                    aria-label="What is the embargo clock"
+                  >
+                    <Info className="h-3.5 w-3.5" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  side="bottom"
+                  align="start"
+                  sideOffset={6}
+                  className="w-64 p-3"
+                >
+                  <p className="text-xs font-normal normal-case tracking-normal text-muted-foreground">
+                    Sensitive results stay hidden from the patient for this many
+                    days after publish, unless a clinician releases them sooner.
+                  </p>
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="mt-1 flex items-center gap-1.5">
               <button
