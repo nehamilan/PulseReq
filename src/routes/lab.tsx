@@ -10,12 +10,6 @@ import { ReleaseStateChip } from "@/components/result-chips";
 import { StatusBadge } from "@/components/status-badge";
 import { PriorityBadge } from "@/components/priority-badge";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -361,13 +355,21 @@ function LabPage() {
                 </button>
               ))}
             </div>
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Filter by name, PHN or token"
-              aria-label="Filter queue"
-              className="w-56 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/25"
-            />
+            <div className="w-56">
+              <label
+                htmlFor="queue-filter"
+                className="block text-[11px] font-medium uppercase tracking-wide text-muted-foreground"
+              >
+                Filter queue
+              </label>
+              <input
+                id="queue-filter"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Filter by name, PHN or token"
+                className="mt-1.5 w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/25"
+              />
+            </div>
           </div>
 
           <div className="overflow-x-auto">
