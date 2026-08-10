@@ -420,7 +420,7 @@ function LabPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full table-fixed text-left text-sm">
+            <table className="w-full min-w-[960px] table-fixed text-left text-sm">
               <colgroup>
                 <col className="w-[13%]" />
                 <col className="w-[13%]" />
