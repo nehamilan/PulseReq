@@ -1,6 +1,6 @@
 # PulseReq
 
-**Paper lab requisitions, replaced by a governed link.**
+**Paper diagnostic requisitions, replaced by a tokenized, expiring link.**
 
 PulseReq is a working frontend prototype of an e-requisition layer for Canadian ambulatory care. A clinician issues a LOINC-coded diagnostic order as a secure, expiring link; the patient books and checks in with it; the diagnostic centre resolves the token into structured data instead of re-keying a printed form; results flow back under an explicit release policy.
 
