@@ -204,6 +204,7 @@ function LabPage() {
             Simulated now
             <div className="mt-1 flex items-center gap-1.5 rounded-md border border-input bg-background px-2.5 py-2 text-xs font-normal normal-case tracking-normal text-foreground tabular">
               {simulatedNow.toLocaleDateString("en-CA", {
+                timeZone: "America/Edmonton",
                 month: "short",
                 day: "numeric",
                 hour: "2-digit",
