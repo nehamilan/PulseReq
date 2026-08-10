@@ -18,7 +18,8 @@ import { CATALOG_CATEGORIES, TEST_CATALOG } from "@/lib/seed-data";
 import { newToken } from "@/lib/tokens";
 
 const URGENCY = [
-  { key: "routine" as const, label: "Normal" },
+  { key: "routine" as const, label: "Routine" },
+  { key: "urgent" as const, label: "Urgent" },
   { key: "stat" as const, label: "STAT" },
 ];
 
@@ -36,7 +37,8 @@ export function OrderForm() {
 
   const [patientId, setPatientId] = useState<string>(patients[0]?.id ?? "");
   const [selected, setSelected] = useState<string[]>([]);
-  const [priority, setPriority] = useState<"routine" | "stat">("routine");
+  const [priority, setPriority] =
+    useState<Requisition["priority"]>("routine");
   const [linkLifetimeDays, setLinkLifetimeDays] = useState<7 | 14 | 21 | 28>(14);
   const [notes, setNotes] = useState("");
   const [created, setCreated] = useState<Requisition | null>(null);
