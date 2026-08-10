@@ -54,7 +54,7 @@ This mirrors real provincial and facility rules (open-results legislation with c
 ## 4. Product decisions worth defending
 
 - **Three roles, one artifact.** The token is the only shared object. Every view is a different lens on the same requisition, which keeps state reasoning honest.
-- **Pills are never clickable.** Status is informational; actions are links. Mixing the two was tested and removed.
+- **Pills are never clickable.** Status is informational; actions are links. 
 - **Fixed-width tables over content-sized ones.** Column positions must not move between rows — clinical scanning depends on positional memory.
 - **Role-aware copy.** The same requisition page speaks differently to a clinician than to a patient. A clinician viewing a patient link sees read-only clinical framing, not "your appointment."
 - **Non-colour priority differentiators.** STAT and URGENT carry distinct icons and weight, not just hue.
