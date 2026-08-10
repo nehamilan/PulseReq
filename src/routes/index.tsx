@@ -73,7 +73,7 @@ const ROLES = [
 const FLOW: { icon: LucideIcon; label: string }[] = [
   { icon: Stethoscope, label: "Clinician" },
   { icon: Link2, label: "Link" },
-  { icon: FlaskConical, label: "Centre" },
+  { icon: FlaskConical, label: "Lab" },
 ];
 
 const PRINCIPLES: {
@@ -100,7 +100,7 @@ const PRINCIPLES: {
   {
     icon: ShieldCheck,
     title: "Safety",
-    body: "Links expire after a clinician-chosen window (3–21 days) and can be revoked. All data here is synthetic — no real patient information.",
+    body: "Links expire after a clinician-chosen window (7–28 days) and can be revoked. Sensitive results stay hidden from the patient until the ordering clinician signs off or an embargo window lapses.",
   },
 ];
 

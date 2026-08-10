@@ -50,7 +50,7 @@ function OrderPage() {
           <Panel title="Interoperability">
             <dl className="grid gap-3">
               <Field label="Coding system" value="LOINC (http://loinc.org)" />
-              <Field label="Link lifetime" value="3 / 7 / 14 / 21 days, configurable at issue" />
+              <Field label="Link lifetime" value="7 / 14 / 21 / 28 days, configurable at issue" />
               <Field label="Export shape" value="FHIR R4 Bundle · collection" />
             </dl>
           </Panel>
