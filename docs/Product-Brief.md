@@ -55,8 +55,6 @@ Depth over breadth, deliberately: extension governance, release policy, and walk
 
 _____________________________________________
 
-** Domain-agnostic pattern: ** a time-bound, policy-gated disclosure workflow — a sensitive artifact becomes visible to its subject only when a rule-defined release condition is met, a human can override in either direction, and every state change is logged.
-
-** Fintech analog: ** an ACH fraud hold that auto-releases a flagged transaction after a review window lapses unless an analyst intervenes — the customer sees the transaction only once released, structurally the same as PulseReq's embargo-then-auto-release logic.
-
-** Security analog: ** coordinated vulnerability disclosure — a reported issue is embargoed from public disclosure until a fix ships or a fixed clock (commonly 90 days) lapses, with the affected vendor able to request an extension — the same embargo / extension-request / release shape as PulseReq.
+**Domain-agnostic pattern:** a time-bound, policy-gated disclosure workflow — a sensitive artifact becomes visible to its subject only when a rule-defined release condition is met, a human can override in either direction, and every state change is logged.
+**Fintech analog:** an ACH fraud hold that auto-releases a flagged transaction after a review window lapses unless an analyst intervenes — the customer sees the transaction only once released, structurally the same as PulseReq's embargo-then-auto-release logic.
+**Security analog:** coordinated vulnerability disclosure — a reported issue is embargoed from public disclosure until a fix ships or a fixed clock (commonly 90 days) lapses, with the affected vendor able to request an extension — the same embargo / extension-request / release shape as PulseReq.
