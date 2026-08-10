@@ -422,13 +422,13 @@ function LabPage() {
           <div className="overflow-x-auto">
             <table className="w-full table-fixed text-left text-sm">
               <colgroup>
-                <col className="w-[18%]" />
-                <col className="w-[12%]" />
-                <col className="w-[22%]" />
+                <col className="w-[14%]" />
+                <col className="w-[10%]" />
+                <col className="w-[16%]" />
                 <col className="w-[11%]" />
                 <col className="w-[13%]" />
-                <col className="w-[12%]" />
-                <col className="w-[12%]" />
+                <col className="w-[16%]" />
+                <col className="w-[20%]" />
               </colgroup>
               <thead>
                 <tr className="border-b border-border text-[11px] uppercase tracking-wide text-muted-foreground">
