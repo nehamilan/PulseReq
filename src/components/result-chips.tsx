@@ -38,26 +38,45 @@ export function ReleaseStateChip({
   now: Date;
 }) {
   const visible = isVisibleToPatient(report, now);
-  const text = visible
-    ? report.status === "released" && report.releasedBy === "policy:auto"
-      ? "Auto-released to patient"
-      : embargoLapsed(report, now) && report.status !== "released"
-        ? "Embargo lapsed · visible to patient"
-        : "Released to patient"
-    : report.policy === "EMBARGO_DELAY"
-      ? `Embargoed until ${report.embargoLiftsAt ? formatClinicalDate(report.embargoLiftsAt) : "review"}`
-      : "Held for clinician review";
+  let label: string;
+  let detail: string | null = null;
+
+  if (visible) {
+    if (report.status === "released" && report.releasedBy === "policy:auto") {
+      label = "Auto-released";
+      detail = "to patient";
+    } else if (embargoLapsed(report, now) && report.status !== "released") {
+      label = "Embargo lapsed";
+      detail = "visible to patient";
+    } else {
+      label = "Released";
+      detail = "to patient";
+    }
+  } else if (report.policy === "EMBARGO_DELAY") {
+    label = "Embargoed";
+    detail = report.embargoLiftsAt
+      ? `until ${formatClinicalDate(report.embargoLiftsAt)}`
+      : "until review";
+  } else {
+    label = "Held for review";
+  }
 
   return (
-    <span
-      className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${
-        visible
-          ? "border-success/25 bg-success/10 text-success"
-          : "border-warning/35 bg-warning/15 text-warning-foreground"
-      }`}
-    >
-      {text}
-    </span>
+    <div className="flex flex-col items-start gap-0.5">
+      <span
+        className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+          visible
+            ? "border-success/25 bg-success/10 text-success"
+            : "border-warning/35 bg-warning/15 text-warning-foreground"
+        }`}
+      >
+        <span className="size-1.5 rounded-full bg-current" />
+        {label}
+      </span>
+      {detail ? (
+        <span className="text-xs text-muted-foreground">{detail}</span>
+      ) : null}
+    </div>
   );
 }
 
