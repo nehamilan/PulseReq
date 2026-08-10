@@ -62,7 +62,7 @@ export function ReleaseStateChip({
   }
 
   return (
-    <div className="flex flex-col items-start gap-0.5">
+    <div className="flex flex-col items-start gap-0.5 text-left">
       <span
         className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-medium ${
           visible
@@ -74,7 +74,7 @@ export function ReleaseStateChip({
         {label}
       </span>
       {detail ? (
-        <span className="text-xs text-muted-foreground">{detail}</span>
+        <span className="pl-0 text-xs text-muted-foreground">{detail}</span>
       ) : null}
     </div>
   );

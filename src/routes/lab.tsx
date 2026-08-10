@@ -422,18 +422,18 @@ function LabPage() {
           <div className="overflow-x-auto">
             <table className="w-full table-fixed text-left text-sm">
               <colgroup>
-                <col className="w-[14%]" />
-                <col className="w-[10%]" />
-                <col className="w-[16%]" />
-                <col className="w-[11%]" />
                 <col className="w-[13%]" />
+                <col className="w-[13%]" />
+                <col className="w-[15%]" />
+                <col className="w-[10%]" />
+                <col className="w-[12%]" />
                 <col className="w-[16%]" />
-                <col className="w-[20%]" />
+                <col className="w-[21%]" />
               </colgroup>
               <thead>
                 <tr className="border-b border-border text-[11px] uppercase tracking-wide text-muted-foreground">
                   <th className="pb-2 font-medium">Time / Token</th>
-                  <th className="pb-2 font-medium">Priority</th>
+                  <th className="pb-2 pr-4 font-medium">Priority</th>
                   <th className="pb-2 font-medium">Patient</th>
                   <th className="pb-2 font-medium">DOB</th>
                   <th className="pb-2 font-medium">Tests</th>
@@ -467,7 +467,7 @@ function LabPage() {
                           {req.token}
                         </span>
                       </td>
-                      <td className="py-3">
+                      <td className="py-3 pr-4">
                         <PriorityBadge priority={req.priority} />
                       </td>
                       <td className="py-3 text-foreground">
