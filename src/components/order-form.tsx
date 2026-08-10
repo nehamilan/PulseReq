@@ -18,7 +18,8 @@ import { CATALOG_CATEGORIES, TEST_CATALOG } from "@/lib/seed-data";
 import { newToken } from "@/lib/tokens";
 
 const URGENCY = [
-  { key: "routine" as const, label: "Normal" },
+  { key: "routine" as const, label: "Routine" },
+  { key: "urgent" as const, label: "Urgent" },
   { key: "stat" as const, label: "STAT" },
 ];
 
