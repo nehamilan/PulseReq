@@ -9,3 +9,9 @@
 
 ## New Requisition
 <img width="477" height="2376" alt="image" src="https://github.com/user-attachments/assets/71e87dc0-fef8-48eb-8174-203df3402796" />
+
+## Individual patient requisition details
+<img width="1728" height="1067" alt="image" src="https://github.com/user-attachments/assets/8eeb83d4-25e4-42f6-a801-b6fe50d28901" />
+
+## Individual patient requisition results view
+<img width="1729" height="952" alt="image" src="https://github.com/user-attachments/assets/4b504eba-0689-4351-b603-07b66301ca29" />
