@@ -14,10 +14,15 @@ A physician orders blood work or imaging, prints a requisition, and hands it to 
 
 PulseReq removes the paper. The clinician issues a LOINC-coded order and an expiring link; the patient picks where and when and receives that link; the diagnostic centre resolves it at intake as a structured order, not a document to re-interpret.
 
-Full problem framing, decision logic, metrics, and trade-offs: product_brief.md.
+Full problem framing, decision logic, metrics, and trade-offs: [Product_Brief.md](/docs/Product-Brief.md)
 
 ## Screenshots
-https://github.com/nehamilan/PulseReq/tree/main/docs/screenshots
+| Portal             | Role                           | Prototype screenshots             |
+| ------------------ | ------------------------------ |--------------|
+| Doctor Portal      | Ordering clinician             |[Doctors Portal](/docs/screenshots/Doctors_portal.md) |
+| Lab Tech Dashboard | Diagnostic centre intake       |[Lab Tech Dashboard](/docs/screenshots/Lab_tech_dashboard.md) |
+| Patient Portal     | Patient, all orders            |[Patient Portal](/docs/screenshots/Patient_portal.md)|
+| Homepage           | PulseReq Homepage              |[Homepage](/docs/screenshots/PulseReq_Homepage.md)|
 
 ## How it works
 Three actors, one handoff:
