@@ -347,7 +347,7 @@ function LabPage() {
           title="Appointment queue"
           hint={`${scoped.length} appointment${scoped.length === 1 ? "" : "s"}`}
         >
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
             <div
               role="tablist"
               aria-label="Queue range"
@@ -403,10 +403,10 @@ function LabPage() {
                 ))}
               </div>
             </div>
-            <div className="w-56">
+            <div className="flex items-center gap-2">
               <label
                 htmlFor="queue-filter"
-                className="block text-[11px] font-medium uppercase tracking-wide text-muted-foreground"
+                className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground"
               >
                 Filter queue
               </label>
@@ -415,7 +415,7 @@ function LabPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Filter by name, PHN or token"
-                className="mt-1.5 w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/25"
+                className="w-56 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/25"
               />
             </div>
           </div>
