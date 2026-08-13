@@ -10,7 +10,7 @@ Built as a product portfolio project: the interesting work here is the decision 
 
 ## What it is
 
-A physician orders blood work or imaging, prints a requisition, and hands it to the patient — who then has to store it, find a diagnostic centre, and present the paper at the appointment. Lost forms cause unbilled clinic rework; lab staff spend 5–7 minutes per patient re-keying order details that already exist upstream, because nothing arrives structured — time that should be spent confirming and collecting, not transcribing.
+A physician orders blood work or imaging, prints a requisition, and hands it to the patient — who then has to store it, find a diagnostic centre, and present the paper at the appointment. Lost forms cause unbilled clinic rework; lab staff spend 5–7 minutes per patient re-keying order details that already exist upstream, because nothing arrives structured — time that should go to confirming and collecting, not transcribing. Manual transcription also introduces order errors.
 
 PulseReq removes the paper. The clinician issues a LOINC-coded order and an expiring link; the patient picks where and when and receives that link; the diagnostic centre resolves it at intake as a structured order, not a document to re-interpret.
 
@@ -30,7 +30,7 @@ Three actors, one handoff:
 - **Patient** opens the link, picks a diagnostic centre that can actually perform the ordered modality, books a slot, and gets a check-in code. Results are visible only once a release policy allows it — immediate, after an embargo window lapses, or once the ordering clinician signs off.
 - **Diagnostic centre** resolves the token (or, where a centre's walk-in policy allows it, enters a requisition manually), and receives a structured order — the clinical details are confirmed, not re-typed from scratch. (Specimen labeling and patient ID confirmation still happen at intake, as they should — PulseReq removes the transcription, not the safety check.)
 
-Internally, orders project to FHIR R4 ServiceRequest / DiagnosticReport / Observation resources.
+Internally, orders project to FHIR R4 `ServiceRequest` / `DiagnosticReport` / `Observation` resources.
 
 ## What's real vs. simulated
 This is a frontend-only prototype built to demonstrate product decisions, not a production system. Worth knowing before reading too much into it:
@@ -40,8 +40,13 @@ This is a frontend-only prototype built to demonstrate product decisions, not a 
 - **All data is synthetic**, including edge cases placed deliberately (e.g. a result seeded near its embargo boundary) so the policy logic is visible in a short demo.
 - **Time is simulated.** A clock offset control exists specifically so embargo/expiry rules are observable without waiting real days.
 
+## Documentation
+- [`Product_Brief.md`](/docs/Product-Brief.md) — problem framing, decision logic, success metrics, human-in-the-loop design, guardrails, iteration log, and trade-offs, mapped explicitly to each.
+- [`Product_Roadmap.md`](/docs/product-roadmap.md) — what's next, grouped by disclosed gaps being closed vs. new capability vs. explicitly not planned.
+
 ## Stack
-Built in Lovable (React + TypeScript). Test catalog is LOINC-coded. Data shapes follow FHIR R4. All patient, clinician, and centre data is synthetic — no real PHI at any point.
+Built in Lovable (React + TypeScript). Test catalog is LOINC-coded. Data shapes follow FHIR R4. 
+All patient, clinician, and centre data is synthetic — no real PHI at any point.
 
 ```sh
 npm i
