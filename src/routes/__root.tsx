@@ -80,6 +80,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "google-site-verification", content: "5Zq1ru_sbygQuaLU6aQsVs1F4Siy9cLlP8qiIjT2SyM" },
       { title: "PulseReq — Paperless diagnostic requisitions" },
       {
         name: "description",
