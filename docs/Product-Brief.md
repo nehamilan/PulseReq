@@ -39,7 +39,9 @@ There's no confidence score to threshold, because there's no model output — bu
 
 ## 5. Human-in-the-loop design
 
-- Three review points, each a real approval gate, not a notification: the ordering clinician approves or declines extension requests and signs off on held/embargoed results before a patient can see them; the clinician can revoke an order outright while it's still actionable; lab intake staff confirm a walk-in or scheduled check-in and complete intake rather than it happening automatically from a token resolve. Every one of these is a decision a human makes, not a step the system completes unattended.
+- Three review points, each a real approval gate, not a notification: the ordering clinician approves or declines extension requests and signs off on held/embargoed results before a patient can see them;
+- the clinician can revoke an order outright while it's still actionable;
+- lab intake staff confirm a walk-in or scheduled check-in and complete intake rather than it happening automatically from a token resolve. Every one of these is a decision a human makes, not a step the system completes unattended.
 
 ## 6. Guardrails and risk
 
