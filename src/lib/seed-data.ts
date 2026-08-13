@@ -12,9 +12,6 @@ import { buildReport, type DiagnosticReportRecord } from "./results";
  * numbers are fabricated in the style of Synthea output.
  */
 
-const ISSUED_AT = "2026-07-30T14:10:00.000Z";
-const EXPIRES_AT = "2026-08-06T14:10:00.000Z"; // +7 days
-
 const LINK_LIFETIME_DAYS = 14 as const;
 
 /**
@@ -155,6 +152,51 @@ export const PATIENTS: Patient[] = [
       postalCode: "T3M 2N4",
     },
   },
+  {
+    id: "pat-8",
+    givenName: "Sofia",
+    familyName: "Marchetti",
+    phn: "AB-419023",
+    province: "AB",
+    birthDate: "1990-08-12",
+    phone: "+1 587-555-0121",
+    address: {
+      line: "615 Bridgeland Dr NE",
+      city: "Calgary",
+      province: "AB",
+      postalCode: "T2E 9K1",
+    },
+  },
+  {
+    id: "pat-9",
+    givenName: "Daniel",
+    familyName: "Okonkwo",
+    phn: "AB-873510",
+    province: "AB",
+    birthDate: "1968-02-25",
+    phone: "+1 403-555-0158",
+    address: {
+      line: "92 Auburn Bay Ave SE",
+      city: "Calgary",
+      province: "AB",
+      postalCode: "T3M 0R4",
+    },
+  },
+  {
+    id: "pat-10",
+    givenName: "Hannah",
+    familyName: "Beaulieu",
+    phn: "AB-260744",
+    province: "AB",
+    birthDate: "1999-10-03",
+    phone: "+1 587-555-0107",
+    address: {
+      line: "1408 Silverado Way SW",
+      city: "Calgary",
+      province: "AB",
+      postalCode: "T2X 0Y8",
+    },
+  },
 ];
 
 export const PRACTITIONERS: Practitioner[] = [
@@ -179,6 +221,13 @@ export const PRACTITIONERS: Practitioner[] = [
     clinic: "Mahogany Village Family Practice",
     province: "AB",
   },
+  {
+    id: "prac-4",
+    name: "Nadia Rahman, NP",
+    licence: "CARNA #NP-7742",
+    clinic: "Bridgeland Community Health",
+    province: "AB",
+  },
 ];
 
 export const CENTERS: DiagnosticCenter[] = [
@@ -189,7 +238,7 @@ export const CENTERS: DiagnosticCenter[] = [
     city: "Calgary",
     province: "AB",
     capabilities: ["Phlebotomy", "Urinalysis", "ECG"],
-    nextAvailable: "2026-07-31T14:30:00.000Z",
+    nextAvailable: relDayAt(0, 14, 30),
     distanceKm: 1.2,
     walkInsAccepted: true,
   },
@@ -200,7 +249,7 @@ export const CENTERS: DiagnosticCenter[] = [
     city: "Calgary",
     province: "AB",
     capabilities: ["Phlebotomy", "X-Ray", "Ultrasound"],
-    nextAvailable: "2026-08-01T09:00:00.000Z",
+    nextAvailable: relDayAt(1, 9, 0),
     distanceKm: 4.5,
     walkInsAccepted: false,
   },
@@ -211,7 +260,7 @@ export const CENTERS: DiagnosticCenter[] = [
     city: "Calgary",
     province: "AB",
     capabilities: ["Phlebotomy", "Urinalysis"],
-    nextAvailable: "2026-07-31T16:15:00.000Z",
+    nextAvailable: relDayAt(0, 16, 15),
     distanceKm: 6.1,
     walkInsAccepted: false,
   },
@@ -222,7 +271,7 @@ export const CENTERS: DiagnosticCenter[] = [
     city: "Calgary",
     province: "AB",
     capabilities: ["X-Ray", "Ultrasound", "CT", "Mammography"],
-    nextAvailable: "2026-08-01T08:45:00.000Z",
+    nextAvailable: relDayAt(1, 8, 45),
     distanceKm: 9.8,
     walkInsAccepted: true,
   },
@@ -233,7 +282,7 @@ export const CENTERS: DiagnosticCenter[] = [
     city: "Calgary",
     province: "AB",
     capabilities: ["Phlebotomy", "Urinalysis", "ECG"],
-    nextAvailable: "2026-07-31T13:00:00.000Z",
+    nextAvailable: relDayAt(0, 13, 0),
     distanceKm: 2.7,
     walkInsAccepted: false,
   },
@@ -248,8 +297,8 @@ export const REQUISITIONS: Requisition[] = [
     practitionerId: "prac-1",
     priority: "routine",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
-    issuedAt: ISSUED_AT,
-    expiresAt: EXPIRES_AT,
+    issuedAt: relDayAt(-6, 8, 10),
+    expiresAt: relDayAt(8, 8, 10),
     clinicalNotes: "Fatigue, 6-week history. Rule out anemia.",
     tests: [
       {
@@ -283,8 +332,8 @@ export const REQUISITIONS: Requisition[] = [
     appointmentAt: todayAt(9, 15),
     priority: "stat",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
-    issuedAt: "2026-07-29T11:00:00.000Z",
-    expiresAt: "2026-08-05T11:00:00.000Z",
+    issuedAt: relDayAt(-7, 5, 0),
+    expiresAt: relDayAt(7, 5, 0),
     tests: [
       {
         id: "ot-3",
@@ -308,8 +357,8 @@ REQUISITIONS.push({
   practitionerId: "prac-1",
   priority: "routine",
   linkLifetimeDays: 7,
-  issuedAt: "2026-07-25T22:00:00.000Z",
-  expiresAt: "2026-08-01T22:00:00.000Z",
+  issuedAt: relDayAt(-11, 16, 0),
+  expiresAt: relDayAt(3, 16, 0),
   clinicalNotes: "Annual metabolic screen.",
   tests: [
     {
@@ -337,8 +386,8 @@ REQUISITIONS.push(
     appointmentAt: todayAt(10, 0),
     priority: "routine",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
-    issuedAt: "2026-07-28T16:30:00.000Z",
-    expiresAt: "2026-08-04T16:30:00.000Z",
+    issuedAt: relDayAt(-8, 10, 30),
+    expiresAt: relDayAt(6, 10, 30),
     clinicalNotes: "Pre-natal screen, first trimester.",
     tests: [
       {
@@ -373,8 +422,8 @@ REQUISITIONS.push(
     appointmentAt: todayAt(8, 30),
     priority: "routine",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
-    issuedAt: "2026-07-27T13:05:00.000Z",
-    expiresAt: "2026-08-03T13:05:00.000Z",
+    issuedAt: relDayAt(-9, 7, 5),
+    expiresAt: relDayAt(5, 7, 5),
     tests: [
       {
         id: "ot-7",
@@ -398,8 +447,8 @@ REQUISITIONS.push(
     appointmentAt: todayAt(13, 45),
     priority: "urgent",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
-    issuedAt: "2026-07-29T09:40:00.000Z",
-    expiresAt: "2026-08-05T09:40:00.000Z",
+    issuedAt: relDayAt(-7, 9, 40),
+    expiresAt: relDayAt(7, 9, 40),
     clinicalNotes: "Persistent cough, 3 weeks.",
     tests: [
       {
@@ -423,8 +472,8 @@ REQUISITIONS.push(
     appointmentAt: tomorrowAt(9, 30),
     priority: "routine",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
-    issuedAt: "2026-07-30T10:15:00.000Z",
-    expiresAt: "2026-08-06T10:15:00.000Z",
+    issuedAt: relDayAt(-6, 10, 15),
+    expiresAt: relDayAt(8, 10, 15),
     tests: [
       {
         id: "ot-9",
@@ -501,8 +550,8 @@ REQUISITIONS.push(
     appointmentAt: todayAt(8, 0),
     priority: "routine",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
-    issuedAt: "2026-07-24T15:00:00.000Z",
-    expiresAt: "2026-07-31T15:00:00.000Z",
+    issuedAt: relDayAt(-12, 9, 0),
+    expiresAt: relDayAt(2, 9, 0),
     clinicalNotes: "Excisional biopsy, left forearm lesion.",
     tests: [
       {
@@ -528,8 +577,8 @@ REQUISITIONS.push(
     appointmentAt: todayAt(11, 15),
     priority: "routine",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
-    issuedAt: "2026-07-26T17:20:00.000Z",
-    expiresAt: "2026-08-02T17:20:00.000Z",
+    issuedAt: relDayAt(-10, 11, 20),
+    expiresAt: relDayAt(4, 11, 20),
     clinicalNotes: "Right upper quadrant pain.",
     tests: [
       {
@@ -844,6 +893,212 @@ REQUISITIONS.push(
   },
 );
 
+
+/** Additional volume across the new patients and the nurse practitioner. */
+REQUISITIONS.push(
+  {
+    id: "rq-22",
+    token: "req-3e91d4",
+    status: "booked",
+    patientId: "pat-8",
+    practitionerId: "prac-4",
+    centerId: "ctr-1",
+    appointmentAt: todayAt(14, 15),
+    priority: "routine",
+    linkLifetimeDays: 14,
+    issuedAt: relDayAt(-3, 9, 30),
+    expiresAt: relDayAt(11, 9, 30),
+    clinicalNotes: "Postpartum thyroid check at 12 weeks.",
+    tests: [
+      {
+        id: "ot-27",
+        coding: {
+          system: "http://loinc.org",
+          code: "3016-3",
+          display: "Thyrotropin [Units/volume] in Serum or Plasma",
+        },
+        specimen: "Serum",
+        modality: "lab",
+      },
+    ],
+  },
+  {
+    id: "rq-23",
+    token: "req-77a0be",
+    status: "checked-in",
+    patientId: "pat-9",
+    practitionerId: "prac-4",
+    centerId: "ctr-1",
+    appointmentAt: todayAt(12, 30),
+    priority: "urgent",
+    linkLifetimeDays: 7,
+    issuedAt: relDayAt(-2, 8, 0),
+    expiresAt: relDayAt(5, 8, 0),
+    clinicalNotes: "New-onset polyuria. Screen for diabetes.",
+    tests: [
+      {
+        id: "ot-28",
+        coding: {
+          system: "http://loinc.org",
+          code: "2339-0",
+          display: "Glucose [Mass/volume] in Blood",
+        },
+        instruction: "Fasting 12 hours required",
+        specimen: "Serum",
+        modality: "lab",
+      },
+      {
+        id: "ot-29",
+        coding: {
+          system: "http://loinc.org",
+          code: "4548-4",
+          display: "Hemoglobin A1c/Hemoglobin.total in Blood",
+        },
+        specimen: "Whole blood",
+        modality: "lab",
+      },
+    ],
+  },
+  {
+    id: "rq-24",
+    token: "req-c4820a",
+    status: "active",
+    patientId: "pat-10",
+    practitionerId: "prac-2",
+    priority: "routine",
+    linkLifetimeDays: 28,
+    issuedAt: relDayAt(-1, 15, 45),
+    expiresAt: relDayAt(27, 15, 45),
+    clinicalNotes: "Baseline bloodwork before starting isotretinoin.",
+    tests: [
+      {
+        id: "ot-30",
+        coding: {
+          system: "http://loinc.org",
+          code: "24323-8",
+          display: "Comprehensive metabolic 2000 panel - Serum or Plasma",
+        },
+        specimen: "Serum",
+        modality: "lab",
+      },
+      {
+        id: "ot-31",
+        coding: {
+          system: "http://loinc.org",
+          code: "24331-1",
+          display: "Lipid 1996 panel - Serum or Plasma",
+        },
+        instruction: "Fasting 12 hours required",
+        specimen: "Serum",
+        modality: "lab",
+      },
+    ],
+  },
+  {
+    id: "rq-25",
+    token: "req-16bd39",
+    status: "active",
+    patientId: "pat-9",
+    practitionerId: "prac-3",
+    priority: "routine",
+    linkLifetimeDays: 7,
+    issuedAt: relDayAt(-6, 13, 20),
+    expiresAt: relDayAt(1, 13, 20), // inside the 48-hour extension window
+    clinicalNotes: "Vitamin D recheck after supplementation.",
+    tests: [
+      {
+        id: "ot-32",
+        coding: {
+          system: "http://loinc.org",
+          code: "14635-7",
+          display: "25-hydroxyvitamin D3 [Mass/volume] in Serum or Plasma",
+        },
+        specimen: "Serum",
+        modality: "lab",
+      },
+    ],
+  },
+  {
+    id: "rq-26",
+    token: "req-9d47f0",
+    status: "booked",
+    patientId: "pat-8",
+    practitionerId: "prac-2",
+    centerId: "ctr-4",
+    appointmentAt: relDayAt(-2, 10, 45),
+    priority: "routine",
+    linkLifetimeDays: 7,
+    issuedAt: relDayAt(-9, 10, 45),
+    expiresAt: relDayAt(-2, 10, 45), // appointment missed, link since lapsed
+    clinicalNotes: "Right shoulder pain after a fall.",
+    tests: [
+      {
+        id: "ot-33",
+        coding: {
+          system: "http://loinc.org",
+          code: "24916-9",
+          display: "US Abdomen",
+        },
+        instruction: "Nothing by mouth 6 hours before scan",
+        modality: "imaging",
+      },
+    ],
+  },
+  {
+    id: "rq-27",
+    token: "req-2f60c8",
+    status: "completed",
+    patientId: "pat-10",
+    practitionerId: "prac-4",
+    centerId: "ctr-5",
+    appointmentAt: relDayAt(-4, 8, 15),
+    priority: "routine",
+    linkLifetimeDays: 14,
+    issuedAt: relDayAt(-11, 8, 15),
+    expiresAt: relDayAt(3, 8, 15),
+    clinicalNotes: "Screen for iron deficiency — heavy menses.",
+    tests: [
+      {
+        id: "ot-34",
+        coding: {
+          system: "http://loinc.org",
+          code: "2276-4",
+          display: "Ferritin [Mass/volume] in Serum or Plasma",
+        },
+        specimen: "Serum",
+        modality: "lab",
+      },
+    ],
+  },
+  {
+    id: "rq-28",
+    token: "req-58e2a7",
+    status: "completed",
+    patientId: "pat-9",
+    practitionerId: "prac-3",
+    centerId: "ctr-1",
+    appointmentAt: relDayAt(-1, 9, 5),
+    priority: "stat",
+    linkLifetimeDays: 7,
+    issuedAt: relDayAt(-3, 7, 30),
+    expiresAt: relDayAt(4, 7, 30),
+    clinicalNotes: "Suspicious lymph node — core biopsy sent.",
+    tests: [
+      {
+        id: "ot-35",
+        coding: {
+          system: "http://loinc.org",
+          code: "60568-3",
+          display: "Pathology Synoptic report",
+        },
+        specimen: "Tissue in formalin",
+        modality: "lab",
+        releasePolicy: "CLINICIAN_HOLD",
+      },
+    ],
+  },
+);
+
 export const REPORTS: DiagnosticReportRecord[] = [
   seedReport("rq-5", 3), // routine A1c — auto-released
   seedReport("rq-8", 20), // pathology — held for clinician review
@@ -851,6 +1106,8 @@ export const REPORTS: DiagnosticReportRecord[] = [
   seedReport("rq-14", 24 * 9), // CT chest — embargo already lapsed, link expired
   seedReport("rq-15", 24 * 3), // repeat A1c — auto-released
   seedReport("rq-20", 24 * 6 + 20), // CT chest — embargo lifts in ~4 hours
+  seedReport("rq-27", 24 * 2), // ferritin — auto-released
+  seedReport("rq-28", 5), // biopsy pathology — held for clinician review
 ];
 
 
@@ -862,7 +1119,7 @@ export const EXTENSION_REQUESTS: ExtensionRequest[] = [
     requestedDays: 7,
     reason: "Away for work until next week",
     status: "pending",
-    requestedAt: "2026-07-31T08:20:00.000Z",
+    requestedAt: relDayAt(-2, 8, 20),
   },
   {
     id: "ext-2",
@@ -880,6 +1137,14 @@ export const EXTENSION_REQUESTS: ExtensionRequest[] = [
     status: "approved",
     requestedAt: relDayAt(-3, 12, 0),
     resolvedAt: relDayAt(-3, 15, 20),
+  },
+  {
+    id: "ext-4",
+    requisitionId: "rq-25",
+    requestedDays: 14,
+    reason: "Out of town for a family emergency",
+    status: "pending",
+    requestedAt: relDayAt(-1, 9, 10),
   },
 ];
 
