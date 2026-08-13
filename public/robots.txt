@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://paperless-patient-pass.lovable.app/sitemap.xml
