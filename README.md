@@ -6,6 +6,8 @@ PulseReq is a working frontend prototype of an e-requisition layer for Canadian 
 
 Built as a product portfolio project: the interesting work here is the decision logic and the governance model, not the CRUD.
 
+**Prototype:** https://paperless-patient-pass.lovable.app/
+
 ---
 
 ## What it is
