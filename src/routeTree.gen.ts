@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LabRouteImport } from './routes/lab'
 import { Route as OrderRouteImport } from './routes/order'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PPatientIdRouteImport } from './routes/p.$patientId'
 import { Route as RTokenRouteImport } from './routes/r.$token'
 
@@ -30,6 +31,11 @@ const OrderRoute = OrderRouteImport.update({
   path: '/order',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PPatientIdRoute = PPatientIdRouteImport.update({
   id: '/p/$patientId',
   path: '/p/$patientId',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/lab': typeof LabRoute
   '/order': typeof OrderRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/p/$patientId': typeof PPatientIdRoute
   '/r/$token': typeof RTokenRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/lab': typeof LabRoute
   '/order': typeof OrderRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/p/$patientId': typeof PPatientIdRoute
   '/r/$token': typeof RTokenRoute
 }
@@ -60,21 +68,31 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/lab': typeof LabRoute
   '/order': typeof OrderRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/p/$patientId': typeof PPatientIdRoute
   '/r/$token': typeof RTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/lab' | '/order' | '/p/$patientId' | '/r/$token'
+  fullPaths:
+    '/' | '/lab' | '/order' | '/sitemap.xml' | '/p/$patientId' | '/r/$token'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/lab' | '/order' | '/p/$patientId' | '/r/$token'
-  id: '__root__' | '/' | '/lab' | '/order' | '/p/$patientId' | '/r/$token'
+  to: '/' | '/lab' | '/order' | '/sitemap.xml' | '/p/$patientId' | '/r/$token'
+  id:
+    | '__root__'
+    | '/'
+    | '/lab'
+    | '/order'
+    | '/sitemap.xml'
+    | '/p/$patientId'
+    | '/r/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LabRoute: typeof LabRoute
   OrderRoute: typeof OrderRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   PPatientIdRoute: typeof PPatientIdRoute
   RTokenRoute: typeof RTokenRoute
 }
@@ -102,6 +120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/p/$patientId': {
       id: '/p/$patientId'
       path: '/p/$patientId'
@@ -123,6 +148,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LabRoute: LabRoute,
   OrderRoute: OrderRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   PPatientIdRoute: PPatientIdRoute,
   RTokenRoute: RTokenRoute,
 }
