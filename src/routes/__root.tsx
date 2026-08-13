@@ -88,7 +88,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Prototype for tokenized, paperless lab and imaging requisitions between clinics and diagnostic centres.",
       },
       { name: "author", content: "PulseReq" },
-      { property: "og:title", content: "PulseReq" },
+      { property: "og:title", content: "PulseReq — Paperless diagnostic requisitions" },
       {
         property: "og:description",
         content:

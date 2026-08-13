@@ -15,7 +15,7 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "PulseReq — Paperless diagnostic requisitions" },
+      { title: "PulseReq — Tokenized lab requisition demo" },
       {
         name: "description",
         content:
@@ -23,14 +23,17 @@ export const Route = createFileRoute("/")({
       },
       {
         property: "og:title",
-        content: "PulseReq — Paperless diagnostic requisitions",
+        content: "PulseReq — Tokenized lab requisition demo",
       },
       {
         property: "og:description",
         content:
           "Secure, expiring, LOINC-coded requisition links shared between clinician, patient and diagnostic centre.",
       },
+      { property: "og:url", content: "https://paperless-patient-pass.lovable.app/" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://paperless-patient-pass.lovable.app/" }],
   }),
   component: Index,
 });
