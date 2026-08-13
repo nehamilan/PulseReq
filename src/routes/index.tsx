@@ -38,7 +38,7 @@ export const Route = createFileRoute("/")({
 const ROLES = [
   {
     to: "/order",
-    label: "Doctor Portal",
+    label: "Clinician Portal",
     icon: Stethoscope,
     body: "Order tests by LOINC code and issue an expiring patient link instead of printing a form.",
     cta: "Open ordering view",

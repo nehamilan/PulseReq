@@ -13,7 +13,7 @@ import { PATIENTS } from "@/lib/seed-data";
 import { cn } from "@/lib/utils";
 
 const ROLES = [
-  { to: "/order", label: "Doctor Portal" },
+  { to: "/order", label: "Clinician Portal" },
   { to: "/lab", label: "Lab Tech Dashboard" },
 ] as const;
 
