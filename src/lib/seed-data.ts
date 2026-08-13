@@ -12,9 +12,6 @@ import { buildReport, type DiagnosticReportRecord } from "./results";
  * numbers are fabricated in the style of Synthea output.
  */
 
-const ISSUED_AT = "2026-07-30T14:10:00.000Z";
-const EXPIRES_AT = "2026-08-06T14:10:00.000Z"; // +7 days
-
 const LINK_LIFETIME_DAYS = 14 as const;
 
 /**
@@ -248,8 +245,8 @@ export const REQUISITIONS: Requisition[] = [
     practitionerId: "prac-1",
     priority: "routine",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
-    issuedAt: ISSUED_AT,
-    expiresAt: EXPIRES_AT,
+    issuedAt: relDayAt(-6, 8, 10),
+    expiresAt: relDayAt(8, 8, 10),
     clinicalNotes: "Fatigue, 6-week history. Rule out anemia.",
     tests: [
       {
@@ -283,8 +280,8 @@ export const REQUISITIONS: Requisition[] = [
     appointmentAt: todayAt(9, 15),
     priority: "stat",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
-    issuedAt: "2026-07-29T11:00:00.000Z",
-    expiresAt: "2026-08-05T11:00:00.000Z",
+    issuedAt: relDayAt(-7, 5, 0),
+    expiresAt: relDayAt(7, 5, 0),
     tests: [
       {
         id: "ot-3",
@@ -308,8 +305,8 @@ REQUISITIONS.push({
   practitionerId: "prac-1",
   priority: "routine",
   linkLifetimeDays: 7,
-  issuedAt: "2026-07-25T22:00:00.000Z",
-  expiresAt: "2026-08-01T22:00:00.000Z",
+  issuedAt: relDayAt(-11, 16, 0),
+  expiresAt: relDayAt(3, 16, 0),
   clinicalNotes: "Annual metabolic screen.",
   tests: [
     {
@@ -337,8 +334,8 @@ REQUISITIONS.push(
     appointmentAt: todayAt(10, 0),
     priority: "routine",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
-    issuedAt: "2026-07-28T16:30:00.000Z",
-    expiresAt: "2026-08-04T16:30:00.000Z",
+    issuedAt: relDayAt(-8, 10, 30),
+    expiresAt: relDayAt(6, 10, 30),
     clinicalNotes: "Pre-natal screen, first trimester.",
     tests: [
       {
@@ -373,8 +370,8 @@ REQUISITIONS.push(
     appointmentAt: todayAt(8, 30),
     priority: "routine",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
-    issuedAt: "2026-07-27T13:05:00.000Z",
-    expiresAt: "2026-08-03T13:05:00.000Z",
+    issuedAt: relDayAt(-9, 7, 5),
+    expiresAt: relDayAt(5, 7, 5),
     tests: [
       {
         id: "ot-7",
@@ -398,8 +395,8 @@ REQUISITIONS.push(
     appointmentAt: todayAt(13, 45),
     priority: "urgent",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
-    issuedAt: "2026-07-29T09:40:00.000Z",
-    expiresAt: "2026-08-05T09:40:00.000Z",
+    issuedAt: relDayAt(-7, 9, 40),
+    expiresAt: relDayAt(7, 9, 40),
     clinicalNotes: "Persistent cough, 3 weeks.",
     tests: [
       {
@@ -423,8 +420,8 @@ REQUISITIONS.push(
     appointmentAt: tomorrowAt(9, 30),
     priority: "routine",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
-    issuedAt: "2026-07-30T10:15:00.000Z",
-    expiresAt: "2026-08-06T10:15:00.000Z",
+    issuedAt: relDayAt(-6, 10, 15),
+    expiresAt: relDayAt(8, 10, 15),
     tests: [
       {
         id: "ot-9",
@@ -501,8 +498,8 @@ REQUISITIONS.push(
     appointmentAt: todayAt(8, 0),
     priority: "routine",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
-    issuedAt: "2026-07-24T15:00:00.000Z",
-    expiresAt: "2026-07-31T15:00:00.000Z",
+    issuedAt: relDayAt(-12, 9, 0),
+    expiresAt: relDayAt(2, 9, 0),
     clinicalNotes: "Excisional biopsy, left forearm lesion.",
     tests: [
       {
@@ -528,8 +525,8 @@ REQUISITIONS.push(
     appointmentAt: todayAt(11, 15),
     priority: "routine",
     linkLifetimeDays: LINK_LIFETIME_DAYS,
-    issuedAt: "2026-07-26T17:20:00.000Z",
-    expiresAt: "2026-08-02T17:20:00.000Z",
+    issuedAt: relDayAt(-10, 11, 20),
+    expiresAt: relDayAt(4, 11, 20),
     clinicalNotes: "Right upper quadrant pain.",
     tests: [
       {
@@ -862,7 +859,7 @@ export const EXTENSION_REQUESTS: ExtensionRequest[] = [
     requestedDays: 7,
     reason: "Away for work until next week",
     status: "pending",
-    requestedAt: "2026-07-31T08:20:00.000Z",
+    requestedAt: relDayAt(-2, 8, 20),
   },
   {
     id: "ext-2",
