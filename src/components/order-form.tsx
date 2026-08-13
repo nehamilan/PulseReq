@@ -1,3 +1,4 @@
+import { demoNow } from "@/lib/clock";
 import { useMemo, useState } from "react";
 
 import { RequisitionCreatedDialog } from "@/components/requisition-created-dialog";
@@ -62,7 +63,7 @@ export function OrderForm() {
 
   function handleSubmit() {
     if (!canSubmit || !practitioner) return;
-    const now = new Date();
+    const now = demoNow();
     const tests: OrderedTest[] = selected.map((code, i) => {
       const entry = TEST_CATALOG.find((t) => t.code === code)!;
       return {

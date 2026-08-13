@@ -116,7 +116,7 @@ export function toFhirBundle(input: {
   return {
     resourceType: "Bundle" as const,
     type: "collection" as const,
-    timestamp: new Date().toISOString(),
+    timestamp: demoNow().toISOString(),
     entry: entries,
   };
 }
