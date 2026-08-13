@@ -36,11 +36,11 @@ function tomorrowAt(hour: number, minute: number): string {
   return d.toISOString();
 }
 
-/** N days from the demo anchor (negative = in the past) at a given local time. */
+/** N days from the demo anchor (negative = in the past) at a given UTC time. */
 function relDayAt(offsetDays: number, hour: number, minute = 0): string {
   const d = new Date(DEMO_ANCHOR);
-  d.setDate(d.getDate() + offsetDays);
-  d.setHours(hour, minute, 0, 0);
+  d.setUTCDate(d.getUTCDate() + offsetDays);
+  d.setUTCHours(hour, minute, 0, 0);
   return d.toISOString();
 }
 
