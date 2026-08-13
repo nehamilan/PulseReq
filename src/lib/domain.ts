@@ -1,3 +1,4 @@
+import { demoNow } from "./clock";
 /**
  * PulseReq domain model.
  *
@@ -147,7 +148,7 @@ export const EXTENSION_DAY_OPTIONS = [7, 14, 21, 28] as const;
 export function extendExpiry(
   req: Requisition,
   days: number,
-  now: Date = new Date(),
+  now: Date = demoNow(),
 ): string {
   const base = Math.max(new Date(req.expiresAt).getTime(), now.getTime());
   return new Date(base + days * 86_400_000).toISOString();
@@ -159,7 +160,7 @@ export function extendExpiry(
  */
 export function canRequestExtension(
   req: Requisition,
-  now: Date = new Date(),
+  now: Date = demoNow(),
 ): boolean {
   // Booked requisitions can also expire (missed appointment / rebooking needed).
   if (req.status !== "active" && req.status !== "booked") return false;
@@ -167,7 +168,7 @@ export function canRequestExtension(
 }
 
 /** "waiting 2 days" / "waiting 5h" — queue age for the clinician view. */
-export function waitingLabel(iso: string, now: Date = new Date()): string {
+export function waitingLabel(iso: string, now: Date = demoNow()): string {
   const hours = Math.max(
     0,
     Math.round((now.getTime() - new Date(iso).getTime()) / 3_600_000),
@@ -177,14 +178,14 @@ export function waitingLabel(iso: string, now: Date = new Date()): string {
   return `waiting ${days} day${days === 1 ? "" : "s"}`;
 }
 
-export function isExpired(req: Requisition, now: Date = new Date()): boolean {
+export function isExpired(req: Requisition, now: Date = demoNow()): boolean {
   return new Date(req.expiresAt).getTime() < now.getTime();
 }
 
 /** Status as it should be displayed, accounting for wall-clock expiry. */
 export function effectiveStatus(
   req: Requisition,
-  now: Date = new Date(),
+  now: Date = demoNow(),
 ): RequisitionStatus {
   if (
     req.status === "completed" ||
@@ -196,7 +197,7 @@ export function effectiveStatus(
   return isExpired(req, now) ? "expired" : req.status;
 }
 
-export function hoursRemaining(req: Requisition, now: Date = new Date()): number {
+export function hoursRemaining(req: Requisition, now: Date = demoNow()): number {
   return Math.max(
     0,
     Math.round((new Date(req.expiresAt).getTime() - now.getTime()) / 3_600_000),
@@ -213,7 +214,7 @@ export function formatAddress(a: PatientAddress): string {
 }
 
 /** Age in whole years at `now`. */
-export function ageInYears(birthDate: string, now: Date = new Date()): number {
+export function ageInYears(birthDate: string, now: Date = demoNow()): number {
   const b = new Date(birthDate);
   let age = now.getUTCFullYear() - b.getUTCFullYear();
   const m = now.getUTCMonth() - b.getUTCMonth();
@@ -256,7 +257,7 @@ export function formatClinicalDateTime(iso: string): string {
 }
 
 /** Human countdown to link expiry, e.g. "expires in 6 days" / "expired". */
-export function expiryLabel(req: Requisition, now: Date = new Date()): string {
+export function expiryLabel(req: Requisition, now: Date = demoNow()): string {
   if (isExpired(req, now)) return "expired";
   const hours = hoursRemaining(req, now);
   if (hours < 24) return `expires in ${hours}h`;
@@ -497,7 +498,7 @@ export function auditHash(payload: string, prevHash: string): string {
 }
 
 /** True when `iso` falls on the same calendar day as `now`. */
-export function isSameDay(iso: string, now: Date = new Date()): boolean {
+export function isSameDay(iso: string, now: Date = demoNow()): boolean {
   const d = new Date(iso);
   return (
     d.getFullYear() === now.getFullYear() &&

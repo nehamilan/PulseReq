@@ -1,3 +1,4 @@
+import { demoNow, setDemoClockOffsetDays } from "./clock";
 import {
   createContext,
   useContext,
@@ -175,7 +176,8 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
   const [reports, setReports] = useState<DiagnosticReportRecord[]>(REPORTS);
   const [clockOffsetDays, setClockOffsetDays] = useState(0);
 
-  const now = () => new Date(DEMO_ANCHOR.getTime() + clockOffsetDays * 86_400_000);
+  setDemoClockOffsetDays(clockOffsetDays);
+  const now = () => demoNow();
 
 
   const append = (
@@ -189,7 +191,7 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
     setAuditEvents((prev) => {
       let prevHash = prev[prev.length - 1]?.hash ?? "0".repeat(16);
       const next = entries.map((e, i) => {
-        const at = new Date(Date.now() + i).toISOString();
+        const at = new Date(now().getTime() + i).toISOString();
         const id = `aud-${Math.random().toString(36).slice(2, 8)}`;
         const hash = auditHash(`${id}|${at}|${e.action}|${e.detail}`, prevHash);
         const event: AuditEvent = { ...e, id, at, prevHash, hash };
@@ -331,7 +333,7 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
               ? {
                   ...e,
                   status: "declined",
-                  resolvedAt: new Date().toISOString(),
+                  resolvedAt: now().toISOString(),
                 }
               : e,
           ),
@@ -387,7 +389,7 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
             requestedDays,
             reason: reason?.trim() ? reason.trim().slice(0, 140) : undefined,
             status: "pending",
-            requestedAt: new Date().toISOString(),
+            requestedAt: now().toISOString(),
           },
         ]),
       approveExtension: (extensionId) => {
@@ -408,7 +410,7 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
         setExtensionRequests((prev) =>
           prev.map((e) =>
             e.id === extensionId
-              ? { ...e, status: "approved", resolvedAt: new Date().toISOString() }
+              ? { ...e, status: "approved", resolvedAt: now().toISOString() }
               : e,
           ),
         );
@@ -417,7 +419,7 @@ export function RequisitionProvider({ children }: { children: ReactNode }) {
         setExtensionRequests((prev) =>
           prev.map((e) =>
             e.id === extensionId && e.status === "pending"
-              ? { ...e, status: "declined", resolvedAt: new Date().toISOString() }
+              ? { ...e, status: "declined", resolvedAt: now().toISOString() }
               : e,
           ),
         ),

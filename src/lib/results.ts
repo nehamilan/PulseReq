@@ -1,3 +1,4 @@
+import { demoNow } from "./clock";
 import type { OrderedTest, ReleasePolicy, Requisition } from "./domain";
 
 /**
@@ -458,7 +459,7 @@ export function narrativeFor(req: Requisition): string | undefined {
  */
 export function buildReport(
   req: Requisition,
-  now: Date = new Date(),
+  now: Date = demoNow(),
 ): DiagnosticReportRecord {
   const spec = resolveReleasePolicy(req.tests);
   const publishedAt = now.toISOString();
@@ -494,7 +495,7 @@ export function abnormalCount(report: DiagnosticReportRecord): number {
 /** Has the embargo clock lapsed? */
 export function embargoLapsed(
   report: DiagnosticReportRecord,
-  now: Date = new Date(),
+  now: Date = demoNow(),
 ): boolean {
   return Boolean(
     report.embargoLiftsAt &&
@@ -504,7 +505,7 @@ export function embargoLapsed(
 
 export function isVisibleToPatient(
   report: DiagnosticReportRecord,
-  now: Date = new Date(),
+  now: Date = demoNow(),
 ): boolean {
   return report.status === "released" || embargoLapsed(report, now);
 }
@@ -512,7 +513,7 @@ export function isVisibleToPatient(
 /** FHIR DiagnosticReport.status for the report's current state. */
 export function fhirReportStatus(
   report: DiagnosticReportRecord,
-  now: Date = new Date(),
+  now: Date = demoNow(),
 ): "preliminary" | "final" {
   return isVisibleToPatient(report, now) ? "final" : "preliminary";
 }

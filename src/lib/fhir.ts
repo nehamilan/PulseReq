@@ -1,3 +1,4 @@
+import { demoNow } from "./clock";
 import {
   effectiveStatus,
   type DiagnosticCenter,
@@ -187,7 +188,7 @@ export function toFhirObservation(
 export function toFhirDiagnosticReport(
   report: DiagnosticReportRecord,
   req: Requisition,
-  now: Date = new Date(),
+  now: Date = demoNow(),
 ) {
   return {
     resourceType: "DiagnosticReport" as const,
@@ -235,7 +236,7 @@ export function toFhirDiagnosticReport(
 export function toFhirResultBundle(
   report: DiagnosticReportRecord,
   req: Requisition,
-  now: Date = new Date(),
+  now: Date = demoNow(),
 ) {
   return {
     resourceType: "Bundle" as const,

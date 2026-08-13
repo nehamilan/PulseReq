@@ -6,6 +6,7 @@ import type {
   Requisition,
 } from "./domain";
 import { buildReport, type DiagnosticReportRecord } from "./results";
+import { DEMO_ANCHOR } from "./clock";
 
 /**
  * Synthetic seed data. No real PHI — names, health numbers and licence
@@ -19,7 +20,7 @@ const LINK_LIFETIME_DAYS = 14 as const;
  * prototype is deterministic across SSR and hydration, and the demo still
  * works no matter when the preview is opened.
  */
-const DEMO_ANCHOR = new Date("2026-08-05T06:00:00.000Z");
+
 
 /** Demo "today" at a given local 24h time — keeps the lab queue populated. */
 function todayAt(hour: number, minute: number): string {
