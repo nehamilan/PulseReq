@@ -30,6 +30,7 @@ What it must never do: release a held or embargoed result without an explicit cl
 ## 3. Evaluation and success metrics
 
 There's no accuracy, precision, or recall to report — the equivalent obligation is that the rules are correct by construction and testable: most-restrictive-policy resolution across a mixed order, the extension-eligibility window, and centre-capability matching are each unit-testable conditions with one defined right answer, not a learned approximation. The one quantitative claim on the surface — 5.2 minutes saved per patient — is explicitly labeled in the UI as "a model, not a measurement": 26 structured fields × 12 seconds/field, both constants estimated rather than sourced from a time-motion study, and scoped to order-detail transcription specifically — the estimate does not include specimen accessioning or patient ID confirmation, which remain as intake steps regardless of order format. 
+
 **Target:** keeping this framed as a directionally credible, honestly caveated estimate — not a validated outcome. A real deployment would need an actual time-motion baseline before defending this number past a demo.
 
 ## 4. Handling uncertainty — confidence and escalation
