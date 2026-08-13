@@ -114,7 +114,7 @@ function Index() {
         <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-foreground">
           Paper requisitions, replaced by a link
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+        <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
           A paper requisition is a data handoff pretending to be a document.
           PulseReq keeps the same three actors and removes the paper: the
           clinician issues a coded order, the patient gets an expiring link, the
