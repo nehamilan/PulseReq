@@ -4,7 +4,7 @@ Positioning: PulseReq demonstrates the deterministic-workflow-logic pole of a si
 ---
 
 
-## 1. Problem framing
+## 1. Problem Statement
 
 A diagnostic order today moves between three parties — the ordering clinician, the patient, and the diagnostic centre — who use three different systems and are bridged by a printed requisition. The paper causes three failures: patients lose it and clinics absorb unbilled re-contact work; lab staff re-key 5–7 minutes of structured data per patient because nothing arrives structured; and manual transcription introduces order-selection errors that reach patient care.
 
