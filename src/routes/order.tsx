@@ -13,13 +13,13 @@ export const Route = createFileRoute("/order")({
   }),
   head: () => ({
     meta: [
-      { title: "Doctor Portal — PulseReq" },
+      { title: "Clinician Portal — PulseReq" },
       {
         name: "description",
         content:
           "Issue LOINC-coded lab and imaging requisitions as secure patient links instead of paper forms.",
       },
-      { property: "og:title", content: "Doctor Portal — PulseReq" },
+      { property: "og:title", content: "Clinician Portal — PulseReq" },
       {
         property: "og:description",
         content:
@@ -34,7 +34,7 @@ function OrderPage() {
   return (
     <PageShell
       eyebrow="Role · Ordering clinician"
-      title="Doctor Portal"
+      title="Clinician Portal"
       description="Issue a diagnostic requisition as a secure, expiring link. The patient chooses where and when; the lab receives structured LOINC-coded orders."
       actions={
         <span className="rounded-md border border-border bg-surface px-3 py-1.5 text-xs text-muted-foreground">

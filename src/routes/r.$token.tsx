@@ -79,7 +79,7 @@ function BackLink({
         search={{ tab: fromTab === "log" ? ("log" as const) : undefined }}
         className={className}
       >
-        ← Back to Doctor Portal
+        ← Back to Clinician Portal
       </Link>
     );
   }
@@ -194,7 +194,7 @@ function PatientView() {
         body={
           status === "expired"
             ? isClinicianView
-              ? `The booking window closed on this requisition (issued with a ${req.linkLifetimeDays}-day window; 14 days is the current default). Extend or reissue it from the Doctor Portal.`
+              ? `The booking window closed on this requisition (issued with a ${req.linkLifetimeDays}-day window; 14 days is the current default). Extend or reissue it from the Clinician Portal.`
               : `This link was issued with a ${req.linkLifetimeDays}-day window (14 days is the current default). Contact your clinic to have a new one issued.`
             : isClinicianView
               ? "This order was revoked, so the patient link is disabled."
@@ -239,7 +239,7 @@ function PatientView() {
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
           {isClinicianView
-            ? "The patient can no longer book. Extend or reissue this requisition from the Doctor Portal. Any released results stay available in the Results tab."
+            ? "The patient can no longer book. Extend or reissue this requisition from the Clinician Portal. Any released results stay available in the Results tab."
             : "Contact your clinic to have a new requisition issued. Any results already released to you stay available in the Results tab."}
         </p>
         {isClinicianView ? null : <ExtensionRequestControl req={req} />}
