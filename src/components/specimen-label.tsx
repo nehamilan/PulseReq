@@ -1,3 +1,4 @@
+import { demoNow } from "@/lib/clock";
 import {
   accessionFor,
   formatClinicalDate,
@@ -71,7 +72,7 @@ export function SpecimenLabelCard({
         PHN {patient.phn} · DOB {formatClinicalDate(patient.birthDate)}
       </p>
       <p className="mt-1 font-mono text-[11px] text-muted-foreground tabular">
-        {accession} · {formatClinicalDate(new Date().toISOString())}
+        {accession} · {formatClinicalDate(demoNow().toISOString())}
       </p>
       <div className="mt-2 text-foreground">
         <Barcode value={`${accession}-${label.tube.code}`} />
