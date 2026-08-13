@@ -1,6 +1,7 @@
 ---
 title: Product Brief — PulseReq
 Positioning: PulseReq demonstrates the deterministic-workflow-logic pole of a single decisioning pattern
+Prototype: https://paperless-patient-pass.lovable.app/
 ---
 
 
@@ -13,6 +14,7 @@ PulseReq replaces the paper with a tokenized, expiring link. The clinician issue
 Alberta Precision Laboratories — the province's sole public lab provider since 2023 — already suppresses paper printing for orders placed through Connect Care, since the lab can see the order electronically before the patient arrives. That's a real precedent, reached through province-wide consolidation to one lab vendor and one clinical record system. Most of the country doesn't have that path available: Ontario alone routes orders across multiple competing labs (LifeLabs, Dynacare, Alpha), and no clinician EMR can know in advance which one a patient will pick, so orders default back to paper. PulseReq targets that harder, more common case — a patient-driven choice of destination, resolved after the order is issued rather than requiring the clinician to route it upfront.
 
 **Goals (v1):** eliminate lab re-keying at intake; make a requisition unlosable (recoverable by token or from a patient-facing list); model who is allowed to see a sensitive result and when.
+
 **Non-goals (v1):** EMR ingest (orders are entered by hand in this prototype, not received via webhook); LIS egress (PulseReq hands off to the lab; it never results a test); authentication (role is determined by URL, not login); an auditor or compliance-officer view of the audit ledger.
 
 ## 2. Defining the system's job precisely (no ML — deterministic decision logic)
