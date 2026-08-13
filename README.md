@@ -19,7 +19,7 @@ Full problem framing, decision logic, metrics, and trade-offs: [Product_Brief.md
 ## Screenshots
 | Portal             | Role                           | Prototype screenshots             |
 | ------------------ | ------------------------------ |--------------|
-| Doctor Portal      | Ordering clinician             |[Doctors Portal](/docs/screenshots/Doctors_portal.md) |
+| Clinician Portal   | Ordering clinician             |[Clinicians Portal](/docs/screenshots/Doctors_portal.md) |
 | Lab Tech Dashboard | Diagnostic centre intake       |[Lab Tech Dashboard](/docs/screenshots/Lab_tech_dashboard.md) |
 | Patient Portal     | Patient, all orders            |[Patient Portal](/docs/screenshots/Patient_portal.md)|
 | Homepage           | PulseReq Homepage              |[Homepage](/docs/screenshots/PulseReq_Homepage.md)|
