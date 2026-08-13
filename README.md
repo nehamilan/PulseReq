@@ -10,7 +10,7 @@ Built as a product portfolio project: the interesting work here is the decision 
 
 ## What it is
 
-A physician orders blood work or imaging, prints a requisition, and hands it to the patient — who then has to store it, find a diagnostic centre, and present the paper at the appointment. Lost forms cause unbilled clinic rework; lab staff re-key 5–7 minutes of structured data per patient because nothing arrives structured; manual transcription introduces order errors.
+A physician orders blood work or imaging, prints a requisition, and hands it to the patient — who then has to store it, find a diagnostic centre, and present the paper at the appointment. Lost forms cause unbilled clinic rework; lab staff spend 5–7 minutes per patient re-keying order details that already exist upstream, because nothing arrives structured — time that should be spent confirming and collecting, not transcribing.
 
 PulseReq removes the paper. The clinician issues a LOINC-coded order and an expiring link; the patient picks where and when and receives that link; the diagnostic centre resolves it at intake as a structured order, not a document to re-interpret.
 
@@ -28,7 +28,7 @@ Full problem framing, decision logic, metrics, and trade-offs: [Product_Brief.md
 Three actors, one handoff:
 - **Clinician** orders by LOINC code, sets urgency (Routine / Urgent / STAT) and a link lifetime (7–28 days), and issues a tokenized link instead of a printout.
 - **Patient** opens the link, picks a diagnostic centre that can actually perform the ordered modality, books a slot, and gets a check-in code. Results are visible only once a release policy allows it — immediate, after an embargo window lapses, or once the ordering clinician signs off.
-- **Diagnostic centre** resolves the token (or, where a centre's walk-in policy allows it, enters a requisition manually), and receives a structured order — no handwriting, no re-keying.
+- **Diagnostic centre** resolves the token (or, where a centre's walk-in policy allows it, enters a requisition manually), and receives a structured order — the clinical details are confirmed, not re-typed from scratch. (Specimen labeling and patient ID confirmation still happen at intake, as they should — PulseReq removes the transcription, not the safety check.)
 
 Internally, orders project to FHIR R4 ServiceRequest / DiagnosticReport / Observation resources.
 
