@@ -8,6 +8,8 @@ Built as a product portfolio project: the interesting work here is the decision 
 
 **Prototype:** https://paperless-patient-pass.lovable.app/
 
+**Substack:** https://nehamilan756304.substack.com/p/pulsereq-when-rules-beat-ai
+
 ---
 
 ## What it is
